@@ -9,7 +9,7 @@ stringExpr
     | IDENTIFIER
     | toString
     | getString
-//    | subString 左循环了呜呜
+    | subString
 ;
 
 intExpr
@@ -100,7 +100,7 @@ getString : 'getString' '(' ')';
 getInt : 'getInt' '(' ')';
 toString : 'toString' '(' intExpr')';
 intLength : stringExpr'.''length''('')';
-//subString : stringExpr'.''substring' '(' intExpr',' intExpr')';
+subString : (STRING|'('stringExpr')')'.''substring' '(' intExpr',' intExpr')';
 parseInt : stringExpr '.' 'parseInt' '(' ')';
 intOrd : stringExpr '.''ord''('intExpr ')';
 
