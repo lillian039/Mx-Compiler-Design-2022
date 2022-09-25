@@ -2,10 +2,14 @@ grammar Mx;   //名称需要和文件名一致
 
 s : (classdefine|funcdefine)*mainfuncdefine EOF;   //解决问题: no viable alternative at input '<EOF>'
 
+//=======expressions=======
 stringExpr
-    : stringExpr  '+' stringExpr
+    : stringExpr  '+'  stringExpr
     | STRING
     | IDENTIFIER
+    | toString
+    | getString
+//    | subString 左循环了呜呜
 ;
 
 intExpr
@@ -20,6 +24,8 @@ intExpr
     | '('  intExpr ')'
     | INTEGER
     | IDENTIFIER
+    | getInt
+    | (intLength | parseInt | intOrd)
 ;
 
 boolExpr
@@ -35,17 +41,13 @@ boolExpr
     | IDENTIFIER
 ;
 
-statement:vardefinestate|varassignstate|whilestate|conditionstate|expressstate|forstate;
-
-vardefinestate :'int' IDENTIFIER ('='(intExpr))?(',' IDENTIFIER ?('='(intExpr))?)* ';' |
-                'bool' IDENTIFIER ('='boolExpr)?(','IDENTIFIER ('='boolExpr)?)*';'|
-                'string' IDENTIFIER ('=' stringExpr)?(','IDENTIFIER ('=' stringExpr)?)*';';
-
+//=======definitions=======
 vardefine : 'int' IDENTIFIER ('='intExpr)? |
             'bool' IDENTIFIER ('='boolExpr)? |
             'string' IDENTIFIER ('=' stringExpr)? ;
 
-varassignstate : IDENTIFIER '='(boolExpr|stringExpr|intExpr)(',' IDENTIFIER ?('='(boolExpr|stringExpr|intExpr))?)* ';' ;
+newvalue : 'new' ('int'|'bool'|'string');//未完成
+
 
 funcdefine: 'int' IDENTIFIER '(' (vardefine(','vardefine)*)?  ')'  '{' (statement)* 'return' intExpr ';' '}'
             |'bool' IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* 'return' boolExpr ';' '}'
@@ -54,6 +56,23 @@ funcdefine: 'int' IDENTIFIER '(' (vardefine(','vardefine)*)?  ')'  '{' (statemen
             | IDENTIFIER IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* ('return' IDENTIFIER ';') '}';//class??
 
 mainfuncdefine :'int' 'main' '(' (vardefine(','vardefine)*)?  ')'  '{' (statement)* 'return' intExpr ';' '}' ;
+
+classdefine: 'class' IDENTIFIER '{'
+    vardefinestate*
+    (IDENTIFIER '(' ')' '{' statement*'}')?
+    funcdefine*
+'}' ';';
+
+//=======statements=======
+statement:vardefinestate|varassignstate|whilestate|conditionstate|expressstate|forstate|innerfuncstatement|callfuncstate;
+
+vardefinestate :'int' ('[' ']')* IDENTIFIER ('='(intExpr))?(',' IDENTIFIER ?('='(intExpr))?)* ';' |
+                'bool'('[' ']')* IDENTIFIER ('='boolExpr)?(','IDENTIFIER ('='boolExpr)?)*';'|
+                'string'('[' ']')*  IDENTIFIER ('=' stringExpr)?(','IDENTIFIER ('=' stringExpr)?)*';';
+
+varassignstate : IDENTIFIER '='(boolExpr|stringExpr|intExpr)(',' IDENTIFIER ?('='(boolExpr|stringExpr|intExpr))?)* ';' ;
+
+//arraydefinestate : arraydefine';';
 
 conditionstate: 'if'  '('  boolExpr  ')'(statement | '{' statement* '}') ( 'else' (statement | '{' statement* '}'))?;
 
@@ -64,15 +83,26 @@ expressstate : (boolExpr|stringExpr|intExpr)';';
 forstate : 'for''('('int' IDENTIFIER ('='(intExpr))?(',' IDENTIFIER ?('='(intExpr))?)*)? ';'(boolExpr)?';' (intExpr)?')'
             ((statement|breakstate|continuestate) | '{' (statement|breakstate|continuestate)* '}');
 
-classdefine: 'class' IDENTIFIER '{'
-    vardefinestate*
-    (IDENTIFIER '(' ')' '{' statement*'}')?
-    funcdefine*
-'}' ';';
-
 breakstate: BREAK ';';
 
 continuestate: CONTINUE ';';
+
+innerfuncstatement: (printInt|printlnInt|printStr|printlnStr|getString|getInt|toString)';';
+
+callfuncstate :(innerfuncstatement | (IDENTIFIER '('(boolExpr|stringExpr|intExpr)?(','(boolExpr|stringExpr|intExpr))* ')'))';';
+
+//=======innerfunctions=======
+printStr : 'print' '(' stringExpr ')';
+printlnStr : 'println' '(' stringExpr ')';
+printInt : 'printInt' '(' intExpr ')';
+printlnInt : 'printlnInt' '(' intExpr ')';
+getString : 'getString' '(' ')';
+getInt : 'getInt' '(' ')';
+toString : 'toString' '(' intExpr')';
+intLength : stringExpr'.''length''('')';
+//subString : stringExpr'.''substring' '(' intExpr',' intExpr')';
+parseInt : stringExpr '.' 'parseInt' '(' ')';
+intOrd : stringExpr '.''ord''('intExpr ')';
 
 INTEGER : [1-9][0-9]* | '0' ;//定义整数
 BOOLEN :('true'|'false');//定义bool值
@@ -88,3 +118,4 @@ COMMENT : '/*' .*? '*/'->skip;//跳过'/* */'
 
 BREAK : 'break';
 CONTINUE : 'continue';
+

@@ -1,0 +1,25 @@
+class AA{
+    int a;
+    int b=1;
+
+};
+int main(){
+    int a =1/~2+3*3;
+    //aksdlksldk
+    bool a = c + b<2 +3%2;//???
+    a=a+1-2;
+    a=getInt();
+    if (a + b<2 +3 && x<3){}
+    string a= "148"+"23849328";
+    string a=" \"\\ \n sdsjdkj";
+    while(a<3) {
+    for(int i=1;i<=2;i++){
+    a++;
+    }
+    a++;
+    a=a+1;
+    b=b++;
+    b=b+3;
+    }
+    return 0;
+}
