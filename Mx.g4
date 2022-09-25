@@ -1,6 +1,6 @@
 grammar Mx;   //名称需要和文件名一致
 
-s : funcdefine* EOF;   //解决问题: no viable alternative at input '<EOF>'
+s : (classdefine|funcdefine)*mainfuncdefine EOF;   //解决问题: no viable alternative at input '<EOF>'
 
 stringExpr
     : stringExpr  '+' stringExpr
@@ -9,7 +9,7 @@ stringExpr
 ;
 
 intExpr
-    : intExpr ('++'|'--')
+    : intExpr ('++'|'--')// -a 与 1-a如何区分？
     | ('~'|'++'|'--') intExpr
     | intExpr ('*'|'/'|'%') intExpr
     | intExpr ('+'|'-') intExpr
@@ -20,7 +20,6 @@ intExpr
     | '('  intExpr ')'
     | INTEGER
     | IDENTIFIER
-
 ;
 
 boolExpr
@@ -51,17 +50,31 @@ varassignstate : IDENTIFIER '='(boolExpr|stringExpr|intExpr)(',' IDENTIFIER ?('=
 funcdefine: 'int' IDENTIFIER '(' (vardefine(','vardefine)*)?  ')'  '{' (statement)* 'return' intExpr ';' '}'
             |'bool' IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* 'return' boolExpr ';' '}'
             |'string' IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* 'return' stringExpr ';' '}'
-            |'void' IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* ('return' ';')? '}';
+            |'void' IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* 'return' ';' '}'
+            | IDENTIFIER IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* ('return' IDENTIFIER ';') '}';//class??
+
+mainfuncdefine :'int' 'main' '(' (vardefine(','vardefine)*)?  ')'  '{' (statement)* 'return' intExpr ';' '}' ;
 
 conditionstate: 'if'  '('  boolExpr  ')'(statement | '{' statement* '}') ( 'else' (statement | '{' statement* '}'))?;
 
-whilestate: 'while' '(' boolExpr ')'(statement | '{' statement* '}') ;
+whilestate: 'while' '(' boolExpr ')'((statement|breakstate|continuestate) | '{' (statement|breakstate|continuestate)* '}') ;
 
 expressstate : (boolExpr|stringExpr|intExpr)';';
 
-forstate : 'for''('('int' IDENTIFIER ('='(intExpr))?(',' IDENTIFIER ?('='(intExpr))?)*)? ';'(boolExpr)?';' (intExpr)?')'(statement | '{' statement* '}');
+forstate : 'for''('('int' IDENTIFIER ('='(intExpr))?(',' IDENTIFIER ?('='(intExpr))?)*)? ';'(boolExpr)?';' (intExpr)?')'
+            ((statement|breakstate|continuestate) | '{' (statement|breakstate|continuestate)* '}');
 
-INTEGER : '-'?[1-9][0-9]* | '0' ;//定义整数
+classdefine: 'class' IDENTIFIER '{'
+    vardefinestate*
+    (IDENTIFIER '(' ')' '{' statement*'}')?
+    funcdefine*
+'}' ';';
+
+breakstate: BREAK ';';
+
+continuestate: CONTINUE ';';
+
+INTEGER : [1-9][0-9]* | '0' ;//定义整数
 BOOLEN :('true'|'false');//定义bool值
 STRING:'"' (ESC | .)*? '"';//定义string值
 fragment
@@ -72,3 +85,6 @@ IDENTIFIER : ('_'|[a-zA-Z])([0-9a-zA-Z]|'_')*;//定义变量名
 WS : ([ \r\n\t]+ ) -> skip;     //跳过空白类字符
 LINE_COMMENT:'//' .*? '\r'? '\n' ->skip ;//跳过'//'
 COMMENT : '/*' .*? '*/'->skip;//跳过'/* */'
+
+BREAK : 'break';
+CONTINUE : 'continue';
