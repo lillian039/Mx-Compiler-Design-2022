@@ -3,8 +3,8 @@ grammar Mx;   //名称需要和文件名一致
 s : funcdefine* EOF;   //解决问题: no viable alternative at input '<EOF>'
 
 stringExpr
-  //  : stringExpr  '+' stringExpr
-    :STRING
+    : stringExpr  '+' stringExpr
+    | STRING
     | IDENTIFIER
 ;
 
@@ -25,22 +25,26 @@ boolExpr
     | BOOLEN
     | IDENTIFIER
 ;
+
 statement:vardefinestate;
 
 vardefinestate :'int' IDENTIFIER ('='(intExpr))?(',' IDENTIFIER ?('='(intExpr))?)* ';' |
-                'bool' IDENTIFIER ('='BOOLEN)?(','IDENTIFIER ('='BOOLEN)?)*';'|
-                'string' IDENTIFIER ('=' STRING)?(','IDENTIFIER ('=' STRING)?)*';';
+                'bool' IDENTIFIER ('='boolExpr)?(','IDENTIFIER ('='boolExpr)?)*';'|
+                'string' IDENTIFIER ('=' stringExpr)?(','IDENTIFIER ('=' stringExpr)?)*';';
 
-vardefine : 'int' IDENTIFIER ('='(intExpr))? |
+vardefine : 'int' IDENTIFIER ('='intExpr)? |
             'bool' IDENTIFIER ('='boolExpr)? |
             'string' IDENTIFIER ('=' stringExpr)? ;
-//varassign : IDENTIFIER '='(BOOLEN|INTEGER|IDENTIFIER|expr)(',' IDENTIFIER ?('='(BOOLEN|INTEGER|IDENTIFIER|expr))?)* ';' ;
-funcdefine: 'int' IDENTIFIER +'(' +(vardefine+(','+vardefine)*)?  ')' + '{' +(vardefinestate| conditionstate)* '}'
+
+varassign : IDENTIFIER '='(boolExpr|stringExpr|intExpr)(',' IDENTIFIER ?('='(boolExpr|stringExpr|intExpr))?)* ';' ;
+
+funcdefine: 'int' IDENTIFIER '(' (vardefine(','vardefine)*)?  ')'  '{' (vardefinestate| conditionstate)* 'return' intExpr ';' '}'|
+            'bool' IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (vardefinestate| conditionstate)* 'return' boolExpr ';' '}'
+
 ;
 
-conditionstate: 'if' + '(' + boolExpr + ')'+(statement | '{' +statement* '}') +( 'else' +(statement | '{' +statement* '}'))?;
+conditionstate: 'if'  '('  boolExpr  ')'(statement | '{' statement* '}') ( 'else' (statement | '{' statement* '}'))?;
 
-//returnstate : 'return' + expr +';';
 INTEGER : '-'?[1-9][0-9]* | '0' ;//定义整数
 BOOLEN :('true'|'false');//定义bool值
 STRING:'"'([0-9a-zA-Z]|'\n'|'\\'|' '|'!'|[#-/:-@^-`{-~]|'['|']')*'"';//'\"'?有问题啊 有很多问题
