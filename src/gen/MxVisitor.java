@@ -1,4 +1,5 @@
-// Generated from D:/a_homework_of_c++/2-1_semester/Mx-Compiler-Design-2022\Mx.g4 by ANTLR 4.10.1
+// Generated from D:/a_homework_of_c++/2-1_semester/Mx-Compiler-Design-2022/src\Mx.g4 by ANTLR 4.10.1
+package gen;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -177,6 +178,12 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitIntLength(MxParser.IntLengthContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#subString}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSubString(MxParser.SubStringContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#parseInt}.
 	 * @param ctx the parse tree
