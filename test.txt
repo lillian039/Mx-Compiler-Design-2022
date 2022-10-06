@@ -23,3 +23,16 @@ int main(){
     }
     return 0;
 }
+
+//=======innerfunctions=======
+/*printStr : 'print' '(' stringExpr ')';
+printlnStr : 'println' '(' stringExpr ')';
+printInt : 'printInt' '(' intExpr ')';
+printlnInt : 'printlnInt' '(' intExpr ')';
+getString : 'getString' '(' ')';
+getInt : 'getInt' '(' ')';
+toString : 'toString' '(' intExpr')';
+intLength : stringExpr'.''length''('')';
+subString : (STRING|'('stringExpr')')'.''substring' '(' intExpr',' intExpr')';
+parseInt : stringExpr '.' 'parseInt' '(' ')';
+intOrd : stringExpr '.''ord''('intExpr ')';*/
