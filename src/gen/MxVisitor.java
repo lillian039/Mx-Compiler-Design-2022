@@ -23,6 +23,12 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStringExpr(MxParser.StringExprContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MxParser#unknownExpr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUnknownExpr(MxParser.UnknownExprContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MxParser#intExpr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -35,17 +41,71 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBoolExpr(MxParser.BoolExprContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MxParser#classExpr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassExpr(MxParser.ClassExprContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpression(MxParser.ExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#arrayelement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayelement(MxParser.ArrayelementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#intvardefine}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIntvardefine(MxParser.IntvardefineContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#boolvardefine}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBoolvardefine(MxParser.BoolvardefineContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#stringvardefine}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStringvardefine(MxParser.StringvardefineContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#classvardefine}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassvardefine(MxParser.ClassvardefineContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#intarraydefine}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIntarraydefine(MxParser.IntarraydefineContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#boolarraydefine}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBoolarraydefine(MxParser.BoolarraydefineContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#stringarraydefine}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStringarraydefine(MxParser.StringarraydefineContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MxParser#vardefine}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitVardefine(MxParser.VardefineContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MxParser#newvalue}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNewvalue(MxParser.NewvalueContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#funcdefine}.
 	 * @param ctx the parse tree
@@ -76,6 +136,18 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitVardefinestate(MxParser.VardefinestateContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#arrayassign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayassign(MxParser.ArrayassignContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#varassign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVarassign(MxParser.VarassignContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#varassignstate}.
 	 * @param ctx the parse tree
@@ -119,11 +191,17 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitContinuestate(MxParser.ContinuestateContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#innerfuncstatement}.
+	 * Visit a parse tree produced by {@link MxParser#callfunction}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitInnerfuncstatement(MxParser.InnerfuncstatementContext ctx);
+	T visitCallfunction(MxParser.CallfunctionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#callclassfunction}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCallclassfunction(MxParser.CallclassfunctionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#callfuncstate}.
 	 * @param ctx the parse tree
@@ -131,69 +209,69 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCallfuncstate(MxParser.CallfuncstateContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#printStr}.
+	 * Visit a parse tree produced by {@link MxParser#returnstate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPrintStr(MxParser.PrintStrContext ctx);
+	T visitReturnstate(MxParser.ReturnstateContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#printlnStr}.
+	 * Visit a parse tree produced by {@link MxParser#lamdaglobe}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPrintlnStr(MxParser.PrintlnStrContext ctx);
+	T visitLamdaglobe(MxParser.LamdaglobeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#printInt}.
+	 * Visit a parse tree produced by {@link MxParser#lamdainner}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPrintInt(MxParser.PrintIntContext ctx);
+	T visitLamdainner(MxParser.LamdainnerContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#printlnInt}.
+	 * Visit a parse tree produced by {@link MxParser#lamdaExpr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPrintlnInt(MxParser.PrintlnIntContext ctx);
+	T visitLamdaExpr(MxParser.LamdaExprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#getString}.
+	 * Visit a parse tree produced by {@link MxParser#intreturnstate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGetString(MxParser.GetStringContext ctx);
+	T visitIntreturnstate(MxParser.IntreturnstateContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#getInt}.
+	 * Visit a parse tree produced by {@link MxParser#boolreturnstate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGetInt(MxParser.GetIntContext ctx);
+	T visitBoolreturnstate(MxParser.BoolreturnstateContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#toString}.
+	 * Visit a parse tree produced by {@link MxParser#stringreturnstate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitToString(MxParser.ToStringContext ctx);
+	T visitStringreturnstate(MxParser.StringreturnstateContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#intLength}.
+	 * Visit a parse tree produced by {@link MxParser#voidreturnstate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIntLength(MxParser.IntLengthContext ctx);
+	T visitVoidreturnstate(MxParser.VoidreturnstateContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#subString}.
+	 * Visit a parse tree produced by {@link MxParser#classreturnstate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSubString(MxParser.SubStringContext ctx);
+	T visitClassreturnstate(MxParser.ClassreturnstateContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#parseInt}.
+	 * Visit a parse tree produced by {@link MxParser#classmember}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParseInt(MxParser.ParseIntContext ctx);
+	T visitClassmember(MxParser.ClassmemberContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#intOrd}.
+	 * Visit a parse tree produced by {@link MxParser#innermember}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIntOrd(MxParser.IntOrdContext ctx);
+	T visitInnermember(MxParser.InnermemberContext ctx);
 }

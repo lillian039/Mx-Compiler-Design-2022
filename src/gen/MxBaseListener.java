@@ -39,6 +39,18 @@ public class MxBaseListener implements MxListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterUnknownExpr(MxParser.UnknownExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitUnknownExpr(MxParser.UnknownExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIntExpr(MxParser.IntExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -63,6 +75,126 @@ public class MxBaseListener implements MxListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterClassExpr(MxParser.ClassExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClassExpr(MxParser.ClassExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterExpression(MxParser.ExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitExpression(MxParser.ExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArrayelement(MxParser.ArrayelementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayelement(MxParser.ArrayelementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIntvardefine(MxParser.IntvardefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIntvardefine(MxParser.IntvardefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBoolvardefine(MxParser.BoolvardefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBoolvardefine(MxParser.BoolvardefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterStringvardefine(MxParser.StringvardefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStringvardefine(MxParser.StringvardefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterClassvardefine(MxParser.ClassvardefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClassvardefine(MxParser.ClassvardefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIntarraydefine(MxParser.IntarraydefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIntarraydefine(MxParser.IntarraydefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBoolarraydefine(MxParser.BoolarraydefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBoolarraydefine(MxParser.BoolarraydefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterStringarraydefine(MxParser.StringarraydefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStringarraydefine(MxParser.StringarraydefineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterVardefine(MxParser.VardefineContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -70,18 +202,6 @@ public class MxBaseListener implements MxListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitVardefine(MxParser.VardefineContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNewvalue(MxParser.NewvalueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNewvalue(MxParser.NewvalueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -142,6 +262,30 @@ public class MxBaseListener implements MxListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitVardefinestate(MxParser.VardefinestateContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArrayassign(MxParser.ArrayassignContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayassign(MxParser.ArrayassignContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterVarassign(MxParser.VarassignContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitVarassign(MxParser.VarassignContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -231,13 +375,25 @@ public class MxBaseListener implements MxListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInnerfuncstatement(MxParser.InnerfuncstatementContext ctx) { }
+	@Override public void enterCallfunction(MxParser.CallfunctionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInnerfuncstatement(MxParser.InnerfuncstatementContext ctx) { }
+	@Override public void exitCallfunction(MxParser.CallfunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCallclassfunction(MxParser.CallclassfunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCallclassfunction(MxParser.CallclassfunctionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -255,133 +411,133 @@ public class MxBaseListener implements MxListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPrintStr(MxParser.PrintStrContext ctx) { }
+	@Override public void enterReturnstate(MxParser.ReturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPrintStr(MxParser.PrintStrContext ctx) { }
+	@Override public void exitReturnstate(MxParser.ReturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPrintlnStr(MxParser.PrintlnStrContext ctx) { }
+	@Override public void enterLamdaglobe(MxParser.LamdaglobeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPrintlnStr(MxParser.PrintlnStrContext ctx) { }
+	@Override public void exitLamdaglobe(MxParser.LamdaglobeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPrintInt(MxParser.PrintIntContext ctx) { }
+	@Override public void enterLamdainner(MxParser.LamdainnerContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPrintInt(MxParser.PrintIntContext ctx) { }
+	@Override public void exitLamdainner(MxParser.LamdainnerContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPrintlnInt(MxParser.PrintlnIntContext ctx) { }
+	@Override public void enterLamdaExpr(MxParser.LamdaExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPrintlnInt(MxParser.PrintlnIntContext ctx) { }
+	@Override public void exitLamdaExpr(MxParser.LamdaExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGetString(MxParser.GetStringContext ctx) { }
+	@Override public void enterIntreturnstate(MxParser.IntreturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGetString(MxParser.GetStringContext ctx) { }
+	@Override public void exitIntreturnstate(MxParser.IntreturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGetInt(MxParser.GetIntContext ctx) { }
+	@Override public void enterBoolreturnstate(MxParser.BoolreturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGetInt(MxParser.GetIntContext ctx) { }
+	@Override public void exitBoolreturnstate(MxParser.BoolreturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterToString(MxParser.ToStringContext ctx) { }
+	@Override public void enterStringreturnstate(MxParser.StringreturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitToString(MxParser.ToStringContext ctx) { }
+	@Override public void exitStringreturnstate(MxParser.StringreturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIntLength(MxParser.IntLengthContext ctx) { }
+	@Override public void enterVoidreturnstate(MxParser.VoidreturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIntLength(MxParser.IntLengthContext ctx) { }
+	@Override public void exitVoidreturnstate(MxParser.VoidreturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSubString(MxParser.SubStringContext ctx) { }
+	@Override public void enterClassreturnstate(MxParser.ClassreturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSubString(MxParser.SubStringContext ctx) { }
+	@Override public void exitClassreturnstate(MxParser.ClassreturnstateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterParseInt(MxParser.ParseIntContext ctx) { }
+	@Override public void enterClassmember(MxParser.ClassmemberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitParseInt(MxParser.ParseIntContext ctx) { }
+	@Override public void exitClassmember(MxParser.ClassmemberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIntOrd(MxParser.IntOrdContext ctx) { }
+	@Override public void enterInnermember(MxParser.InnermemberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIntOrd(MxParser.IntOrdContext ctx) { }
+	@Override public void exitInnermember(MxParser.InnermemberContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

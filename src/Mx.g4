@@ -1,5 +1,5 @@
 grammar Mx;   //名称需要和文件名一致
-
+import MxLexerRules;
 s : (classdefine|funcdefine|vardefinestate)*mainfuncdefine EOF;   //解决问题: no viable alternative at input '<EOF>'
 
 //=======expressions=======
@@ -7,8 +7,8 @@ stringExpr
     : stringExpr  '+'  stringExpr
     | STRING
     | IDENTIFIER
-    | INNERMEMBER
-    | CLASSMEMBER
+    | innermember
+    | classmember
     | unknownExpr
 ;
 
@@ -98,7 +98,15 @@ classdefine: 'class' IDENTIFIER '{'
 '}' ';';
 
 //=======statements=======
-statement:vardefinestate|varassignstate|whilestate|conditionstate|expressstate|forstate|callfuncstate|returnstate;
+statement:
+     vardefinestate
+    |varassignstate
+    |whilestate
+    |conditionstate
+    |expressstate
+    |forstate
+    |callfuncstate
+    |returnstate;
 
 vardefinestate :'int' intvardefine(','intvardefine)*';'|
                 'int' ( '[' ']')+ intarraydefine(',' intarraydefine)* ';' |
@@ -154,22 +162,7 @@ classreturnstate: 'return' classExpr ';';
 classmember:IDENTIFIER'.'IDENTIFIER;
 innermember:THIS'.'IDENTIFIER;
 
-INTEGER : [1-9][0-9]* | '0' ;//定义整数
-BOOLEN :('true'|'false');//定义bool值
-STRING:'"' (ESC | .)*? '"';//定义string值
-fragment
-ESC : '\\"'| '\\\\' | '\\n';
 
-IDENTIFIER : ('_'|[a-zA-Z])([0-9a-zA-Z]|'_')*;//定义变量名
-
-WS : ([ \r\n\t]+ ) -> skip;     //跳过空白类字符
-LINE_COMMENT:'//' .*? '\r'? '\n' ->skip ;//跳过'//'
-COMMENT : '/*' .*? '*/'->skip;//跳过'/* */'
-
-BREAK : 'break';
-CONTINUE : 'continue';
-
-THIS:'this';//在Java文件里头特判 this只能在class中出现 外面就不管啦！
 
 
 
