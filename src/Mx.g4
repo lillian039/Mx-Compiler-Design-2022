@@ -8,12 +8,11 @@ mainfunc :INT 'main' '(' ')'  suite ;
 
 expression
     : primary                                          #atomExpr
-    | op='!'  expression                               #cellExpr
+    | op=('!'|'-')  expression                         #cellExpr
     | expression op=('++'|'--')                        #cellExpr
     | op=('~'|'++'|'--') expression                    #cellExpr
     | expression op=('*'|'/'|'%') expression           #binaryExpr
     | expression op=('+'|'-') expression               #binaryExpr
-    | op='-' expression                                #cellExpr
     | expression op=('<<'|'>>') expression             #binaryExpr
     | expression op='&' expression                     #binaryExpr
     | expression op='^' expression                     #binaryExpr
@@ -31,9 +30,9 @@ vardef
     |<assoc=right> type ('['']')+ IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';' #arrayvar
     ;
 
-assigndef
+/*assigndef
     :<assoc=right> (IDENTIFIER|arrayelement) ('=' expression)*(','IDENTIFIER ('=' expression)*)*
-    ;
+    ;*/
 
 primary
     : '(' expression ')'
@@ -64,12 +63,12 @@ statement
     : suite                                                                 #block
     | classdefine                                                           #classdefineStmt
     | vardef                                                                #vardefineStmt
-    | assigndef ';'                                                         #assignStmt
+   // | assigndef ';'                                                         #assignStmt
     | 'while' '('expression ')' statement                                   #whileStmt
     |  'if'  '('  expression  ')'trueStmt=statement
                       ( 'else' falseStmt=statement)?                        #ifStmt
-    | 'for' '(' (assigndef|vardef|expression)?';'
-      expression? ';' (assigndef|expression)? ')' statement                 #forStmt
+    | 'for' '(' (vardef|expression)?';'
+      expression? ';' (expression)? ')' statement                 #forStmt
     | 'return' expression? ';'                                              #returnStmt
     | expression(','expression)* ';'                                        #exprStmt
     | funcdefine                                                            #funcdefineStmt
