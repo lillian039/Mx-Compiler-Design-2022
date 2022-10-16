@@ -1,35 +1,46 @@
 lexer grammar MxLexerRules;
 
+LeftParen : '(';
+RightParen : ')';
+LeftBracket : '[';
+RightBracket : ']';
+LeftBrace : '{';
+RightBrace : '}';
+
 ASSIGN : '=';
 
-ADD:'+' ;
-SUB:'-';
-MUL:'*';
-DIV:'/';
-MOD : '%';
-OR_OP : '|';
-XOR : '^';
-AND_OP : '&';
-LEFT_SHIFT : '<<';
-RIGHT_SHIFT : '>>';
-NOT_OP : '~';
+Add:'+' ;
+Sub:'-';
+Mul:'*';
+Div:'/';
+Mod : '%';
+Or : '|';
+Xor : '^';
+And : '&';
+Not: '!';
+LeftShift : '<<';
+RightShift : '>>';
+Invert : '~';
+AddSelf:'++';
+SubSelf:'--';
 
-LESS_THAN : '<';
-GREATER_THAN : '>';
-EQUALS : '==';
-GT_EQ : '>=';
-LT_EQ : '<=';
-NOT_EQ_1 : '<>';
-NOT_EQ_2 : '!=';
+Less : '<';
+Greater : '>';
+Equals : '==';
+GreaterEqual : '>=';
+LessEqual : '<=';
+NotEqual : '!=';
+AndAnd: '&&';
+Oror:'||';
 
-RETURN:'return';
-FOR:'for';
-IF:'if';
-WHILE:'while';
+Return:'return';
+For:'for';
+If:'if';
+While:'while';
 
-SEMI:';';
-COMMA:',';
-DOT : '.';
+Semi:';';
+Comma:',';
+Dot : '.';
 
 INT:'int';
 BOOL:'bool';
@@ -38,14 +49,14 @@ VOID:'void';
 
 NEW:'new';
 
-
-
-
+TRUE:'true';
+FALSE:'false';
 INTEGER : [1-9][0-9]* | '0' ;//定义整数
-BOOLEN :('true'|'false');//定义bool值
 STRING:'"' (ESC | .)*? '"';//定义string值
 fragment
 ESC : '\\"'| '\\\\' | '\\n';
+
+THIS:'this';
 
 IDENTIFIER : ('_'|[a-zA-Z])([0-9a-zA-Z]|'_')*;//定义变量名
 
@@ -56,4 +67,3 @@ COMMENT : '/*' .*? '*/'->skip;//跳过'/* */'
 BREAK : 'break';
 CONTINUE : 'continue';
 
-THIS:'this';//在Java文件里头特判 this只能在class中出现 外面就不管啦！

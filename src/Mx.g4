@@ -1,166 +1,104 @@
 grammar Mx;   //名称需要和文件名一致
 import MxLexerRules;
-s : (classdefine|funcdefine|vardefinestate)*mainfuncdefine EOF;   //解决问题: no viable alternative at input '<EOF>'
+s : (vardef|funcdefine|classdefine)*mainfunc EOF;   //解决问题: no viable alternative at input '<EOF>'
 
 //=======expressions=======
-stringExpr
-    : stringExpr  '+'  stringExpr
-    | STRING
-    | IDENTIFIER
-    | innermember
-    | classmember
-    | unknownExpr
-;
 
-unknownExpr
-    : callclassfunction
-    | callfunction
-    | lamdaExpr
-    | arrayelement
-;
-intExpr
-    : intExpr ('++'|'--')// -a 与 1-a如何区分？
-    | ('~'|'++'|'--') intExpr
-    | intExpr ('*'|'/'|'%') intExpr
-    | intExpr ('+'|'-') intExpr
-    | intExpr ('<<'|'>>') intExpr
-    | intExpr '&' intExpr
-    | intExpr '^' intExpr
-    | intExpr '|' intExpr
-    | '('  intExpr ')'
-    | INTEGER
-    | IDENTIFIER
-    | unknownExpr
-    | classmember
-    | innermember
-;
+mainfunc :INT 'main' '(' ')'  suite ;
 
-boolExpr
-    :'(' boolExpr ')'
-    |'!'boolExpr
-    | intExpr ('>'|'<'|'>='|'<=') intExpr
-    | stringExpr ('>'|'<'|'>='|'<=') stringExpr
-    | intExpr ('=='|'!=') intExpr
-    | stringExpr ('=='|'!=') stringExpr
-    | boolExpr ('&&') boolExpr
-    | boolExpr ('||')boolExpr
-    | BOOLEN
-    | IDENTIFIER
-    | innermember
-    | classmember
-    | unknownExpr
-;
-
-classExpr
-    : IDENTIFIER
-    | unknownExpr
-    | THIS
+expression
+    : primary                                          #atomExpr
+    | op='!'  expression                               #cellExpr
+    | expression op=('++'|'--')                        #cellExpr
+    | op=('~'|'++'|'--') expression                    #cellExpr
+    | expression op=('*'|'/'|'%') expression           #binaryExpr
+    | expression op=('+'|'-') expression               #binaryExpr
+    | op='-' expression                                #cellExpr
+    | expression op=('<<'|'>>') expression             #binaryExpr
+    | expression op='&' expression                     #binaryExpr
+    | expression op='^' expression                     #binaryExpr
+    | expression op='|' expression                     #binaryExpr
+    | expression op=('>'|'<'|'>='|'<=') expression     #binaryCmp
+    | expression op=('=='|'!=') expression             #binaryCmp
+    | expression op= '&&' expression                   #binaryBool
+    | expression op= '||' expression                   #binaryBool
+    | <assoc=right> expression '=' expression          #assignExpr
+    | (('new' type ('['(expression)?']')+)|'null')     #newExpr
     ;
 
-expression:
-    boolExpr|
-    intExpr|
-    stringExpr|
-    classExpr;
+vardef
+    :<assoc=right> type  IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';'          #signalvar
+    |<assoc=right> type ('['']')+ IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';' #arrayvar
+    ;
 
+assigndef
+    :<assoc=right> (IDENTIFIER|arrayelement) ('=' expression)*(','IDENTIFIER ('=' expression)*)*
+    ;
+
+primary
+    : '(' expression ')'
+    | IDENTIFIER
+    | INTEGER
+    | STRING
+    | THIS
+    | (TRUE | FALSE)
+    | innermember
+    | classmember
+    | arrayelement
+    | callfunction
+    | lamdaExpr
+    | callclassfunction
+    | newclass
+    ;
+
+type:INT | BOOL | STR | IDENTIFIER;
+
+suite: '{' statement* '}';
 //=======definitions=======
-arrayelement: IDENTIFIER ('[' intExpr ']')+;
+arrayelement: IDENTIFIER ('[' expression ']')+;
 
-intvardefine: IDENTIFIER ('='intExpr)?;
-boolvardefine: IDENTIFIER ('='boolExpr)?;
-stringvardefine: IDENTIFIER ('=' stringExpr)?;
-classvardefine:IDENTIFIER IDENTIFIER;
-
-intarraydefine:  IDENTIFIER ('='(('new''int'('['(intExpr)?']')+)|'null'))?;
-boolarraydefine: IDENTIFIER ('='(('new''bool'('['(intExpr)?']')+)|'null'))?;
-stringarraydefine: IDENTIFIER ('='(('new''string'('['(intExpr)?']')+)|'null'))?;
-
-vardefine :  'int' intvardefine|
-             'bool' boolvardefine|
-             'string' stringvardefine|
-             'int' ( '[' ']')+intarraydefine|
-             'bool' ( '[' ']')+boolarraydefine|
-             'string' ( '[' ']')+stringarraydefine|
-             classvardefine;
-
-funcdefine: 'int' IDENTIFIER '(' (vardefine(','vardefine)*)?  ')'  '{' (statement)* intreturnstate '}'
-            |'bool' IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* boolreturnstate '}'
-            |'string' IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* stringreturnstate '}'
-            |'void' IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* voidreturnstate '}'
-            | IDENTIFIER IDENTIFIER '('(vardefine(','vardefine)*)?  ')'  '{' (statement)* classreturnstate'}';//class??
-
-mainfuncdefine :'int' 'main' '(' (vardefine(','vardefine)*)?  ')'  '{' (statement)* ('return' intExpr ';')? '}' ;
-
-classdefine: 'class' IDENTIFIER '{'
-    vardefinestate*
-    (IDENTIFIER '(' ')' '{' statement*'}')?
-    funcdefine*
-'}' ';';
+functionParameterList: type ('['']')* expression(','type ('['']')* expression)*;
 
 //=======statements=======
-statement:
-     vardefinestate
-    |varassignstate
-    |whilestate
-    |conditionstate
-    |expressstate
-    |forstate
-    |callfuncstate
-    |returnstate;
-
-vardefinestate :'int' intvardefine(','intvardefine)*';'|
-                'int' ( '[' ']')+ intarraydefine(',' intarraydefine)* ';' |
-                'bool' boolvardefine(','boolvardefine)*';'|
-                'bool' ( '[' ']')+ boolarraydefine(','boolarraydefine)*';'|
-                'string' stringvardefine(','stringvardefine)*';'|
-                'string' ( '[' ']')+stringarraydefine(','stringarraydefine)* ';';
-
-arrayassign: IDENTIFIER ('['(intExpr)?']')+'='(expression|('new'('int'|'bool'|'string')('['(intExpr)?']')+));
-varassign: IDENTIFIER '='(expression);
-varassignstate : (arrayassign|varassign)(',' (varassign|arrayassign))* ';' ;
-
-conditionstate: 'if'  '('  boolExpr  ')'(statement | '{' statement* '}') ( 'else' (statement | '{' statement* '}'))?;
-
-whilestate: 'while' '(' boolExpr ')'((statement|breakstate|continuestate) | '{' (statement|breakstate|continuestate)* '}') ;
-
-expressstate : expression';';
-
-forstate : 'for''('(('int')? IDENTIFIER ('='(intExpr))?(',' IDENTIFIER ?('='(intExpr))?)*)? ';'(boolExpr)?';' (intExpr|varassign)?')'
-            ((statement|breakstate|continuestate) | '{' (statement|breakstate|continuestate)* '}');
+statement
+    : suite                                                                 #block
+    | classdefine                                                           #classdefineStmt
+    | vardef                                                                #vardefineStmt
+    | assigndef ';'                                                         #assignStmt
+    | 'while' '('expression ')' statement                                   #whileStmt
+    |  'if'  '('  expression  ')'trueStmt=statement
+                      ( 'else' falseStmt=statement)?                        #ifStmt
+    | 'for' '(' (assigndef|vardef|expression)?';'
+      expression? ';' (assigndef|expression)? ')' statement                 #forStmt
+    | 'return' expression? ';'                                              #returnStmt
+    | expression(','expression)* ';'                                        #exprStmt
+    | funcdefine                                                            #funcdefineStmt
+    | BREAK ';'                                                             #breakStmt
+    | CONTINUE ';'                                                          #continueStmt
+    | ';'                                                                   #emptyStmt
+    ;
 
 //======function=======
 
-breakstate: BREAK ';';
+funcdefine: ((type('['']')*)|'void')? IDENTIFIER '(' functionParameterList?')'  suite;
 
-continuestate: CONTINUE ';';
+classdefine : 'class' IDENTIFIER suite ';';
 
-callfunction: (IDENTIFIER '('(boolExpr|stringExpr|intExpr)?(','(boolExpr|stringExpr|intExpr))* ')');
+callfunction: (IDENTIFIER '('expression?(','(expression))* ')');
+
 callclassfunction:IDENTIFIER'.'callfunction;
 
-callfuncstate :(callfunction)';';
+newclass:'new' IDENTIFIER '('')';
 
-returnstate:intreturnstate|boolreturnstate|stringreturnstate|classreturnstate;
-lamdaglobe:'[''&'']'('(' (vardefine(','vardefine)*)?')')?'->''{'
-(statement|returnstate)*
-returnstate
-'}' '('(expression(','expression)*)?')';
+lamdaglobe:'[''&'']'('(' functionParameterList?')')?'->' suite '('(expression(','expression)*)?')';
 
-lamdainner:'['']'('(' (vardefine(','vardefine)*)?')')?'->''{'
-           (statement|returnstate)*
-           returnstate
-           '}' '('(expression(','expression)*)?')';
+lamdainner:'['']'('(' functionParameterList?')')?'->' suite'('(expression(','expression)*)?')';
 
 lamdaExpr:lamdaglobe|lamdainner;
 
-//=====return======
-intreturnstate : 'return' intExpr ';';
-boolreturnstate : 'return' boolExpr ';';
-stringreturnstate : 'return' stringExpr ';';
-voidreturnstate: 'return'  ';';
-classreturnstate: 'return' classExpr ';';
+classmember:(arrayelement|IDENTIFIER|callfunction)('.'(arrayelement|IDENTIFIER|callfunction))+;
 
-classmember:IDENTIFIER'.'IDENTIFIER;
-innermember:THIS'.'IDENTIFIER;
+innermember:THIS('.'(arrayelement|IDENTIFIER|callfunction))+;
 
 
 
