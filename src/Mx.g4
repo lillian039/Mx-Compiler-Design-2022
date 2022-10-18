@@ -1,6 +1,6 @@
 grammar Mx;   //名称需要和文件名一致
 import MxLexerRules;
-s : (vardef|funcdefine|classdefine)*mainfunc EOF;   //解决问题: no viable alternative at input '<EOF>'
+program : (vardef|funcdefine|classdefine)*mainfunc EOF;   //解决问题: no viable alternative at input '<EOF>'
 
 //=======expressions=======
 
@@ -17,40 +17,51 @@ expression
     | expression op='&' expression                     #binaryExpr
     | expression op='^' expression                     #binaryExpr
     | expression op='|' expression                     #binaryExpr
-    | expression op=('>'|'<'|'>='|'<=') expression     #binaryCmp
-    | expression op=('=='|'!=') expression             #binaryCmp
-    | expression op= '&&' expression                   #binaryBool
-    | expression op= '||' expression                   #binaryBool
+    | expression op=('>'|'<'|'>='|'<=') expression     #binaryExpr
+    | expression op=('=='|'!=') expression             #binaryExpr
+    | expression op= '&&' expression                   #binaryExpr
+    | expression op= '||' expression                   #binaryExpr
     | <assoc=right> expression '=' expression          #assignExpr
-    | (('new' type ('['(expression)?']')+)|'null')     #newExpr
+    | (newArrExpr|newClassExpr)                        #newExpr
     ;
+
+primary
+    : '(' expression ')'
+    | variable
+    | constant
+    | funVal
+    ;
+
+constant
+    : INTEGER
+    | STRING
+    | (TRUE | FALSE)
+    ;
+
+variable
+    : IDENTIFIER
+    | innermember
+    | classmember
+    | THIS
+    | arrayelement
+    ;
+
+funVal
+    : callfunction
+    | lamdaExpr
+    | callclassfunction
+    ;
+
+newArrExpr : ('new' type ('['(expression)?']')+)|'null';
+
+newClassExpr: 'new' IDENTIFIER '('')' ;
+
+type:INT | BOOL | STR | IDENTIFIER;
 
 vardef
     :<assoc=right> type  IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';'          #signalvar
     |<assoc=right> type ('['']')+ IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';' #arrayvar
     ;
-
-/*assigndef
-    :<assoc=right> (IDENTIFIER|arrayelement) ('=' expression)*(','IDENTIFIER ('=' expression)*)*
-    ;*/
-
-primary
-    : '(' expression ')'
-    | IDENTIFIER
-    | INTEGER
-    | STRING
-    | THIS
-    | (TRUE | FALSE)
-    | innermember
-    | classmember
-    | arrayelement
-    | callfunction
-    | lamdaExpr
-    | callclassfunction
-    | newclass
-    ;
-
-type:INT | BOOL | STR | IDENTIFIER;
 
 suite: '{' statement* '}';
 //=======definitions=======
@@ -63,12 +74,11 @@ statement
     : suite                                                                 #block
     | classdefine                                                           #classdefineStmt
     | vardef                                                                #vardefineStmt
-   // | assigndef ';'                                                         #assignStmt
     | 'while' '('expression ')' statement                                   #whileStmt
     |  'if'  '('  expression  ')'trueStmt=statement
                       ( 'else' falseStmt=statement)?                        #ifStmt
     | 'for' '(' (vardef|expression)?';'
-      expression? ';' (expression)? ')' statement                 #forStmt
+      expression? ';' (expression)? ')' statement                           #forStmt
     | 'return' expression? ';'                                              #returnStmt
     | expression(','expression)* ';'                                        #exprStmt
     | funcdefine                                                            #funcdefineStmt
@@ -86,8 +96,6 @@ classdefine : 'class' IDENTIFIER suite ';';
 callfunction: (IDENTIFIER '('expression?(','(expression))* ')');
 
 callclassfunction:IDENTIFIER'.'callfunction;
-
-newclass:'new' IDENTIFIER '('')';
 
 lamdaglobe:'[''&'']'('(' functionParameterList?')')?'->' suite '('(expression(','expression)*)?')';
 

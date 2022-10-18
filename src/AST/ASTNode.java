@@ -1,6 +1,6 @@
 package AST;
 
 abstract public class ASTNode {
-    abstract public void selfVisit(ASTVisitor visitor);
+    abstract public void accept(ASTVisitor visitor);
 
 }
