@@ -1,9 +1,11 @@
 package AST;
 
-public abstract class ExprNode extends ASTNode{
-    private String type;
+import Util.*;
 
-    public ExprNode(){ }
+public abstract class ExprNode extends ASTNode{
+    public Type type;
+
+    public ExprNode(Position pos){super(pos); }
 
     public boolean isAssignable(){ return false; }
 

@@ -4,25 +4,25 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-public class position {
+public class Position {
 
     public int row,column;
 
-    public position(int row,int col){
+    public Position(int row, int col){
         this.row=row;
         this.column=col;
     }
 
-    public position(Token token){
+    public Position(Token token){
         this.row=token.getLine();
         this.column=token.getCharPositionInLine();
     }
 
-    public position(TerminalNode terminalNode){
+    public Position(TerminalNode terminalNode){
         this(terminalNode.getSymbol());
     }
 
-    public position(ParserRuleContext ctx){
+    public Position(ParserRuleContext ctx){
         this(ctx.getStart());
     }
 

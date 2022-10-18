@@ -8,6 +8,7 @@ mainfunc :INT 'main' '(' ')'  suite ;
 
 expression
     : primary                                          #atomExpr
+    | expression op='.' expression                     #dotExpr
     | op=('!'|'-')  expression                         #cellExpr
     | expression op=('++'|'--')                        #cellExpr
     | op=('~'|'++'|'--') expression                    #cellExpr
@@ -40,8 +41,6 @@ constant
 
 variable
     : IDENTIFIER
-    | innermember
-    | classmember
     | THIS
     | arrayelement
     ;
@@ -49,12 +48,11 @@ variable
 funVal
     : callfunction
     | lamdaExpr
-    | callclassfunction
     ;
 
 newArrExpr : ('new' type ('['(expression)?']')+)|'null';
 
-newClassExpr: 'new' IDENTIFIER '('')' ;
+newClassExpr: 'new' type '('functionParameterValue?')' ;
 
 type:INT | BOOL | STR | IDENTIFIER;
 
@@ -68,6 +66,7 @@ suite: '{' statement* '}';
 arrayelement: IDENTIFIER ('[' expression ']')+;
 
 functionParameterList: type ('['']')* expression(','type ('['']')* expression)*;
+functionParameterValue:(expression(','expression)*);
 
 //=======statements=======
 statement
@@ -77,35 +76,27 @@ statement
     | 'while' '('expression ')' statement                                   #whileStmt
     |  'if'  '('  expression  ')'trueStmt=statement
                       ( 'else' falseStmt=statement)?                        #ifStmt
-    | 'for' '(' (vardef|expression)?';'
+    | 'for' '(' (statement)?
       expression? ';' (expression)? ')' statement                           #forStmt
     | 'return' expression? ';'                                              #returnStmt
     | expression(','expression)* ';'                                        #exprStmt
     | funcdefine                                                            #funcdefineStmt
-    | BREAK ';'                                                             #breakStmt
-    | CONTINUE ';'                                                          #continueStmt
+    | (BREAK|CONTINUE) ';'                                                  #ctrlStmt
     | ';'                                                                   #emptyStmt
     ;
 
 //======function=======
 
-funcdefine: ((type('['']')*)|'void')? IDENTIFIER '(' functionParameterList?')'  suite;
+returnType:((type('['']')*)|'void');
+
+funcdefine: returnType? IDENTIFIER '(' functionParameterList?')'  suite;
 
 classdefine : 'class' IDENTIFIER suite ';';
 
-callfunction: (IDENTIFIER '('expression?(','(expression))* ')');
+callfunction: (IDENTIFIER '('functionParameterValue? ')');//?
 
-callclassfunction:IDENTIFIER'.'callfunction;
+lamdaExpr:'['('&')?']'('(' functionParameterList?')')?'->' suite '('functionParameterValue?')';
 
-lamdaglobe:'[''&'']'('(' functionParameterList?')')?'->' suite '('(expression(','expression)*)?')';
-
-lamdainner:'['']'('(' functionParameterList?')')?'->' suite'('(expression(','expression)*)?')';
-
-lamdaExpr:lamdaglobe|lamdainner;
-
-classmember:(arrayelement|IDENTIFIER|callfunction)('.'(arrayelement|IDENTIFIER|callfunction))+;
-
-innermember:THIS('.'(arrayelement|IDENTIFIER|callfunction))+;
 
 
 

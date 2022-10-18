@@ -9,10 +9,16 @@ public class Type {
 
     public boolean isInt=false,isBool=false,isString=false,isVoid=false;
 
+    public boolean isArr=false;
+
+    public Vector<Integer> arrLayer=null;
+
     public String name;
 
     public HashMap<String,Type>classMember=null;
 
+    //1、Vector是线程安全的，ArrayList不是线程安全的。
+    //2、ArrayList在底层数组不够用时在原来的基础上扩展0.5倍，Vector是扩展1倍。
     public HashMap<String, Pair<Type, Vector<Type>>> funMember=null;//return type + parameter list
 
     //在Java中比较两个String对象的值，我们要用equals()，而不能用==

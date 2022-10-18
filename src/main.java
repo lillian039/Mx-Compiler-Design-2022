@@ -28,7 +28,6 @@ public class main {
 
         ASTBuilder astBuilder=new ASTBuilder(globalScope);
 
-        System.out.println("Hello World");
 
     }
 }
