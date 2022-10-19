@@ -107,28 +107,51 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitFunVal(MxParser.FunValContext ctx) {
-        return super.visitFunVal(ctx);
+        if (ctx.callfunction()!=null)return visit(ctx.callfunction());
+        else return visit(ctx.lamdaExpr());
+
     }
 
     @Override
     public ASTNode visitCallfunction(MxParser.CallfunctionContext ctx) {
-        return super.visitCallfunction(ctx);
+        Position pos=new Position(ctx);
+        FuncExprNode funct=new FuncExprNode(ctx.IDENTIFIER().toString(),pos);
+        for(var exp:ctx.functionParameterValue().children){
+            if(exp instanceof MxParser.ExpressionContext){
+                funct.parameters.add((ExprNode)visit(exp));
+            }
+        }
+        return funct;
     }
 
     @Override
     public ASTNode visitLamdaExpr(MxParser.LamdaExprContext ctx) {
+        Position pos=new Position(ctx);
+        FuncExprNode lamda=new FuncExprNode(pos);
+        lamda.isLambda=true;
+        if(ctx.And()!=null)lamda.isGlobe=true;
+        for(var exp:ctx.functionParameterValue().children){
+            if(exp instanceof MxParser.ExpressionContext){
+                lamda.parameters.add((ExprNode)visit(exp));
+            }
+        }
+
+        //?????
+
+
         return super.visitLamdaExpr(ctx);
     }
 
     @Override
     public ASTNode visitVariable(MxParser.VariableContext ctx) {
-        return super.visitVariable(ctx);
+        return new VarExprNode(ctx.IDENTIFIER().toString(),new Position(ctx));
     }
 
 
     @Override
     public ASTNode visitNewExpr(MxParser.NewExprContext ctx) {
-        return super.visitNewExpr(ctx);
+        if(ctx.newArrExpr()!=null)return visit(ctx.newArrExpr());
+        else return visit(ctx.newClassExpr());
     }
 
     @Override

@@ -14,7 +14,7 @@ public class FunDefStmtNode extends StmtNode {
     public String name;
 
     public Type returnType;
-    public Vector<Pair<Type, ExprNode>> funcParameterList;
+    public Vector<Pair<Type, String>> funcParameterList;
 
     public BlockStmtNode funcBody;
 
@@ -22,7 +22,7 @@ public class FunDefStmtNode extends StmtNode {
         super(pos);
     }
 
-    public FunDefStmtNode(String name, Type returnType,Vector<Pair<Type, ExprNode>> funcParameterList, BlockStmtNode funcBody, Position pos) {
+    public FunDefStmtNode(String name, Type returnType,Vector<Pair<Type, String>> funcParameterList, BlockStmtNode funcBody, Position pos) {
         super(pos);
         this.name = name;
         this.funcParameterList = funcParameterList;
