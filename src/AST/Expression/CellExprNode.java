@@ -4,20 +4,14 @@ import AST.ASTVisitor;
 import AST.ExprNode;
 import Util.Position;
 
-public class BinaryExprNode extends ExprNode {
+public class CellExprNode extends ExprNode {
 
-    public ExprNode ls,rs;
+    public ExprNode expression;
 
     public String symbol;
 
-    public BinaryExprNode(Position pos) {
+    CellExprNode(Position pos){
         super(pos);
-    }
-
-    public BinaryExprNode(ExprNode ls,ExprNode rs,Position pos) {
-        super(pos);
-        this.ls=ls;
-        this.rs=rs;
     }
 
     @Override

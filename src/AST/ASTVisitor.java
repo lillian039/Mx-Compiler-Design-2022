@@ -10,6 +10,8 @@ public interface ASTVisitor {
 
     void visit(BinaryExprNode node);
 
+    void visit(CellExprNode node);
+
     void visit(ConstExprNode node);
 
     void visit(FuncExprNode node);

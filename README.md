@@ -49,7 +49,8 @@ ASTNode：抽象函数，用作AST节点的基类
       - funcExpr：lamda 全局函数 class方法
       - ConstExpr：int string bool
       - varExpr：identifier class classmember this this.member
-    - binaryExpr：二元运算 包含 ls 与 rs
+    - binaryExpr：二元运算 包含 符号 ls 与 rs
+    - cellExpr：一元运算 包含符号
     - assignExpr：赋值运算 包含ls 与 rs
     - newExpr：new 语句 数组的new 与 class 的 new
     - dotExpr：`.` 语句，用于递归调用classmember或classmethod

@@ -35,6 +35,11 @@ public class SemanticChecker implements ASTVisitor{
     }
 
     @Override
+    public void visit(CellExprNode node) {
+
+    }
+
+    @Override
     public void visit(BinaryExprNode node) {
 
     }
