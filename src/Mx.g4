@@ -1,16 +1,17 @@
 grammar Mx;   //名称需要和文件名一致
 import MxLexerRules;
-program : (vardef|funcdefine|classdefine)*mainfunc EOF;   //解决问题: no viable alternative at input '<EOF>'
+program : definition*mainfunc EOF;   //解决问题: no viable alternative at input '<EOF>'
 
 //=======expressions=======
-
+definition:vardef|funcdefine|classdefine;
 mainfunc :INT 'main' '(' ')'  suite ;
 
 expression
     : primary                                          #atomExpr
+    | '(' expression ')'                               #bracketExpr
     | expression op='.' expression                     #dotExpr
     | op=('!'|'-')  expression                         #cellExpr
-    | expression op=('++'|'--')                        #cellExpr
+    | expression op=('++'|'--')                        #delayCellExpr
     | op=('~'|'++'|'--') expression                    #cellExpr
     | expression op=('*'|'/'|'%') expression           #binaryExpr
     | expression op=('+'|'-') expression               #binaryExpr
@@ -27,8 +28,7 @@ expression
     ;
 
 primary
-    : '(' expression ')'
-    | variable
+    : variable
     | constant
     | funVal
     ;
@@ -58,8 +58,8 @@ newClassExpr: 'new' type '('functionParameterValue?')' ;
 type:INT | BOOL | STR | IDENTIFIER;
 
 vardef
-    :type  IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';'          #signalvar
-    |type ('['']')+ IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';' #arrayvar//why <assoc=right>???
+    : type  IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';'          #signalvar
+    | type ('['']')+ IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';' #arrayvar
     ;
 
 suite: '{' statement* '}';

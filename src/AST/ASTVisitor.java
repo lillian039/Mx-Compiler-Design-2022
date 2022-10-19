@@ -20,6 +20,8 @@ public interface ASTVisitor {
 
     void visit(AssignExprNode node);
 
+    void visit(DelayCellExpr node);
+
     void visit(BlockStmtNode node);
 
     void visit(ClassDefStmtNode node);

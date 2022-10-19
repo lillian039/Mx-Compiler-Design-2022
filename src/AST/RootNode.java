@@ -8,7 +8,7 @@ public class RootNode extends ASTNode {
     public MainNode mainNode;
 
     public ArrayList<StmtNode> definitions;
-    RootNode (MainNode mainNode,Position pos){
+    public RootNode (MainNode mainNode,Position pos){
         super(pos);
         this.mainNode=mainNode;
     }

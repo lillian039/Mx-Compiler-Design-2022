@@ -1,6 +1,7 @@
 package Util;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class Entity {
     public boolean boolVal;
@@ -8,19 +9,27 @@ public class Entity {
     public String stringVal;
     public ArrayList<Entity> classVal;
 
-    Entity(boolean boolVal){
+    public Vector<Boolean> arrBool;
+
+    public Vector<Integer> arrInt;
+
+    public Vector<String> arrString;
+
+
+    public Entity (){}
+    public Entity(boolean boolVal){
         this.boolVal=boolVal;
     }
 
-    Entity(int intVal){
+    public Entity(int intVal){
         this.intVal=intVal;
     }
 
-    Entity(String stringVal){
+    public Entity(String stringVal){
         this.stringVal=stringVal;
     }
 
-    Entity(ArrayList<Entity> classVal){
+    public Entity(ArrayList<Entity> classVal){
         this.classVal=classVal;
     }
 

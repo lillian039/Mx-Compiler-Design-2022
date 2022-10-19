@@ -18,6 +18,16 @@ public interface MxListener extends ParseTreeListener {
 	 */
 	void exitProgram(MxParser.ProgramContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MxParser#definition}.
+	 * @param ctx the parse tree
+	 */
+	void enterDefinition(MxParser.DefinitionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxParser#definition}.
+	 * @param ctx the parse tree
+	 */
+	void exitDefinition(MxParser.DefinitionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MxParser#mainfunc}.
 	 * @param ctx the parse tree
 	 */
@@ -51,6 +61,30 @@ public interface MxListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDotExpr(MxParser.DotExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code delayCellExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterDelayCellExpr(MxParser.DelayCellExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code delayCellExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitDelayCellExpr(MxParser.DelayCellExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code bracketExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBracketExpr(MxParser.BracketExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code bracketExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBracketExpr(MxParser.BracketExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code atomExpr}
 	 * labeled alternative in {@link MxParser#expression}.

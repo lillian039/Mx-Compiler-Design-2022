@@ -7,7 +7,7 @@ public class MainNode extends ASTNode{
     public ArrayList<StmtNode> stmts;
 
     public Type intType,boolType,stringType,voidType;
-    MainNode (Position pos){
+    public MainNode (Position pos){
         super(pos);
         intType=new Type("int");
         boolType=new Type("bool");

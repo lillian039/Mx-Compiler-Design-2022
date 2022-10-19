@@ -4,6 +4,7 @@ import AST.ASTVisitor;
 import AST.ExprNode;
 import Util.Position;
 import Util.Type;
+import org.antlr.v4.runtime.misc.Pair;
 
 import java.util.ArrayList;
 
@@ -11,7 +12,7 @@ public class NewExprNode extends ExprNode {
     public boolean newArr = false;
     public boolean newClass = false;
 
-    public ArrayList<Integer> layerSize;
+    public ArrayList<Pair<Integer,ExprNode>> layerSize=new ArrayList<>();
 
     public ArrayList<ExprNode> funcParaList;
 

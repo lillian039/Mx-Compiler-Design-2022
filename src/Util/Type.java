@@ -7,7 +7,7 @@ import java.util.Vector;
 
 public class Type {
 
-    public boolean isInt=false,isBool=false,isString=false,isVoid=false;
+    public boolean isInt=false,isBool=false,isString=false,isVoid=false,isNull=false;
 
     public boolean isArr=false;
 

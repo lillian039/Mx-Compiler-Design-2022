@@ -35,6 +35,11 @@ public class SemanticChecker implements ASTVisitor{
     }
 
     @Override
+    public void visit(DelayCellExpr node) {
+
+    }
+
+    @Override
     public void visit(CellExprNode node) {
 
     }

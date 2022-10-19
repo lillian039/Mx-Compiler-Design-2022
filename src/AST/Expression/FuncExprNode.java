@@ -10,6 +10,8 @@ import java.util.ArrayList;
 public class FuncExprNode extends ExprNode {
     public String name;
     public ArrayList<ExprNode> parameters=new ArrayList<>();
+    public boolean isLambda=false;
+    public boolean isGlobe=false;
 
     public FuncExprNode(Position pos) {
         super(pos);
