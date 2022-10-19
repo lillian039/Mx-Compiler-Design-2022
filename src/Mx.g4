@@ -37,6 +37,7 @@ constant
     : INTEGER
     | STRING
     | (TRUE | FALSE)
+    | NULL
     ;
 
 variable
@@ -57,8 +58,8 @@ newClassExpr: 'new' type '('functionParameterValue?')' ;
 type:INT | BOOL | STR | IDENTIFIER;
 
 vardef
-    :<assoc=right> type  IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';'          #signalvar
-    |<assoc=right> type ('['']')+ IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';' #arrayvar
+    :type  IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';'          #signalvar
+    |type ('['']')+ IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';' #arrayvar//why <assoc=right>???
     ;
 
 suite: '{' statement* '}';
@@ -96,9 +97,3 @@ classdefine : 'class' IDENTIFIER suite ';';
 callfunction: (IDENTIFIER '('functionParameterValue? ')');//?
 
 lamdaExpr:'['('&')?']'('(' functionParameterList?')')?'->' suite '('functionParameterValue?')';
-
-
-
-
-
-

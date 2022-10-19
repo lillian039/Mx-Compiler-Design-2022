@@ -6,15 +6,19 @@ import Util.Position;
 import Util.Type;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class FuncExprNode extends ExprNode {
     public String name;
-    public Type returnType;
-    public ArrayList<Type> parameters;
+    public ArrayList<ExprNode> parameters=new ArrayList<>();
 
     public FuncExprNode(Position pos) {
         super(pos);
+    }
+
+    public FuncExprNode(String name,Type returnType,Position pos) {
+        super(pos);
+        this.name=name;
+        this.type=returnType;
     }
 
     @Override

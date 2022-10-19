@@ -1,4 +1,5 @@
 import Frontend.ASTBuilder;
+import Util.Err.Error;
 import Util.GlobalScope;
 import gen.MxLexer;
 import gen.MxParser;
@@ -15,18 +16,23 @@ public class main {
     public static void main(String[] args) throws Exception{
         String name="test.mx";
         InputStream input=new FileInputStream(name);
+        try {
+            GlobalScope globalScope=new GlobalScope(null);
 
-        GlobalScope globalScope=new GlobalScope(null);
+            MxLexer lexer=new MxLexer(CharStreams.fromStream(input));
+            lexer.removeErrorListeners();
 
-        MxLexer lexer=new MxLexer(CharStreams.fromStream(input));
-        lexer.removeErrorListeners();
+            MxParser parser=new MxParser(new CommonTokenStream(lexer));
+            parser.removeErrorListeners();
 
-        MxParser parser=new MxParser(new CommonTokenStream(lexer));
-        parser.removeErrorListeners();
+            ParseTree parseTreeRoot=parser.program();
 
-        ParseTree parseTreeRoot=parser.program();
+            ASTBuilder astBuilder=new ASTBuilder(globalScope);
+        }catch (Error err){
+            System.out.println(err.errorMsg());
+            System.out.println("-1");
+        }
 
-        ASTBuilder astBuilder=new ASTBuilder(globalScope);
 
 
     }

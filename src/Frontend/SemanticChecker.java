@@ -49,6 +49,10 @@ public class SemanticChecker implements ASTVisitor{
 
     }
 
+    @Override
+    public void visit(DotExprNode node) {
+
+    }
 
     @Override
     public void visit(BlockStmtNode node) {

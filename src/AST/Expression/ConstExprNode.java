@@ -12,9 +12,10 @@ public class ConstExprNode extends ExprNode {
         super(pos);
     }
 
-    public ConstExprNode(Type type,Position pos){
+    public ConstExprNode(Type type,Entity value,Position pos){
         super(pos);
         this.type=type;
+        this.value=value;
     }
 
     @Override

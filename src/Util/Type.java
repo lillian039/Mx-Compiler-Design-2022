@@ -11,7 +11,9 @@ public class Type {
 
     public boolean isArr=false;
 
-    public Vector<Integer> arrLayer=null;
+    public int layer=1;
+
+    public Vector<Integer> arrLayerSize=null;
 
     public String name;
 
@@ -24,6 +26,9 @@ public class Type {
     //在Java中比较两个String对象的值，我们要用equals()，而不能用==
     // 因为它比较的是两个对象的引用地址，即内存地址是否相同
     // 而对于基本数据类型，如byte、short、int等，==比较的就是它们的值了。
+    public Type(){
+
+    }
     public Type(String name){
         if(name.equals("int"))isInt=true;
         else if (name.equals("bool"))isBool=true;

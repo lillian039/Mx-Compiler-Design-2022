@@ -4,18 +4,18 @@ import AST.ASTVisitor;
 import AST.ExprNode;
 import Util.Position;
 
-public class AssignExprNode extends ExprNode {
+public class DotExprNode extends ExprNode {
+    public ExprNode lhs;
+    public ExprNode rhs;
 
-    public ExprNode lhs, rhs;
-
-    public AssignExprNode(Position pos) {
+    DotExprNode(Position pos) {
         super(pos);
     }
 
-    public AssignExprNode(ExprNode ls, ExprNode rs, Position pos) {
+    DotExprNode(ExprNode lhs, ExprNode rhs, Position pos) {
         super(pos);
-        this.lhs = ls;
-        this.rhs = rs;
+        this.lhs = lhs;
+        this.rhs = rhs;
     }
 
     @Override

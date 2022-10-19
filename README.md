@@ -58,3 +58,13 @@ ASTNode：抽象函数，用作AST节点的基类
 
   - SymbolCollector：从根节点开始跑树，将所有定义的class，收集到gScope的types中 //怎么感觉没有必要？
   - SemanticCheck：从根节点开始跑树，进行语义检查
+
+- Error类：
+  - error：虚函数，基类，记录错误提示与错误位置
+  - SemanticError：语义错误
+  - SyntaxError：语法错误
+
+参考资料：
+
+- Tutorial of Yx
+- Antlr 介绍：[(127条消息) ANTLR4_pourtheworld的博客-CSDN博客](https://blog.csdn.net/pourtheworld/category_10336918.html)

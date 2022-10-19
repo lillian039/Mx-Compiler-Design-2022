@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Position {
 
-    public int row,column;
+    private int row,column;
 
     public Position(int row, int col){
         this.row=row;

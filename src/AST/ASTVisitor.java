@@ -14,6 +14,8 @@ public interface ASTVisitor {
 
     void visit(FuncExprNode node);
 
+    void visit(DotExprNode node);
+
     void visit(AssignExprNode node);
 
     void visit(BlockStmtNode node);
