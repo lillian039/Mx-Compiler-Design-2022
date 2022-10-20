@@ -1,31 +1,21 @@
 package AST.Statement;
 
 import AST.ASTVisitor;
+import AST.Atom.SingleVarDefNode;
+import AST.Atom.TypeNode;
 import AST.ExprNode;
 import AST.StmtNode;
 import Util.Position;
 import Util.Type;
 
-public class VarDefStmtNode extends StmtNode {
-    public String name;
-    public Type type;
-    public ExprNode expression=null;
+import java.util.ArrayList;
 
+public class VarDefStmtNode extends StmtNode {
+    public Type type;
+    public TypeNode typeNode;
+    public ArrayList<SingleVarDefNode> varDef=new ArrayList<>();
     public VarDefStmtNode(Position pos) {
         super(pos);
-    }
-
-    public VarDefStmtNode(Type type,String name,Position pos) {
-        super(pos);
-        this.type=type;
-        this.name=name;
-    }
-
-    public VarDefStmtNode(Type type,String name,ExprNode expression,Position pos) {
-        super(pos);
-        this.type=type;
-        this.name=name;
-        this.expression=expression;
     }
 
     @Override

@@ -1,4 +1,6 @@
 package AST;
+import AST.Atom.SingleVarDefNode;
+import AST.Atom.TypeNode;
 import AST.Expression.*;
 import AST.Statement.*;
 public interface ASTVisitor {
@@ -43,5 +45,9 @@ public interface ASTVisitor {
     void visit(VarDefStmtNode node);
 
     void visit(WhileStmtNode node);
+
+    void visit(SingleVarDefNode node);
+
+    void visit(TypeNode node);
 
 }

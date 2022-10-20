@@ -1,6 +1,7 @@
 package AST.Expression;
 
 import AST.ASTVisitor;
+import AST.Atom.TypeNode;
 import AST.ExprNode;
 import Util.Position;
 import Util.Type;
@@ -12,6 +13,10 @@ public class NewExprNode extends ExprNode {
     public boolean newArr = false;
     public boolean newClass = false;
 
+    public TypeNode typeNode;
+
+    public String typeName;
+
     public ArrayList<Pair<Integer,ExprNode>> layerSize=new ArrayList<>();
 
     public ArrayList<ExprNode> funcParaList;
@@ -20,11 +25,9 @@ public class NewExprNode extends ExprNode {
         super(pos);
     }
 
-    public NewExprNode(Type type, Position pos) {
+    public NewExprNode(String type, Position pos) {
         super(pos);
-        this.type = type;
-        if(type.isArr)newArr=true;
-        else newClass=true;
+        this.typeName=type;
     }
 
     @Override

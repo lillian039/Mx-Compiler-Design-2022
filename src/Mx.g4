@@ -50,24 +50,24 @@ funVal
     : callfunction
     | lamdaExpr
     ;
-
-newArrExpr : ('new' type ('['(expression)?']')+)|'null';
+newArrExpr : ('new' (INT | BOOL | STR | IDENTIFIER) ('['(expression)?']')+);
 
 newClassExpr: 'new' type '('functionParameterValue?')' ;
 
-type:INT | BOOL | STR | IDENTIFIER;
+type:(INT | BOOL | STR | IDENTIFIER)('['']')*;
 
-vardef
-    : type  IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';'          #signalvar
-    | type ('['']')+ IDENTIFIER ('=' expression)*(','IDENTIFIER ('=' expression)*)*';' #arrayvar
-    ;
+vardef: type singleVarDef(','singleVarDef)*';';
 
 suite: '{' statement* '}';
 //=======definitions=======
 arrayelement: IDENTIFIER ('[' expression ']')+;
 
-functionParameterList: type ('['']')* expression(','type ('['']')* expression)*;
+
+paralistVarDef: type IDENTIFIER;
+singleVarDef:IDENTIFIER ('=' expression)?;
+functionParameterList: paralistVarDef(','paralistVarDef)*;
 functionParameterValue:(expression(','expression)*);
+
 
 //=======statements=======
 statement
@@ -75,12 +75,12 @@ statement
     | classdefine                                                           #classdefineStmt
     | vardef                                                                #vardefineStmt
     | 'while' '('expression ')' statement                                   #whileStmt
-    |  'if'  '('  expression  ')'trueStmt=statement
-                      ( 'else' falseStmt=statement)?                        #ifStmt
+    |  If  '('  expression  ')'trueStmt=statement
+                      ( Else falseStmt=statement)?                        #ifStmt
     | 'for' '(' (statement)?
       expression? ';' (expression)? ')' statement                           #forStmt
     | 'return' expression? ';'                                              #returnStmt
-    | expression(','expression)* ';'                                        #exprStmt
+    | expression';'                                                         #exprStmt
     | funcdefine                                                            #funcdefineStmt
     | (BREAK|CONTINUE) ';'                                                  #ctrlStmt
     | ';'                                                                   #emptyStmt
@@ -88,7 +88,7 @@ statement
 
 //======function=======
 
-returnType:((type('['']')*)|'void');
+returnType:(type|'void');
 
 funcdefine: returnType? IDENTIFIER '(' functionParameterList?')'  suite;
 

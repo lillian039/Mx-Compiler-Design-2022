@@ -204,29 +204,15 @@ public interface MxListener extends ParseTreeListener {
 	 */
 	void exitType(MxParser.TypeContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code signalvar}
-	 * labeled alternative in {@link MxParser#vardef}.
+	 * Enter a parse tree produced by {@link MxParser#vardef}.
 	 * @param ctx the parse tree
 	 */
-	void enterSignalvar(MxParser.SignalvarContext ctx);
+	void enterVardef(MxParser.VardefContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code signalvar}
-	 * labeled alternative in {@link MxParser#vardef}.
+	 * Exit a parse tree produced by {@link MxParser#vardef}.
 	 * @param ctx the parse tree
 	 */
-	void exitSignalvar(MxParser.SignalvarContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code arrayvar}
-	 * labeled alternative in {@link MxParser#vardef}.
-	 * @param ctx the parse tree
-	 */
-	void enterArrayvar(MxParser.ArrayvarContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code arrayvar}
-	 * labeled alternative in {@link MxParser#vardef}.
-	 * @param ctx the parse tree
-	 */
-	void exitArrayvar(MxParser.ArrayvarContext ctx);
+	void exitVardef(MxParser.VardefContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MxParser#suite}.
 	 * @param ctx the parse tree
@@ -247,6 +233,26 @@ public interface MxListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArrayelement(MxParser.ArrayelementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MxParser#paralistVarDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterParalistVarDef(MxParser.ParalistVarDefContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxParser#paralistVarDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitParalistVarDef(MxParser.ParalistVarDefContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MxParser#singleVarDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterSingleVarDef(MxParser.SingleVarDefContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxParser#singleVarDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitSingleVarDef(MxParser.SingleVarDefContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MxParser#functionParameterList}.
 	 * @param ctx the parse tree

@@ -4,8 +4,16 @@ import AST.ASTVisitor;
 import AST.ExprNode;
 import Util.Position;
 
+import java.util.ArrayList;
+
 public class VarExprNode extends ExprNode {
-    String name;
+    public String name;
+
+    public boolean isArrElement=false;
+
+    public ArrayList<ExprNode> elementLayer=new ArrayList<>();
+
+
 
     public VarExprNode(Position pos) {
         super(pos);
@@ -14,6 +22,11 @@ public class VarExprNode extends ExprNode {
     public VarExprNode(String name, Position pos) {
         super(pos);
         this.name = name;
+    }
+
+    @Override
+    public boolean isAssignable() {
+        return true;
     }
 
     @Override

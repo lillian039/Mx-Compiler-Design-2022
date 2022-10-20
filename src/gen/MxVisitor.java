@@ -127,19 +127,11 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitType(MxParser.TypeContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code signalvar}
-	 * labeled alternative in {@link MxParser#vardef}.
+	 * Visit a parse tree produced by {@link MxParser#vardef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSignalvar(MxParser.SignalvarContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code arrayvar}
-	 * labeled alternative in {@link MxParser#vardef}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitArrayvar(MxParser.ArrayvarContext ctx);
+	T visitVardef(MxParser.VardefContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#suite}.
 	 * @param ctx the parse tree
@@ -152,6 +144,18 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitArrayelement(MxParser.ArrayelementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#paralistVarDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParalistVarDef(MxParser.ParalistVarDefContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MxParser#singleVarDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSingleVarDef(MxParser.SingleVarDefContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#functionParameterList}.
 	 * @param ctx the parse tree

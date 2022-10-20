@@ -36,6 +36,7 @@ Oror:'||';
 Return:'return';
 For:'for';
 If:'if';
+Else:'else';
 While:'while';
 
 Semi:';';
@@ -48,6 +49,7 @@ STR:'string';
 VOID:'void';
 
 NEW:'new';
+
 
 TRUE:'true';
 FALSE:'false';

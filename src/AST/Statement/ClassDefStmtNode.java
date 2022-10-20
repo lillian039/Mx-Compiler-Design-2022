@@ -12,6 +12,8 @@ public class ClassDefStmtNode extends StmtNode {
     public ArrayList<VarDefStmtNode> memberDef = new ArrayList<>();
     public ArrayList<FunDefStmtNode> funcDef = new ArrayList<>();
 
+    public BlockStmtNode classBody;
+
     public ClassDefStmtNode(Position pos) {
         super(pos);
     }

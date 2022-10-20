@@ -12,12 +12,6 @@ public class CtrlStmtNode extends StmtNode {
         super(pos);
     }
 
-    public CtrlStmtNode(String name, Position pos) {
-        super(pos);
-        if(name.equals("break"))isBreak=true;
-        else isContinue=true;
-    }
-
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);

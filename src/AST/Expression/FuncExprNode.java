@@ -1,6 +1,7 @@
 package AST.Expression;
 
 import AST.ASTVisitor;
+import AST.Atom.SingleVarDefNode;
 import AST.ExprNode;
 import AST.Statement.BlockStmtNode;
 import Util.Position;
@@ -13,9 +14,7 @@ import java.util.Vector;
 public class FuncExprNode extends ExprNode {
     public String name;
     public ArrayList<ExprNode> parameters=new ArrayList<>();
-
-    public Vector<Pair<Type, ExprNode>> funcParameterList;
-
+    public ArrayList<SingleVarDefNode> funcParameterList=new ArrayList<>();
     public BlockStmtNode funcBody;
     public boolean isLambda=false;
     public boolean isGlobe=false;

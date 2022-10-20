@@ -231,25 +231,13 @@ public class MxBaseListener implements MxListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSignalvar(MxParser.SignalvarContext ctx) { }
+	@Override public void enterVardef(MxParser.VardefContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSignalvar(MxParser.SignalvarContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterArrayvar(MxParser.ArrayvarContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitArrayvar(MxParser.ArrayvarContext ctx) { }
+	@Override public void exitVardef(MxParser.VardefContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -274,6 +262,30 @@ public class MxBaseListener implements MxListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitArrayelement(MxParser.ArrayelementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParalistVarDef(MxParser.ParalistVarDefContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParalistVarDef(MxParser.ParalistVarDefContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSingleVarDef(MxParser.SingleVarDefContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSingleVarDef(MxParser.SingleVarDefContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

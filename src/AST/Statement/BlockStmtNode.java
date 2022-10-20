@@ -7,7 +7,7 @@ import Util.*;
 import java.util.ArrayList;
 
 public class BlockStmtNode extends StmtNode {
-    public ArrayList<StmtNode> statements;
+    public ArrayList<StmtNode> statements=new ArrayList<>();
     public BlockStmtNode(Position pos){ super(pos); }
     @Override
     public void accept(ASTVisitor visitor) {

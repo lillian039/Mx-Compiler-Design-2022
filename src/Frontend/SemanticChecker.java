@@ -1,6 +1,8 @@
 package Frontend;
 import AST.*;
 
+import AST.Atom.SingleVarDefNode;
+import AST.Atom.TypeNode;
 import AST.Expression.*;
 import AST.Statement.*;
 import Util.GlobalScope;
@@ -119,5 +121,13 @@ public class SemanticChecker implements ASTVisitor{
 
     }
 
+    @Override
+    public void visit(SingleVarDefNode node) {
 
+    }
+
+    @Override
+    public void visit(TypeNode node) {
+
+    }
 }
