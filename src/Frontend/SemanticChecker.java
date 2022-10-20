@@ -1,6 +1,7 @@
 package Frontend;
 import AST.*;
 
+import AST.Atom.NewArrDemNode;
 import AST.Atom.SingleVarDefNode;
 import AST.Atom.TypeNode;
 import AST.Expression.*;
@@ -128,6 +129,11 @@ public class SemanticChecker implements ASTVisitor{
 
     @Override
     public void visit(TypeNode node) {
+
+    }
+
+    @Override
+    public void visit(NewArrDemNode node) {
 
     }
 }

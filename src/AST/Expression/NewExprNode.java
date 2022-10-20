@@ -1,6 +1,7 @@
 package AST.Expression;
 
 import AST.ASTVisitor;
+import AST.Atom.NewArrDemNode;
 import AST.Atom.TypeNode;
 import AST.ExprNode;
 import Util.Position;
@@ -13,6 +14,7 @@ public class NewExprNode extends ExprNode {
     public boolean newArr = false;
     public boolean newClass = false;
 
+    public ArrayList<NewArrDemNode> arrList=new ArrayList<>();
     public TypeNode typeNode;
 
     public String typeName;

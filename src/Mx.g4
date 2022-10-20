@@ -50,7 +50,10 @@ funVal
     : callfunction
     | lamdaExpr
     ;
-newArrExpr : ('new' (INT | BOOL | STR | IDENTIFIER) ('['(expression)?']')+);
+
+newArrExprAtom:'['(expression)?']';
+
+newArrExpr : ('new' (INT | BOOL | STR | IDENTIFIER) (newArrExprAtom)+);
 
 newClassExpr: 'new' type '('functionParameterValue?')' ;
 
@@ -76,7 +79,7 @@ statement
     | vardef                                                                #vardefineStmt
     | 'while' '('expression ')' statement                                   #whileStmt
     |  If  '('  expression  ')'trueStmt=statement
-                      ( Else falseStmt=statement)?                        #ifStmt
+                      ( Else falseStmt=statement)?                          #ifStmt
     | 'for' '(' (statement)?
       expression? ';' (expression)? ')' statement                           #forStmt
     | 'return' expression? ';'                                              #returnStmt

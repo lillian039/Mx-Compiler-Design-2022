@@ -195,6 +195,18 @@ public class MxBaseListener implements MxListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterNewArrExprAtom(MxParser.NewArrExprAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNewArrExprAtom(MxParser.NewArrExprAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterNewArrExpr(MxParser.NewArrExprContext ctx) { }
 	/**
 	 * {@inheritDoc}

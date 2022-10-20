@@ -174,6 +174,16 @@ public interface MxListener extends ParseTreeListener {
 	 */
 	void exitFunVal(MxParser.FunValContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MxParser#newArrExprAtom}.
+	 * @param ctx the parse tree
+	 */
+	void enterNewArrExprAtom(MxParser.NewArrExprAtomContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxParser#newArrExprAtom}.
+	 * @param ctx the parse tree
+	 */
+	void exitNewArrExprAtom(MxParser.NewArrExprAtomContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MxParser#newArrExpr}.
 	 * @param ctx the parse tree
 	 */

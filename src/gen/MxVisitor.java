@@ -109,6 +109,12 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFunVal(MxParser.FunValContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MxParser#newArrExprAtom}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNewArrExprAtom(MxParser.NewArrExprAtomContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MxParser#newArrExpr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

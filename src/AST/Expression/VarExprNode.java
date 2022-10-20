@@ -11,9 +11,7 @@ public class VarExprNode extends ExprNode {
 
     public boolean isArrElement=false;
 
-    public ArrayList<ExprNode> elementLayer=new ArrayList<>();
-
-
+    public ArrayList<ExprNode> arrDimension=new ArrayList<>();
 
     public VarExprNode(Position pos) {
         super(pos);
