@@ -5,12 +5,13 @@
 🌱TODO LIST：
 
 - [x] 完成 Mx.g4 
-- [ ] 完成 AST 的架构
-- [ ] 完成 SemanticCheck的书写
+- [x] 完成 AST 的架构
+- [x] 完成SymbolCollector
+- [ ] 完成 SemanticCheck
 
 
 
-🌻**AST（abstract syntax code）架构初步设想：**
+🌻**AST（abstract syntax code）架构：**
 
 ASTNode：抽象函数，用作AST节点的基类
 
@@ -24,13 +25,12 @@ ASTNode：抽象函数，用作AST节点的基类
 
     GlobalScope类：继承Scope，记录所有定义的type，以及全局变量
 
-  - Type类：记录基础变量形式，以及新定义的class，和class里面的函数，变量。（？可不可以把数组也看成一个type？）
+  - Type类：记录基础变量形式，以及新定义的classNode
 
 - ASTNode大类：
 
   - ASTNode：基类虚函数，每个节点都含有连向接口 `ASTVisitor` 的`accept`函数，`accept`函数按照节点不同的类型调用不同的 `ASTVisitor` 接口的 `visitor` 函数，实现不同方法
   - RootNode：整个程序的根节点
-  - MainNode：main函数节点
   - StmtNode：语句节点，基类虚函数，包含 position 用于找到词所在位置
 
     - blockStmt：引入一个新的花括号作用域，该class里面需要包含这个作用域里头的所有statements
@@ -51,19 +51,41 @@ ASTNode：抽象函数，用作AST节点的基类
       - varExpr：identifier class classmember this this.member
     - binaryExpr：二元运算 包含 符号 ls 与 rs
     - cellExpr：一元运算 包含符号
+    - delayCellExpr：一元运算，a++，a--
     - assignExpr：赋值运算 包含ls 与 rs
     - newExpr：new 语句 数组的new 与 class 的 new
-    - dotExpr：`.` 语句，用于递归调用classmember或classmethod
+    - dotVarExpr：`.` 语句，用于递归调用classmember
+    - dotFuncExpr：`.` 语句，用于递归调用classmethod
+  - Atom类：一些更为基础的小节点
+    - NewArrDemNode：记录new[ Express？]方括号内的内容
+    - SingleVarDefNode：记录单个变量定义
+    - TypeNode：记录变量类型，包括是否为数组
 
 - ASTVisitor接口：一种遍历树的方式，里面函数全部名为 `visit`，对不同的ASTNode调用不同的方法
 
-  - SymbolCollector：从根节点开始跑树，将所有定义的class，收集到gScope的types中 //怎么感觉没有必要？
+  - SymbolCollector：从根节点开始跑树，将所有定义的class收集到gScope的types中，同时收集function 
   - SemanticCheck：从根节点开始跑树，进行语义检查
 
 - Error类：
   - error：虚函数，基类，记录错误提示与错误位置
   - SemanticError：语义错误
   - SyntaxError：语法错误
+
+
+
+🌻**SymbolChecker 架构：**
+
+- firstVisit
+
+  第一次遍历，将所有Type判断是否重名后丢件gScope的types内
+
+  接着遍历将所有全局函数，更新返回值，参数列表，并将其放进funDef内
+
+- secondVisit
+
+  第二次遍历，收集所有Class内的member与method，method同样只更新返回值与参数列表
+
+至此，除上述已更新的值外，其余vardef的type均还未更新，要注意！！！
 
 参考资料：
 
