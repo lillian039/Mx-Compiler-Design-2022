@@ -8,13 +8,20 @@ import Util.Type;
 
 public class SingleVarDefNode extends ASTNode {
     public String name;
-    public Type type;
+
     public TypeNode typeNode;
 
     public ExprNode expression=null;
 
     public SingleVarDefNode(Position pos) {
         super(pos);
+    }
+
+    public SingleVarDefNode(Position pos,String name,TypeNode typeNode)
+    {
+        super(pos);
+        this.name=name;
+        this.typeNode=typeNode;
     }
 
     @Override

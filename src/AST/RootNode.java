@@ -1,17 +1,24 @@
 package AST;
+
+import AST.Atom.SingleVarDefNode;
+import AST.Statement.ClassDefStmtNode;
+import AST.Statement.FunDefStmtNode;
+import AST.Statement.VarDefStmtNode;
 import Util.*;
 
 import java.util.ArrayList;
 
 public class RootNode extends ASTNode {
 
-    public MainNode mainNode;
+    public FunDefStmtNode mainNode;
+    public ArrayList<FunDefStmtNode> funcDef = new ArrayList<>();
+    public ArrayList<VarDefStmtNode> varDef = new ArrayList<>();
+    public ArrayList<ClassDefStmtNode> classDef = new ArrayList<>();
 
-    public ArrayList<StmtNode> definitions;
-    public RootNode (MainNode mainNode,Position pos){
+    public RootNode( Position pos) {
         super(pos);
-        this.mainNode=mainNode;
     }
+
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);

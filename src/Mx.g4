@@ -1,15 +1,15 @@
 grammar Mx;   //名称需要和文件名一致
 import MxLexerRules;
-program : definition*mainfunc EOF;   //解决问题: no viable alternative at input '<EOF>'
+program : definition* EOF;   //解决问题: no viable alternative at input '<EOF>'
 
 //=======expressions=======
 definition:vardef|funcdefine|classdefine;
-mainfunc :INT 'main' '(' ')'  suite ;
 
 expression
     : primary                                          #atomExpr
     | '(' expression ')'                               #bracketExpr
-    | expression op='.' expression                     #dotExpr
+    | expression op='.' callfunction                   #dotFuncExpr
+    | expression op='.' variable                       #dotVarExpr
     | op=('!'|'-')  expression                         #cellExpr
     | expression op=('++'|'--')                        #delayCellExpr
     | op=('~'|'++'|'--') expression                    #cellExpr
@@ -55,7 +55,7 @@ newArrExprAtom:'['(expression)?']';
 
 newArrExpr : ('new' (INT | BOOL | STR | IDENTIFIER) (newArrExprAtom)+);
 
-newClassExpr: 'new' type '('functionParameterValue?')' ;
+newClassExpr: 'new' type '('')' ;
 
 type:(INT | BOOL | STR | IDENTIFIER)('['']')*;
 
@@ -93,7 +93,7 @@ statement
 
 returnType:(type|'void');
 
-funcdefine: returnType? IDENTIFIER '(' functionParameterList?')'  suite;
+funcdefine: returnType? (IDENTIFIER) '(' functionParameterList?')'  suite;
 
 classdefine : 'class' IDENTIFIER suite ';';
 

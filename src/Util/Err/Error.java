@@ -12,6 +12,6 @@ abstract public class Error extends RuntimeException{
     }
 
     public String errorMsg(){
-        return (message + ":" + pos.toString());
+        return (message + ":" +pos.posToString());
     }
 }

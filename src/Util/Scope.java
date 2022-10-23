@@ -1,33 +1,74 @@
 package Util;
 
+import AST.Atom.SingleVarDefNode;
+import AST.Statement.FunDefStmtNode;
+import AST.Statement.VarDefStmtNode;
 import org.antlr.v4.runtime.misc.Pair;
 
 import java.util.HashMap;
 
 public class Scope {
-    private HashMap<String,Type> variableMembers;//<name,type>
-    private HashMap<String, Pair<Type,ArrayLayer>> arrayMembers;//<name,type,layer>
+    private HashMap<String, SingleVarDefNode> variableMembers;//<name,type>
+    private HashMap<String, FunDefStmtNode> funcMembers;//<name,type,layer>
 
-    private Scope parentScope;
+    public boolean isClass;
+    public boolean isFunc;
+    public String name;
+    public Type scopeType;
 
-    public Scope(Scope parentScope_){
-        arrayMembers=new HashMap<>();
-        variableMembers=new HashMap<>();
-        parentScope=parentScope_;
+    public Scope parentScope;
+
+    public Scope(Scope parentScope_) {
+        funcMembers = new HashMap<>();
+        variableMembers = new HashMap<>();
+        parentScope = parentScope_;
     }
 
-    public void varDefine(String varName,Type varType){
-        if(variableMembers.containsKey(varName)||arrayMembers.containsKey(varName)){
+    public void makeClassScope(String scopeName) {
+        name = scopeName;
+        isClass = true;
+        isFunc = false;
+    }
+
+    public void addVarDefine(String varName, SingleVarDefNode var) {
+        if (variableMembers.containsKey(varName)) {
             System.out.println("err!");
-        }
-        else variableMembers.put(varName,varType);
+        } else variableMembers.put(varName, var);
     }
 
-    public void arrDefine(String varName,Pair<Type,ArrayLayer> arr){
-        if(variableMembers.containsKey(varName)||arrayMembers.containsKey(varName)){
+    public void addFunDefine(String varName, FunDefStmtNode func) {
+        if (funcMembers.containsKey(varName)) {
             System.out.println("err");
-        }
-        else arrayMembers.put(varName,arr);
+        } else funcMembers.put(varName, func);
     }
+
+    public boolean funcNameValid(String name) {
+        if (funcMembers.containsKey(name)) return false;
+        else return true;
+    }
+
+    public SingleVarDefNode getVar(String name) {
+        Scope now = this;
+        while (now != null) {
+            if (now.variableMembers.containsKey(name)) return now.variableMembers.get(name);
+            now = now.parentScope;
+        }
+        return null;
+    }
+
+    public FunDefStmtNode getFun(String name) {
+        Scope now = this;
+        while (now != null) {
+            if (now.funcMembers.containsKey(name)) return now.funcMembers.get(name);
+            now = now.parentScope;
+        }
+        return null;
+    }
+
+    public boolean varNameValid(String name) {
+        if (variableMembers.containsKey(name)) return false;
+        else return true;
+    }
+
 
 }

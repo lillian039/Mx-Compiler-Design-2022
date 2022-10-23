@@ -23,25 +23,12 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDefinition(MxParser.DefinitionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#mainfunc}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMainfunc(MxParser.MainfuncContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code newExpr}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitNewExpr(MxParser.NewExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code dotExpr}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDotExpr(MxParser.DotExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code delayCellExpr}
 	 * labeled alternative in {@link MxParser#expression}.
@@ -57,6 +44,13 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBracketExpr(MxParser.BracketExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code dotFuncExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDotFuncExpr(MxParser.DotFuncExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code atomExpr}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
@@ -70,6 +64,13 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBinaryExpr(MxParser.BinaryExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code dotVarExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDotVarExpr(MxParser.DotVarExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code assignExpr}
 	 * labeled alternative in {@link MxParser#expression}.

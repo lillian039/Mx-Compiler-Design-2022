@@ -28,16 +28,6 @@ public interface MxListener extends ParseTreeListener {
 	 */
 	void exitDefinition(MxParser.DefinitionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MxParser#mainfunc}.
-	 * @param ctx the parse tree
-	 */
-	void enterMainfunc(MxParser.MainfuncContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MxParser#mainfunc}.
-	 * @param ctx the parse tree
-	 */
-	void exitMainfunc(MxParser.MainfuncContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code newExpr}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
@@ -49,18 +39,6 @@ public interface MxListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNewExpr(MxParser.NewExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code dotExpr}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterDotExpr(MxParser.DotExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code dotExpr}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitDotExpr(MxParser.DotExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code delayCellExpr}
 	 * labeled alternative in {@link MxParser#expression}.
@@ -86,6 +64,18 @@ public interface MxListener extends ParseTreeListener {
 	 */
 	void exitBracketExpr(MxParser.BracketExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code dotFuncExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterDotFuncExpr(MxParser.DotFuncExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code dotFuncExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitDotFuncExpr(MxParser.DotFuncExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code atomExpr}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
@@ -109,6 +99,18 @@ public interface MxListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBinaryExpr(MxParser.BinaryExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code dotVarExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterDotVarExpr(MxParser.DotVarExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code dotVarExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitDotVarExpr(MxParser.DotVarExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code assignExpr}
 	 * labeled alternative in {@link MxParser#expression}.
