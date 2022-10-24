@@ -15,6 +15,7 @@ public class SingleVarDefNode extends ASTNode {
 
     public SingleVarDefNode(Position pos) {
         super(pos);
+        this.typeNode=new TypeNode(pos);
     }
 
     public SingleVarDefNode(Position pos,String name,TypeNode typeNode)

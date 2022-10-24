@@ -1,7 +1,5 @@
 package AST;
-import AST.Atom.NewArrDemNode;
-import AST.Atom.SingleVarDefNode;
-import AST.Atom.TypeNode;
+import AST.Atom.*;
 import AST.Expression.*;
 import AST.Statement.*;
 public interface ASTVisitor {
@@ -52,5 +50,10 @@ public interface ASTVisitor {
     void visit(NewArrDemNode node);
 
     void visit(DotVarExprNode node);
+    void visit(LambdaExprNode node);
+
+    void visit(FunctionParameterListNode node);
+
+    void visit(FunctionParameterValueNode node);
 
 }

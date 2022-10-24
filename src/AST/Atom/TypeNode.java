@@ -19,6 +19,7 @@ public class TypeNode extends ASTNode {
 
     public TypeNode(Position pos) {
         super(pos);
+        type=new Type();
     }
 
     public TypeNode(Position pos,Type type,boolean isArr){

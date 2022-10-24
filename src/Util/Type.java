@@ -6,7 +6,7 @@ public class Type {
 
     public String name;
 
-    public ClassDefStmtNode classDef;
+    public ClassDefStmtNode classDef=null;
 
     public Type(String name){
         this.name=name;

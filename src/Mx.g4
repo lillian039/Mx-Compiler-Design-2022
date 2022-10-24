@@ -1,9 +1,6 @@
 grammar Mx;   //名称需要和文件名一致
 import MxLexerRules;
-program : definition* EOF;   //解决问题: no viable alternative at input '<EOF>'
-
-//=======expressions=======
-definition:vardef|funcdefine|classdefine;
+program : (vardef|funcdefine|classdefine)* EOF;   //解决问题: no viable alternative at input '<EOF>'
 
 expression
     : primary                                          #atomExpr
@@ -68,7 +65,7 @@ arrayelement: IDENTIFIER ('[' expression ']')+;
 
 paralistVarDef: type IDENTIFIER;
 singleVarDef:IDENTIFIER ('=' expression)?;
-functionParameterList: paralistVarDef(','paralistVarDef)*;
+functionParameterList: singleVarDef(','paralistVarDef)*;
 functionParameterValue:(expression(','expression)*);
 
 

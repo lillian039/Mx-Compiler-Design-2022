@@ -1,5 +1,6 @@
 import AST.RootNode;
 import Frontend.ASTBuilder;
+import Frontend.SymbolCollector;
 import Util.Err.Error;
 import Util.GlobalScope;
 import Util.MxErrorListener;
@@ -19,8 +20,9 @@ public class main {
         String name="test.mx";
         InputStream input=new FileInputStream(name);
         try {
-            RootNode ASTRoot;
+            RootNode root;
             GlobalScope globalScope=new GlobalScope(null);
+            globalScope.initializeGlobalScope();
 
             MxLexer lexer=new MxLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();
@@ -32,7 +34,9 @@ public class main {
 
             ParseTree parseTreeRoot=parser.program();
             ASTBuilder astBuilder=new ASTBuilder(globalScope);
-            ASTRoot=(RootNode) astBuilder.visit(parseTreeRoot);
+            root=(RootNode) astBuilder.visit(parseTreeRoot);
+            SymbolCollector symbolCollector=new SymbolCollector(globalScope);
+            symbolCollector.visit(root);
         }catch (Error err){
             System.out.println(err.errorMsg());
             System.out.println("-1");

@@ -2,9 +2,7 @@ package Frontend;
 
 import AST.*;
 
-import AST.Atom.NewArrDemNode;
-import AST.Atom.SingleVarDefNode;
-import AST.Atom.TypeNode;
+import AST.Atom.*;
 import AST.Expression.*;
 import AST.Statement.*;
 import Util.Err.SemanticError;
@@ -90,7 +88,7 @@ public class SemanticChecker implements ASTVisitor {
         if(currentScope!=gScope||!currentScope.isClass)throw new SyntaxError("can't define function here",node.pos);
         if(currentScope.funcNameValid(node.name))throw new SemanticError("rename function",node.pos);
         currentScope=new Scope(currentScope);
-        for(SingleVarDefNode varDef :node.parameterList) {
+        for(SingleVarDefNode varDef :node.parameterList.parameterList) {
             if(!currentScope.varNameValid(varDef.name))throw new SemanticError("rename variable",node.pos);
             currentScope.addVarDefine(varDef.name,varDef);
         }
@@ -165,6 +163,21 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(DotVarExprNode node) {
+
+    }
+
+    @Override
+    public void visit(LambdaExprNode node) {
+
+    }
+
+    @Override
+    public void visit(FunctionParameterListNode node) {
+
+    }
+
+    @Override
+    public void visit(FunctionParameterValueNode node) {
 
     }
 }

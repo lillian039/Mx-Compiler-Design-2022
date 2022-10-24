@@ -1,6 +1,7 @@
 package AST.Expression;
 
 import AST.ASTVisitor;
+import AST.Atom.TypeNode;
 import AST.ExprNode;
 import Util.*;
 
@@ -14,7 +15,7 @@ public class ConstExprNode extends ExprNode {
 
     public ConstExprNode(Type type,Entity value,Position pos){
         super(pos);
-        this.type=type;
+        this.type= new TypeNode(pos,type,false);
         this.value=value;
     }
 

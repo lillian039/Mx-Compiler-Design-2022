@@ -1,29 +1,30 @@
 package AST.Statement;
 
 import AST.ASTVisitor;
-import AST.Atom.SingleVarDefNode;
+import AST.Atom.FunctionParameterListNode;
 import AST.Atom.TypeNode;
 import AST.StmtNode;
 import Util.Position;
-
-import java.util.ArrayList;
 
 
 public class FunDefStmtNode extends StmtNode {
     public String name;
     public TypeNode returnTypeNode;
-    public ArrayList<SingleVarDefNode> parameterList;
+
+    public FunctionParameterListNode parameterList;
 
     public BlockStmtNode funcBody;
 
     public FunDefStmtNode(Position pos) {
         super(pos);
+        parameterList=new FunctionParameterListNode(pos);
     }
 
     public FunDefStmtNode(Position pos,String name,TypeNode returnTypeNode) {
         super(pos);
         this.name=name;
         this.returnTypeNode=returnTypeNode;
+        parameterList=new FunctionParameterListNode(pos);
     }
 
     @Override

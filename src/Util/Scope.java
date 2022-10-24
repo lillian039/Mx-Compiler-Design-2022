@@ -13,6 +13,7 @@ public class Scope {
 
     public boolean isClass;
     public boolean isFunc;
+    public boolean isLoop;
     public String name;
     public Type scopeType;
 

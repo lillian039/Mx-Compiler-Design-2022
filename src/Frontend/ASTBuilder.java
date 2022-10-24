@@ -1,9 +1,7 @@
 package Frontend;
 
 import AST.*;
-import AST.Atom.NewArrDemNode;
-import AST.Atom.SingleVarDefNode;
-import AST.Atom.TypeNode;
+import AST.Atom.*;
 import AST.Expression.*;
 import AST.Statement.*;
 import Util.GlobalScope;
@@ -30,23 +28,12 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         voidType=gScope.getType("void");
         nullType=gScope.getType("null");
         RootNode rootNode = new RootNode(new Position(ctx));
-        for (var def : ctx.definition()) {
-            if (def.children instanceof MxParser.ClassdefineContext) {
-                rootNode.classDef.add((ClassDefStmtNode) visit(def));
-            } else if (def.children instanceof MxParser.VardefContext) {
-                rootNode.varDef.add((VarDefStmtNode) visit(def));
-            } else if (def.children instanceof MxParser.FuncdefineContext) {
-                rootNode.funcDef.add((FunDefStmtNode) visit(def));
-            }
-        }
-        //  ctx.definition().forEach(cd->rootNode.definitions.add((StmtNode)visit(cd)));
+        ctx.classdefine().forEach(cur-> rootNode.classDef.add((ClassDefStmtNode) visit(cur)));
+        ctx.funcdefine().forEach(cur->rootNode.funcDef.add((FunDefStmtNode)visit(cur)));
+        ctx.vardef().forEach(cur->rootNode.varDef.add((VarDefStmtNode) visit(cur)));
         return rootNode;
     }
 
-    @Override
-    public ASTNode visitDefinition(MxParser.DefinitionContext ctx) {
-        return super.visitDefinition(ctx);
-    }
 
     @Override
     public ASTNode visitAtomExpr(MxParser.AtomExprContext ctx) {
@@ -137,32 +124,25 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     public ASTNode visitCallfunction(MxParser.CallfunctionContext ctx) {
         Position pos = new Position(ctx);
         FuncExprNode funct = new FuncExprNode(ctx.IDENTIFIER().toString(), pos);
-        if (ctx.functionParameterValue() != null) {
-            for (var exp : ctx.functionParameterValue().children) {
-                if (exp instanceof MxParser.ExpressionContext) {
-                    funct.parameters.add((ExprNode) visit(exp));
-                }
-            }
-        }
+        if(ctx.functionParameterValue()!=null)funct.parameterValueNode=(FunctionParameterValueNode) visit(ctx.functionParameterValue());
         return funct;
+    }
+
+    @Override
+    public ASTNode visitFunctionParameterValue(MxParser.FunctionParameterValueContext ctx) {
+        Position pos = new Position(ctx);
+        FunctionParameterValueNode functionParameterValueNode=new FunctionParameterValueNode(pos);
+        ctx.expression().forEach(cur->functionParameterValueNode.parameters.add((ExprNode)visit(cur)));
+        return functionParameterValueNode;
     }
 
     @Override
     public ASTNode visitLamdaExpr(MxParser.LamdaExprContext ctx) {
         Position pos = new Position(ctx);
-        FuncExprNode lambda = new FuncExprNode(pos);
-        lambda.isLambda = true;
+        LambdaExprNode lambda = new LambdaExprNode(pos);
         if (ctx.And() != null) lambda.isGlobe = true;
-        for (var def : ctx.functionParameterList().children) {
-            if (def instanceof MxParser.ParalistVarDefContext) {
-                lambda.funcParameterList.add((SingleVarDefNode) visit(def));
-            }
-        }
-        for (var exp : ctx.functionParameterValue().children) {
-            if (exp instanceof MxParser.ExpressionContext) {
-                lambda.parameters.add((ExprNode) visit(exp));
-            }
-        }
+        lambda.functionParameterList=(FunctionParameterListNode)visit(ctx.functionParameterList());
+        lambda.functionParameterValue=(FunctionParameterValueNode)visit(ctx.functionParameterValue());
         lambda.funcBody = (BlockStmtNode) visit(ctx.suite());
         return lambda;
     }
@@ -241,7 +221,6 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         SingleVarDefNode singleVarDefNode = new SingleVarDefNode(new Position(ctx));
         singleVarDefNode.name = ctx.IDENTIFIER().toString();
         if (ctx.expression() != null) singleVarDefNode.expression = (ExprNode) visit(ctx.expression());
-
         return singleVarDefNode;
     }
 
@@ -320,13 +299,24 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         FunDefStmtNode funDefStmtNode = new FunDefStmtNode(new Position(ctx));
         funDefStmtNode.name = ctx.IDENTIFIER().toString();
         if(ctx.returnType()!=null)funDefStmtNode.returnTypeNode = (TypeNode) visit(ctx.returnType());
-        for (var vardef : ctx.functionParameterList().children) {
-            if (vardef instanceof MxParser.ParalistVarDefContext) {
-                funDefStmtNode.parameterList.add((SingleVarDefNode) visit(vardef));
-            }
-        }
+        if(ctx.functionParameterList()!=null)funDefStmtNode.parameterList=(FunctionParameterListNode) visit(ctx.functionParameterList());
         funDefStmtNode.funcBody = (BlockStmtNode) visit(ctx.suite());
         return funDefStmtNode;
+    }
+
+    @Override
+    public ASTNode visitFunctionParameterList(MxParser.FunctionParameterListContext ctx) {
+        Position pos=new Position(ctx);
+        FunctionParameterListNode parameteListNode=new FunctionParameterListNode(pos);
+        ctx.paralistVarDef().forEach(cur->parameteListNode.add((SingleVarDefNode) visit(cur)));
+        return parameteListNode;
+    }
+
+    @Override
+    public ASTNode visitParalistVarDef(MxParser.ParalistVarDefContext ctx) {
+        TypeNode typeNode=(TypeNode) visit(ctx.type());
+        SingleVarDefNode singleVarDefNode=new SingleVarDefNode(new Position(ctx),ctx.IDENTIFIER().toString(),typeNode);
+        return singleVarDefNode;
     }
 
     @Override

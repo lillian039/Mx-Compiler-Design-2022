@@ -1,9 +1,7 @@
 package Frontend;
 
 import AST.ASTVisitor;
-import AST.Atom.NewArrDemNode;
-import AST.Atom.SingleVarDefNode;
-import AST.Atom.TypeNode;
+import AST.Atom.*;
 import AST.Expression.*;
 import AST.RootNode;
 import AST.Statement.*;
@@ -106,15 +104,22 @@ public class SymbolCollector implements ASTVisitor {
 
     @Override
     public void visit(FunDefStmtNode node) {
-        if (gScope.hasType(node.name)) throw new SyntaxError("Class name already exist", node.pos);
-        if (!gScope.hasType(node.returnTypeNode.type.name))
-            throw new SyntaxError("Return type not exist", node.pos);
-        node.returnTypeNode.type = gScope.getType(node.returnTypeNode.type.name);
-        for (SingleVarDefNode varDef : node.parameterList) {
-            if (!gScope.hasType(varDef.typeNode.type.name))
-                throw new SyntaxError("Variable type not exist", node.pos);
-            varDef.typeNode.type = gScope.getType(varDef.typeNode.type.name);
+        if(TmpClass!=null&&TmpClass.name.equals(node.name)){
+            if(TmpClass.constructor!=null)throw new SemanticError("Constructor already exist",node.pos);
+            if(!node.parameterList.isEmpty())throw new SemanticError("Constructor cannot have parameter",node.pos);
+            node.returnTypeNode=new TypeNode(node.pos,gScope.getType(TmpClass.name),false);
+            TmpClass.constructor=node;
         }
+        else {
+            if (gScope.hasType(node.name)) throw new SyntaxError("Class name already exist", node.pos);
+            if (!gScope.hasType(node.returnTypeNode.type.name))
+                throw new SyntaxError("Return type not exist", node.pos);
+            node.returnTypeNode.type = gScope.getType(node.returnTypeNode.type.name);
+            for (SingleVarDefNode varDef : node.parameterList.parameterList) {
+                if (!gScope.hasType(varDef.typeNode.type.name))
+                    throw new SyntaxError("Variable type not exist", node.pos);
+                varDef.typeNode.type = gScope.getType(varDef.typeNode.type.name);
+            }
         if (firstVisit) {
             if (!gScope.funcNameValid(node.name)) throw new SyntaxError("Func name already exist", node.pos);
             gScope.addFunDefine(node.name, node);
@@ -122,6 +127,7 @@ public class SymbolCollector implements ASTVisitor {
             if (TmpClass.funcDef.containsKey(node.name))
                 throw new SyntaxError("Func name already exist in class", node.pos);
             TmpClass.funcDef.put(node.name, node);
+        }
         }
     }
 
@@ -145,6 +151,16 @@ public class SymbolCollector implements ASTVisitor {
             }
             TmpClass = null;
         }
+    }
+
+    @Override
+    public void visit(FunctionParameterListNode node) {
+
+    }
+
+    @Override
+    public void visit(FunctionParameterValueNode node) {
+
     }
 
     @Override
@@ -194,6 +210,11 @@ public class SymbolCollector implements ASTVisitor {
 
     @Override
     public void visit(DotVarExprNode node) {
+
+    }
+
+    @Override
+    public void visit(LambdaExprNode node) {
 
     }
 }

@@ -75,9 +75,11 @@ ASTNode：抽象函数，用作AST节点的基类
 
 🌻**SymbolChecker 架构：**
 
+要注意：ClassDef 和 FunctionDef 支持前向引用
+
 - firstVisit
 
-  第一次遍历，将所有Type判断是否重名后丢件gScope的types内
+  先遍历所有ClassDef，定义所有Type，判断是否重名后丢件gScope的types内
 
   接着遍历将所有全局函数，更新返回值，参数列表，并将其放进funDef内
 
