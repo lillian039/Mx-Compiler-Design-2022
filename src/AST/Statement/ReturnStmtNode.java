@@ -1,11 +1,12 @@
 package AST.Statement;
 
 import AST.*;
+import AST.Atom.TypeNode;
 import Util.*;
 
 public class ReturnStmtNode extends StmtNode {
     public ExprNode returnExpr=null;
-    public Type returnType;
+    public TypeNode returnType;
     public ReturnStmtNode(Position pos) {
         super(pos);
     }

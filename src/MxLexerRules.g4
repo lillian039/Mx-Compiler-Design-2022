@@ -58,7 +58,6 @@ STRING:'"' (ESC | .)*? '"';//定义string值
 fragment
 ESC : '\\"'| '\\\\' | '\\n';
 
-THIS:'this';
 NULL:'null';
 
 IDENTIFIER : ('_'|[a-zA-Z])([0-9a-zA-Z]|'_')*;//定义变量名

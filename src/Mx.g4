@@ -52,7 +52,7 @@ newArrExprAtom:'['(expression)?']';
 
 newArrExpr : ('new' (INT | BOOL | STR | IDENTIFIER) (newArrExprAtom)+);
 
-newClassExpr: 'new' type '('')' ;
+newClassExpr: 'new' IDENTIFIER '('')' ;
 
 type:(INT | BOOL | STR | IDENTIFIER)('['']')*;
 
@@ -72,7 +72,6 @@ functionParameterValue:(expression(','expression)*);
 //=======statements=======
 statement
     : suite                                                                 #block
-    | classdefine                                                           #classdefineStmt
     | vardef                                                                #vardefineStmt
     | 'while' '('expression ')' statement                                   #whileStmt
     |  If  '('  expression  ')'trueStmt=statement

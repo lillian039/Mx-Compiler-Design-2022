@@ -11,8 +11,8 @@ import java.util.Vector;
 public class TypeNode extends ASTNode {
     public Type type;
 
-    public boolean isArr=false;
 
+    public boolean isArr=false;
     public int layer=1;
 
     public Vector<ExprNode> arrLayerSize=null;
@@ -26,6 +26,10 @@ public class TypeNode extends ASTNode {
         super(pos);
         this.type=type;
         this.isArr=isArr;
+    }
+
+    public boolean sameType(TypeNode other){
+        return other.layer == this.layer && other.type == this.type;
     }
 
     @Override

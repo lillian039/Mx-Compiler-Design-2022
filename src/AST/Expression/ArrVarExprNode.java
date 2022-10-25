@@ -6,16 +6,17 @@ import Util.Position;
 
 import java.util.ArrayList;
 
-public class VarExprNode extends ExprNode {
+public class ArrVarExprNode extends ExprNode {
     public String name;
 
-    public VarExprNode(Position pos) {
+    public ArrayList<ExprNode> arrDimension=new ArrayList<>();
+    public ArrVarExprNode(Position pos){
         super(pos);
     }
 
-    public VarExprNode(String name, Position pos) {
+    public ArrVarExprNode(String name,Position pos){
         super(pos);
-        this.name = name;
+        this.name=name;
     }
 
     @Override

@@ -79,12 +79,7 @@ public class GlobalScope extends Scope{
     }
 
     public void addType(Type newType){
-        if(hasType(newType.name))
-        {
-            System.out.println("multiple definition of"+newType.name);
-        }
-        else
-            types.put(newType.name,newType);
+        types.put(newType.name,newType);
     }
 
     public boolean hasType(String name){

@@ -9,7 +9,6 @@ import Util.Position;
 
 public class LambdaExprNode extends ExprNode {
     public FunctionParameterListNode functionParameterList;
-
     public FunctionParameterValueNode functionParameterValue;
     public BlockStmtNode funcBody;
     public boolean isGlobe=false;

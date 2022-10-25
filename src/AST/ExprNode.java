@@ -6,6 +6,7 @@ import Util.*;
 import java.util.ArrayList;
 
 public abstract class ExprNode extends ASTNode{
+
     public TypeNode type;
 
     public Entity value;

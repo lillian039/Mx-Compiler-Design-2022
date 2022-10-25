@@ -8,7 +8,6 @@ import Util.Type;
 
 public class SingleVarDefNode extends ASTNode {
     public String name;
-
     public TypeNode typeNode;
 
     public ExprNode expression=null;

@@ -328,18 +328,6 @@ public class MxBaseListener implements MxListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterClassdefineStmt(MxParser.ClassdefineStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitClassdefineStmt(MxParser.ClassdefineStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterVardefineStmt(MxParser.VardefineStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}

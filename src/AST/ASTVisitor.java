@@ -5,7 +5,7 @@ import AST.Statement.*;
 public interface ASTVisitor {
     void visit(RootNode node);
 
-    void visit(NewExprNode node);
+    void visit(NewArrNode node);
 
     void visit(BinaryExprNode node);
 
@@ -55,5 +55,9 @@ public interface ASTVisitor {
     void visit(FunctionParameterListNode node);
 
     void visit(FunctionParameterValueNode node);
+
+    void visit(NewClassExprNode node);
+
+    void visit(ArrVarExprNode node);
 
 }

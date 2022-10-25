@@ -6,7 +6,7 @@ import Util.Position;
 
 public class BinaryExprNode extends ExprNode {
 
-    public ExprNode ls,rs;
+    public ExprNode ls, rs;
 
     public String option;
 
@@ -14,11 +14,11 @@ public class BinaryExprNode extends ExprNode {
         super(pos);
     }
 
-    public BinaryExprNode(ExprNode ls,ExprNode rs,String symbol,Position pos) {
+    public BinaryExprNode(ExprNode ls, ExprNode rs, String symbol, Position pos) {
         super(pos);
-        this.ls=ls;
-        this.rs=rs;
-        this.option=symbol;
+        this.ls = ls;
+        this.rs = rs;
+        this.option = symbol;
     }
 
     @Override

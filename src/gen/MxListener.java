@@ -288,18 +288,6 @@ public interface MxListener extends ParseTreeListener {
 	 */
 	void exitBlock(MxParser.BlockContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code classdefineStmt}
-	 * labeled alternative in {@link MxParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterClassdefineStmt(MxParser.ClassdefineStmtContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code classdefineStmt}
-	 * labeled alternative in {@link MxParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitClassdefineStmt(MxParser.ClassdefineStmtContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code vardefineStmt}
 	 * labeled alternative in {@link MxParser#statement}.
 	 * @param ctx the parse tree

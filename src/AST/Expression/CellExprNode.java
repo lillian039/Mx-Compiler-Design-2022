@@ -20,6 +20,14 @@ public class CellExprNode extends ExprNode {
         this.option=symbol;
     }
 
+    public boolean isInt(){
+        return (option.equals("++")||option.equals("--")||option.equals("-")||option.equals("~"));
+    }
+
+    public boolean isBool(){
+        return (option.equals("!"));
+    }
+
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);

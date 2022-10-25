@@ -171,13 +171,14 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         else if (ctx.INT() != null) typename = ctx.INT().toString();
         else if (ctx.BOOL() != null) typename = ctx.BOOL().toString();
         else typename = ctx.STR().toString();
-        NewExprNode newExprNode = new NewExprNode(typename, new Position(ctx));
-        newExprNode.newArr = true;
+        NewArrNode newExprNode = new NewArrNode(typename, new Position(ctx));
         for (var arr : ctx.newArrExprAtom()) {
             newExprNode.arrList.add((NewArrDemNode) visit(arr));
+            newExprNode.type.layer++;
         }
         return newExprNode;
     }
+
 
     @Override
     public ASTNode visitNewArrExprAtom(MxParser.NewArrExprAtomContext ctx) {
@@ -189,19 +190,17 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitNewClassExpr(MxParser.NewClassExprContext ctx) {
-        NewExprNode newExprNode = new NewExprNode(new Position(ctx));
-        newExprNode.newClass = true;
-        newExprNode.typeNode = (TypeNode) (visit(ctx.type()));
+        NewClassExprNode newExprNode = new NewClassExprNode(new Position(ctx));
+        newExprNode.type= new TypeNode(new Position(ctx),new Type(ctx.IDENTIFIER().toString()),false);
         return newExprNode;
     }
 
     @Override
     public ASTNode visitArrayelement(MxParser.ArrayelementContext ctx) {
-        VarExprNode arr = new VarExprNode(ctx.IDENTIFIER().toString(), new Position(ctx));
+        ArrVarExprNode arr = new ArrVarExprNode(ctx.IDENTIFIER().toString(), new Position(ctx));
         for (var exp : ctx.expression()) {
             arr.arrDimension.add((ExprNode) visit(exp));
         }
-        arr.isArrElement = true;
         return arr;
     }
 
@@ -228,10 +227,6 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         return singleVarDefNode;
     }
 
-    @Override
-    public ASTNode visitClassdefineStmt(MxParser.ClassdefineStmtContext ctx) {
-        return visit(ctx.classdefine());
-    }
 
     @Override
     public ASTNode visitCtrlStmt(MxParser.CtrlStmtContext ctx) {
@@ -333,7 +328,6 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     }
 
     @Override
-    ////how Arr???
     public ASTNode visitType(MxParser.TypeContext ctx) {
         TypeNode typeNode = new TypeNode(new Position(ctx));
         String typename;
@@ -342,6 +336,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         else if (ctx.STR() != null) typename="string";
         else typename = ctx.IDENTIFIER().toString();
         typeNode.layer+=ctx.RightBracket().size();
+        if(typeNode.layer>1)typeNode.isArr=true;
         typeNode.type.name=typename;
         return typeNode;
     }

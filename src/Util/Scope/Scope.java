@@ -1,6 +1,7 @@
 package Util.Scope;
 
 import AST.Atom.SingleVarDefNode;
+import AST.Atom.TypeNode;
 import AST.Statement.FunDefStmtNode;
 import Util.Err.SemanticError;
 import Util.Err.SyntaxError;
@@ -9,8 +10,8 @@ import Util.Type;
 import java.util.HashMap;
 
 abstract public class Scope {
-    private HashMap<String, SingleVarDefNode> variableMembers;//<name,type>
-    private HashMap<String, FunDefStmtNode> funcMembers;//<name,type,layer>
+    protected HashMap<String, SingleVarDefNode> variableMembers;//<name,type>
+    protected HashMap<String, FunDefStmtNode> funcMembers;//<name,type,layer>
 
     public Scope parentScope;
 
@@ -21,12 +22,12 @@ abstract public class Scope {
     }
 
     public void addVarDefine(String varName, SingleVarDefNode var) {
-        if (variableMembers.containsKey(varName))throw new SemanticError("variable name exist",var.pos);
+        if (variableMembers.containsKey(varName)||funcMembers.containsKey(varName))throw new SemanticError("variable name exist",var.pos);
         else variableMembers.put(varName, var);
     }
 
     public void addFunDefine(String varName, FunDefStmtNode func) {
-        if (funcMembers.containsKey(varName)) {
+        if (variableMembers.containsKey(varName)||funcMembers.containsKey(varName)) {
             throw new SyntaxError("Func name already exist", func.pos);
         } else funcMembers.put(varName, func);
     }
@@ -40,7 +41,7 @@ abstract public class Scope {
         return null;
     }
 
-    public FunDefStmtNode getFun(String name) {
+    public FunDefStmtNode getFunc(String name) {
         Scope now = this;
         while (now != null) {
             if (now.funcMembers.containsKey(name)) return now.funcMembers.get(name);
@@ -49,9 +50,13 @@ abstract public class Scope {
         return null;
     }
 
-    public boolean varNameValid(String name) {
-        if (variableMembers.containsKey(name)) return false;
-        else return true;
+    public TypeNode getFuncTypeNode(){
+        Scope now=this;
+        while(now !=null){
+            if(now instanceof FuncScope)return ((FuncScope)now).returnType;
+            now=now.parentScope;
+        }
+        return null;
     }
 
 

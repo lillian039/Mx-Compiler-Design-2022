@@ -177,13 +177,6 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBlock(MxParser.BlockContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code classdefineStmt}
-	 * labeled alternative in {@link MxParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitClassdefineStmt(MxParser.ClassdefineStmtContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code vardefineStmt}
 	 * labeled alternative in {@link MxParser#statement}.
 	 * @param ctx the parse tree
