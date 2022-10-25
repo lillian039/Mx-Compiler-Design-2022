@@ -4,7 +4,7 @@ import AST.*;
 import Util.*;
 
 public class ReturnStmtNode extends StmtNode {
-    public ExprNode returnExpr;
+    public ExprNode returnExpr=null;
     public Type returnType;
     public ReturnStmtNode(Position pos) {
         super(pos);

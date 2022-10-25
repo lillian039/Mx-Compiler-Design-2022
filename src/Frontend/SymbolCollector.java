@@ -8,7 +8,7 @@ import AST.Statement.*;
 import AST.StmtNode;
 import Util.Err.SemanticError;
 import Util.Err.SyntaxError;
-import Util.GlobalScope;
+import Util.Scope.GlobalScope;
 import Util.Type;
 
 public class SymbolCollector implements ASTVisitor {
@@ -110,6 +110,11 @@ public class SymbolCollector implements ASTVisitor {
             node.returnTypeNode=new TypeNode(node.pos,gScope.getType(TmpClass.name),false);
             TmpClass.constructor=node;
         }
+        else if(node.name.equals("main")){
+            if(!node.returnTypeNode.type.name.equals("int"))throw new SemanticError("main can only return int",node.pos);
+            if(node.returnTypeNode.isArr)throw new SemanticError("main can not return arr",node.pos);
+            if(!node.parameterList.isEmpty())throw new SemanticError("main function cannot have parameter",node.pos);
+        }
         else {
             if (gScope.hasType(node.name)) throw new SyntaxError("Class name already exist", node.pos);
             if (!gScope.hasType(node.returnTypeNode.type.name))
@@ -121,7 +126,6 @@ public class SymbolCollector implements ASTVisitor {
                 varDef.typeNode.type = gScope.getType(varDef.typeNode.type.name);
             }
         if (firstVisit) {
-            if (!gScope.funcNameValid(node.name)) throw new SyntaxError("Func name already exist", node.pos);
             gScope.addFunDefine(node.name, node);
         } else if (TmpClass != null) {
             if (TmpClass.funcDef.containsKey(node.name))

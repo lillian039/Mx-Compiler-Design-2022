@@ -4,5 +4,5 @@ import java.util.HashMap;
 
 public class ArrayLayer {
     public int layer;
-    public HashMap<Integer,Integer> sizeOfLayer;
+    public HashMap<Integer, Integer> sizeOfLayer;
 }

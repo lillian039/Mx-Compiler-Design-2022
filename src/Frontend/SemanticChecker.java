@@ -7,8 +7,10 @@ import AST.Expression.*;
 import AST.Statement.*;
 import Util.Err.SemanticError;
 import Util.Err.SyntaxError;
-import Util.GlobalScope;
-import Util.Scope;
+import Util.Scope.ClassScope;
+import Util.Scope.FuncScope;
+import Util.Scope.GlobalScope;
+import Util.Scope.Scope;
 import Util.Type;
 
 public class SemanticChecker implements ASTVisitor {
@@ -85,9 +87,8 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(FunDefStmtNode node) {
-        if(currentScope!=gScope||!currentScope.isClass)throw new SyntaxError("can't define function here",node.pos);
-        if(currentScope.funcNameValid(node.name))throw new SemanticError("rename function",node.pos);
-        currentScope=new Scope(currentScope);
+        if(currentScope!=gScope&&!(currentScope instanceof ClassScope))throw new SyntaxError("can't define function here",node.pos);
+        currentScope=new FuncScope(currentScope);
         for(SingleVarDefNode varDef :node.parameterList.parameterList) {
             if(!currentScope.varNameValid(varDef.name))throw new SemanticError("rename variable",node.pos);
             currentScope.addVarDefine(varDef.name,varDef);
@@ -102,8 +103,7 @@ public class SemanticChecker implements ASTVisitor {
         if(currentScope!=gScope)throw new SyntaxError("Class only can be defined out of main", node.pos);
         if(gScope.hasType(node.name))throw new SyntaxError("Class name already exist", node.pos);
         Type newClassType = new Type(node.name);
-        currentScope=new Scope(currentScope);
-        currentScope.makeClassScope(newClassType.name);
+        currentScope=new ClassScope(currentScope);
         for (var stmt : node.classBody.statements) {
             if (stmt instanceof FunDefStmtNode) {
                 stmt.accept(this);

@@ -1,21 +1,16 @@
-package Util;
+package Util.Scope;
 
 import AST.Atom.SingleVarDefNode;
 import AST.Statement.FunDefStmtNode;
-import AST.Statement.VarDefStmtNode;
-import org.antlr.v4.runtime.misc.Pair;
+import Util.Err.SemanticError;
+import Util.Err.SyntaxError;
+import Util.Type;
 
 import java.util.HashMap;
 
-public class Scope {
+abstract public class Scope {
     private HashMap<String, SingleVarDefNode> variableMembers;//<name,type>
     private HashMap<String, FunDefStmtNode> funcMembers;//<name,type,layer>
-
-    public boolean isClass;
-    public boolean isFunc;
-    public boolean isLoop;
-    public String name;
-    public Type scopeType;
 
     public Scope parentScope;
 
@@ -25,27 +20,15 @@ public class Scope {
         parentScope = parentScope_;
     }
 
-    public void makeClassScope(String scopeName) {
-        name = scopeName;
-        isClass = true;
-        isFunc = false;
-    }
-
     public void addVarDefine(String varName, SingleVarDefNode var) {
-        if (variableMembers.containsKey(varName)) {
-            System.out.println("err!");
-        } else variableMembers.put(varName, var);
+        if (variableMembers.containsKey(varName))throw new SemanticError("variable name exist",var.pos);
+        else variableMembers.put(varName, var);
     }
 
     public void addFunDefine(String varName, FunDefStmtNode func) {
         if (funcMembers.containsKey(varName)) {
-            System.out.println("err");
+            throw new SyntaxError("Func name already exist", func.pos);
         } else funcMembers.put(varName, func);
-    }
-
-    public boolean funcNameValid(String name) {
-        if (funcMembers.containsKey(name)) return false;
-        else return true;
     }
 
     public SingleVarDefNode getVar(String name) {

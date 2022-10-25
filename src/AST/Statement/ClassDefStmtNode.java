@@ -7,10 +7,8 @@ import Util.Position;
 import Util.Type;
 import org.antlr.v4.runtime.misc.Pair;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Vector;
+
 public class ClassDefStmtNode extends StmtNode {
     public String name;
     public HashMap<String, SingleVarDefNode> memberDef = new HashMap<>();

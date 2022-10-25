@@ -2,7 +2,7 @@ import AST.RootNode;
 import Frontend.ASTBuilder;
 import Frontend.SymbolCollector;
 import Util.Err.Error;
-import Util.GlobalScope;
+import Util.Scope.GlobalScope;
 import Util.MxErrorListener;
 import gen.MxLexer;
 import gen.MxParser;
@@ -37,12 +37,10 @@ public class main {
             root=(RootNode) astBuilder.visit(parseTreeRoot);
             SymbolCollector symbolCollector=new SymbolCollector(globalScope);
             symbolCollector.visit(root);
+            System.out.println("0");
         }catch (Error err){
             System.out.println(err.errorMsg());
             System.out.println("-1");
         }
-
-
-
     }
 }

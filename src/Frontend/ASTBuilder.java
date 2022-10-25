@@ -4,7 +4,7 @@ import AST.*;
 import AST.Atom.*;
 import AST.Expression.*;
 import AST.Statement.*;
-import Util.GlobalScope;
+import Util.Scope.GlobalScope;
 import Util.Position;
 import Util.Type;
 import Util.Entity;
@@ -28,9 +28,13 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         voidType=gScope.getType("void");
         nullType=gScope.getType("null");
         RootNode rootNode = new RootNode(new Position(ctx));
-        ctx.classdefine().forEach(cur-> rootNode.classDef.add((ClassDefStmtNode) visit(cur)));
-        ctx.funcdefine().forEach(cur->rootNode.funcDef.add((FunDefStmtNode)visit(cur)));
-        ctx.vardef().forEach(cur->rootNode.varDef.add((VarDefStmtNode) visit(cur)));
+        for(var Stmt : ctx.children){
+            StmtNode stmtNode=(StmtNode) visit(Stmt);
+            rootNode.statements.add(stmtNode);
+            if(Stmt instanceof MxParser.ClassdefineContext)rootNode.classDef.add((ClassDefStmtNode) stmtNode);
+            else if(Stmt instanceof MxParser.FuncdefineContext)rootNode.funcDef.add((FunDefStmtNode)stmtNode);
+            else if(Stmt instanceof MxParser.VardefContext)rootNode.varDef.add((VarDefStmtNode) stmtNode);
+        }
         return rootNode;
     }
 
@@ -270,7 +274,8 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitReturnStmt(MxParser.ReturnStmtContext ctx) {
-        return new ReturnStmtNode((ExprNode) visit(ctx.expression()), new Position(ctx));
+        if(ctx.expression()!=null)return new ReturnStmtNode((ExprNode) visit(ctx.expression()), new Position(ctx));
+        else return new ReturnStmtNode(new Position(ctx));
     }
 
     @Override

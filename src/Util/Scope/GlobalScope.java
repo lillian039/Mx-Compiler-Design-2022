@@ -1,16 +1,17 @@
-package Util;
+package Util.Scope;
 
 import AST.Atom.SingleVarDefNode;
 import AST.Atom.TypeNode;
 import AST.Statement.ClassDefStmtNode;
 import AST.Statement.FunDefStmtNode;
+import Util.Position;
+import Util.Type;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class GlobalScope extends Scope{
 
-    private HashMap<String,Type> types=new HashMap<>();
+    private HashMap<String, Type> types=new HashMap<>();
 
     public void initializeGlobalScope(){
         types.put("int",new Type("int"));
