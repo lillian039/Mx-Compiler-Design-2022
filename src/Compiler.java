@@ -18,9 +18,9 @@ import java.io.InputStream;
 public class Compiler {
 
     public static void main(String[] args) throws Exception{
-       /* String name="test.mx";
-        InputStream input=new FileInputStream(name);*/
-        InputStream input = System.in;
+        String name="test.mx";
+        InputStream input=new FileInputStream(name);
+      //  InputStream input = System.in;
         try {
             RootNode root;
             GlobalScope globalScope=new GlobalScope(null);
@@ -43,9 +43,8 @@ public class Compiler {
             semanticChecker.visit(root);
            // System.out.println("0");
         }catch (Error err){
-            throw err;
-          /*  System.out.println(err.errorMsg());
-            System.out.println("-1");*/
+            System.out.println(err.errorMsg());
+            //throw err;
         }
     }
 }

@@ -7,6 +7,7 @@ expression
     | '(' expression ')'                               #bracketExpr
     | expression op='.' callfunction                   #dotFuncExpr
     | expression op='.' variable                       #dotVarExpr
+    | expression ('[' expression ']')+                 #arrayExpr
     | op=('!'|'-')  expression                         #cellExpr
     | expression op=('++'|'--')                        #delayCellExpr
     | op=('~'|'++'|'--') expression                    #cellExpr
@@ -40,7 +41,7 @@ constant
 variable
     : IDENTIFIER
     | THIS
-    | arrayelement
+ //   | arrayelement
     ;
 
 funVal
@@ -60,7 +61,7 @@ vardef: type singleVarDef(','singleVarDef)*';';
 
 suite: '{' statement* '}';
 //=======definitions=======
-arrayelement: IDENTIFIER ('[' expression ']')+;
+//arrayelement: expression ('[' expression ']')+;
 
 
 paralistVarDef: type IDENTIFIER;

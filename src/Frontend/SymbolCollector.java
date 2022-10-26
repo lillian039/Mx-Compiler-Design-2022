@@ -32,6 +32,7 @@ public class SymbolCollector implements ASTVisitor {
             visit(funDef);
             if (funDef.name.equals("main")) node.mainNode = funDef;
         }
+        if(node.mainNode==null)throw new SyntaxError("No main function",node.pos);
         firstVisit = false;
         for (ClassDefStmtNode classDef : node.classDef) {
             visit(classDef);

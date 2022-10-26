@@ -246,11 +246,12 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitForStmt(MxParser.ForStmtContext ctx) {
-        return new ForStmtNode((StmtNode) visit(ctx.statement(0)),
-                (ExprNode) visit(ctx.expression(0)),
-                (ExprNode) visit(ctx.expression(1)),
-                (StmtNode) visit(ctx.statement(1)),
-                new Position(ctx));
+        ForStmtNode forStmtNode=new ForStmtNode(new Position(ctx));
+        if(ctx.statement(0)!=null)forStmtNode.initializeStmt=(StmtNode)visit(ctx.statement(0));
+        if(ctx.expression(0)!=null)forStmtNode.conditionNode=(ExprNode)visit(ctx.expression(0));
+        if(ctx.expression(1)!=null)forStmtNode.conditionNode=(ExprNode)visit(ctx.expression(1));
+        forStmtNode.body=(StmtNode) visit(ctx.statement(1));
+        return forStmtNode;
     }
 
     @Override
