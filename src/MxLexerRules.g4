@@ -66,8 +66,18 @@ CONTINUE : 'continue';
 
 IDENTIFIER : ('_'|[a-zA-Z])([0-9a-zA-Z]|'_')*;//定义变量名
 
+LineComment
+    :   '//' ~[\r\n]*
+        -> skip
+    ;
+
+BlockComment
+    :   '/*' .*? '*/'
+        -> skip
+    ;
+
 WS : ([ \r\n\t]+ ) -> skip;     //跳过空白类字符
-LINE_COMMENT:'//' .*? '\r'? '\n' ->skip ;//跳过'//'
+
 COMMENT : '/*' .*? '*/'->skip;//跳过'/* */'
 
 

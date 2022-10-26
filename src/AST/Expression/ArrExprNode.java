@@ -13,11 +13,6 @@ public class ArrExprNode extends ExprNode {
         super(pos);
     }
 
-/*    public ArrExprNode(String name, Position pos){
-        super(pos);
-        this.name=name;
-    }*/
-
     @Override
     public boolean isAssignable() {
         return true;

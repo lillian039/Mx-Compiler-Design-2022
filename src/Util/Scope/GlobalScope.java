@@ -41,6 +41,7 @@ public class GlobalScope extends Scope{
         stringClassDefNode.funcDef.put("parseInt",stringParseInt);
 
         FunDefStmtNode stringOrd=new FunDefStmtNode(innerPos,"ord",intType);
+        stringOrd.add(new SingleVarDefNode(innerPos,"pos",intType));
         stringClassDefNode.funcDef.put("ord",stringOrd);
 
         stringClass.classDef=stringClassDefNode;

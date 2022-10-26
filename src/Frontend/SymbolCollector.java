@@ -113,15 +113,19 @@ public class SymbolCollector implements ASTVisitor {
         }
     }
 
+
+
     @Override
     public void visit(FunDefStmtNode node) {
         if(TmpClass!=null&&TmpClass.name.equals(node.name)){
             if(TmpClass.constructor!=null)throw new SemanticError("Constructor already exist",node.pos);
+            if(node.returnTypeNode!=null)throw new SemanticError("Wrong construction function define",node.pos);
             if(node.parameterList!=null)throw new SemanticError("Constructor cannot have parameter",node.pos);
             node.returnTypeNode=new TypeNode(node.pos,gScope.getType(TmpClass.name),false);
             TmpClass.constructor=node;
         }
         else if(node.name.equals("main")){
+            if (gScope.hasType(node.name)) throw new SyntaxError("Class name already exist", node.pos);
             if(!node.returnTypeNode.type.name.equals("int"))throw new SemanticError("main can only return int",node.pos);
             if(node.returnTypeNode.isArr)throw new SemanticError("main can not return arr",node.pos);
             if(!(node.parameterList==null))throw new SemanticError("main function cannot have parameter",node.pos);
