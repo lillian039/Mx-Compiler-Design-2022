@@ -41,10 +41,11 @@ public class Compiler {
             symbolCollector.visit(root);
             SemanticChecker semanticChecker=new SemanticChecker(globalScope);
             semanticChecker.visit(root);
-            System.out.println("0");
+           // System.out.println("0");
         }catch (Error err){
-            System.out.println(err.errorMsg());
-            System.out.println("-1");
+            throw err;
+          /*  System.out.println(err.errorMsg());
+            System.out.println("-1");*/
         }
     }
 }
