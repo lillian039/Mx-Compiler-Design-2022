@@ -18,7 +18,7 @@ public class NewArrNode extends ExprNode {
 
     public NewArrNode(String type, Position pos) {
         super(pos);
-        this.type=new TypeNode(pos,new Type(type),true,true);
+        this.type=new TypeNode(pos,new Type(type),true);
     }
 
     @Override

@@ -11,12 +11,15 @@ public class VarExprNode extends ExprNode {
 
     public VarExprNode(Position pos) {
         super(pos);
+        isAssignable=true;
     }
 
     public VarExprNode(String name, Position pos) {
         super(pos);
         this.name = name;
+        isAssignable=true;
     }
+
 
 
     @Override

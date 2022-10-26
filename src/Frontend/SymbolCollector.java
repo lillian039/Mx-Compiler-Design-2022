@@ -103,7 +103,6 @@ public class SymbolCollector implements ASTVisitor {
     public void visit(VarDefStmtNode node) {
         if (!gScope.hasType(node.typeNode.type.name)) throw new SyntaxError("Type not exsit", node.pos);
         node.typeNode.type = gScope.getType(node.typeNode.type.name);
-        node.typeNode.assignable=true;
         for (SingleVarDefNode var : node.varDef) {
             var.typeNode= node.typeNode;
         }
@@ -122,7 +121,7 @@ public class SymbolCollector implements ASTVisitor {
             if(TmpClass.constructor!=null)throw new SemanticError("Constructor already exist",node.pos);
             if(node.returnTypeNode!=null)throw new SemanticError("Wrong construction function define",node.pos);
             if(node.parameterList!=null)throw new SemanticError("Constructor cannot have parameter",node.pos);
-            node.returnTypeNode=new TypeNode(node.pos,gScope.getType(TmpClass.name),false,false);//////??
+            node.returnTypeNode=new TypeNode(node.pos,gScope.getType(TmpClass.name),false);
             TmpClass.constructor=node;
         }
         else if(node.name.equals("main")){

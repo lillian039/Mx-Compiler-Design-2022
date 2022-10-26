@@ -40,7 +40,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(AssignExprNode node) {
         node.rhs.accept(this);
         node.lhs.accept(this);
-        if (!node.lhs.type.assignable) throw new SemanticError("Not assignable", node.pos);
+        if (!node.lhs.isAssignable()) throw new SemanticError("Not assignable", node.pos);
         Type rType = node.rhs.type.type;
         Type lType = node.lhs.type.type;
         if (!node.lhs.type.sameType(node.rhs.type) && (rType != nullType))
@@ -81,23 +81,22 @@ public class SemanticChecker implements ASTVisitor {
         }
         if (node.type.layer < 1) throw new SemanticError("[] not match", node.pos);
         if (node.type.layer == 1) node.type.isArr = false;
-        node.type.assignable=true;
     }
 
     @Override
     public void visit(DelayCellExpr node) {
         node.expression.accept(this);
         node.type = node.expression.type;
-        if (!node.expression.type.assignable) throw new SemanticError("not assignable", node.pos);
+        if (!node.expression.isAssignable()) throw new SemanticError("not assignable", node.pos);
         if (node.type.type != intType || node.type.isArr) throw new SemanticError("only int can do this", node.pos);
-        node.expression.type.assignable=false;
     }
 
     @Override
     public void visit(CellExprNode node) {
         node.expression.accept(this);
         node.type = node.expression.type;
-        if (!node.expression.type.assignable && (node.option.equals("++") || node.option.equals("--")))
+        node.isAssignable=node.expression.isAssignable;
+        if (!node.expression.isAssignable() && (node.option.equals("++") || node.option.equals("--")))
             throw new SemanticError("not assignable", node.pos);
         if (node.type.isArr) throw new SemanticError("no arr", node.pos);
         if (node.isInt() && node.type.type != intType)
@@ -133,13 +132,13 @@ public class SemanticChecker implements ASTVisitor {
                     if (rType != intType) throw semanticError;
                 }
             }
-            node.type = new TypeNode(node.pos, boolType, false,false);
+            node.type = new TypeNode(node.pos, boolType, false);
         } else if (option.equals("||") || option.equals("&&")) {
             if (node.ls.type.isArr || node.rs.type.isArr) {
                 throw semanticError;
             }
             if (lType != boolType || rType != boolType) throw semanticError;
-            node.type = new TypeNode(node.pos, boolType, false,false);
+            node.type = new TypeNode(node.pos, boolType, false);
 
         } else if (option.equals("*") || option.equals("/") || option.equals("%") || option.equals("-") ||
                 option.equals("<<") || option.equals(">>") || option.equals("&") || option.equals("|") || option.equals("^")) {
@@ -147,13 +146,13 @@ public class SemanticChecker implements ASTVisitor {
                 throw semanticError;
             }
             if (lType != intType || rType != intType) throw semanticError;
-            node.type = new TypeNode(node.pos, intType, false,false);
+            node.type = new TypeNode(node.pos, intType, false);
         } else if (option.equals("+")) {
             if (node.ls.type.isArr || node.rs.type.isArr) {
                 throw semanticError;
             }
-            if (lType == intType && rType == intType) node.type = new TypeNode(node.pos, intType, false,false);
-            else if (lType == stringType && rType == stringType) node.type = new TypeNode(node.pos, stringType, false,false);
+            if (lType == intType && rType == intType) node.type = new TypeNode(node.pos, intType, false);
+            else if (lType == stringType && rType == stringType) node.type = new TypeNode(node.pos, stringType, false);
             else throw semanticError;
         } else if (option.equals(">") || option.equals("<") || option.equals(">=") || option.equals("<=")) {
             if (node.ls.type.isArr || node.rs.type.isArr) {
@@ -161,7 +160,7 @@ public class SemanticChecker implements ASTVisitor {
             }
             if (!(lType == intType && rType == intType) && !(lType == stringType && rType == stringType))
                 throw semanticError;
-            node.type = new TypeNode(node.pos, boolType, false,false);
+            node.type = new TypeNode(node.pos, boolType, false);
         }
     }
 
@@ -200,7 +199,7 @@ public class SemanticChecker implements ASTVisitor {
         if (node.lhs.type.isArr) {
             if (node.rhs.parameterValueNode != null || !node.rhs.name.equals("size"))
                 throw new SemanticError("No such method", node.pos);
-            node.type = new TypeNode(node.pos, intType, false,false);
+            node.type = new TypeNode(node.pos, intType, false);
         } else {
             if (varType.classDef == null) throw new SemanticError("No such method", node.pos);
             currentScope = new ClassScope(currentScope, varType);
@@ -236,7 +235,6 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(VarDefStmtNode node) {
         node.typeNode.accept(this);
-        node.typeNode.assignable=true;
         for (SingleVarDefNode var : node.varDef) {
             var.typeNode = node.typeNode;
             var.accept(this);
@@ -261,7 +259,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(ClassDefStmtNode node) {
         Type classType = gScope.getType(node.name);
         currentScope = new ClassScope(currentScope, classType);
-        currentScope.addVarDefine("this", new SingleVarDefNode(node.pos, "this", new TypeNode(node.pos, classType, false,false)));
+        currentScope.addVarDefine("this", new SingleVarDefNode(node.pos, "this", new TypeNode(node.pos, classType, false)));
         for (var funcDef : node.funcDef.values()) {
             funcDef.accept(this);
         }
@@ -337,7 +335,7 @@ public class SemanticChecker implements ASTVisitor {
         if (node.returnExpr != null) {
             node.returnExpr.accept(this);
             node.returnType = node.returnExpr.type;
-        } else node.returnType = new TypeNode(node.pos, gScope.getType("void"), false,false);
+        } else node.returnType = new TypeNode(node.pos, gScope.getType("void"), false);
         Scope funcScope = currentScope.GetCurrentFuncScope();
         if (funcScope == null) throw new SyntaxError("return only in func", node.pos);
         if (funcScope instanceof FuncScope) {
@@ -378,7 +376,6 @@ public class SemanticChecker implements ASTVisitor {
                 throw new SemanticError("type not match", node.pos);
         }
         else  node.typeNode.accept(this);
-        node.typeNode.assignable=true;
     }
 
     @Override
@@ -405,16 +402,17 @@ public class SemanticChecker implements ASTVisitor {
             if (parameterValue.size() != parameterList.size())
                 throw new SemanticError("parameter list not match", node.pos);
             for (int i = 0; i < parameterValue.size(); i++) {
-                if (!parameterList.get(i).typeNode.sameType(parameterValue.get(i).type))
+                if (!parameterList.get(i).typeNode.sameType(parameterValue.get(i).type)) {
+                    int b=1;
                     throw new SemanticError("parameter list not match", node.pos);
-
+                }
             }
             node.funcBody.accept(this);
         } else if (node.functionParameterValue == null && node.functionParameterList == null) {
             node.funcBody.accept(this);
         } else throw new SemanticError("parameter list not match", node.pos);
         if (((LambdaScope) currentScope).returnType == null) {
-            node.type = new TypeNode(node.pos, gScope.getType("void"), false,false);
+            node.type = new TypeNode(node.pos, gScope.getType("void"), false);
         } else node.type = ((LambdaScope) currentScope).returnType;
         currentScope = currentScope.parentScope;
     }

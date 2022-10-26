@@ -11,7 +11,10 @@ public abstract class ExprNode extends ASTNode{
 
     public Entity value;
 
+    public boolean isAssignable=false;
+
     public ExprNode(Position pos){super(pos); }
 
+    public boolean isAssignable(){ return isAssignable; }
 
 }

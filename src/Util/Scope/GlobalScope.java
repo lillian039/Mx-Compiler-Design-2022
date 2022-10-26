@@ -20,11 +20,11 @@ public class GlobalScope extends Scope{
         types.put("null",new Type("null"));
 
         Position innerPos=new Position(0,0);
-        TypeNode intType=new TypeNode(innerPos,types.get("int"),false,false);
-        TypeNode voidType=new TypeNode(innerPos,types.get("void"),false,false);
+        TypeNode intType=new TypeNode(innerPos,types.get("int"),false);
+        TypeNode voidType=new TypeNode(innerPos,types.get("void"),false);
 
         Type stringClass=new Type("string");
-        TypeNode stringType=new TypeNode(innerPos,stringClass,false,false);
+        TypeNode stringType=new TypeNode(innerPos,stringClass,false);
 
         ClassDefStmtNode stringClassDefNode=new ClassDefStmtNode(innerPos);
         stringClassDefNode.classBody=null;

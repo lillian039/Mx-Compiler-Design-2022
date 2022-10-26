@@ -15,7 +15,7 @@ public class ConstExprNode extends ExprNode {
 
     public ConstExprNode(Type type,Entity value,Position pos){
         super(pos);
-        this.type= new TypeNode(pos,type,false,false);
+        this.type= new TypeNode(pos,type,false);
         this.value=value;
     }
 

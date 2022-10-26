@@ -11,7 +11,10 @@ public class ArrExprNode extends ExprNode {
     public ArrayList<ExprNode> arrDimension=new ArrayList<>();
     public ArrExprNode(Position pos){
         super(pos);
+        super.isAssignable=true;
     }
+
+
 
     @Override
     public void accept(ASTVisitor visitor) {

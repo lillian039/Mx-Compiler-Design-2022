@@ -11,7 +11,7 @@ import java.util.Vector;
 public class TypeNode extends ASTNode {
     public Type type;
 
-    public boolean assignable=false;
+
     public boolean isArr=false;
     public int layer=1;
 
@@ -22,11 +22,10 @@ public class TypeNode extends ASTNode {
         type=new Type();
     }
 
-    public TypeNode(Position pos,Type type,boolean isArr,boolean assignable){
+    public TypeNode(Position pos,Type type,boolean isArr){
         super(pos);
         this.type=type;
         this.isArr=isArr;
-        this.assignable=assignable;
     }
 
     public TypeNode(Position pos,TypeNode other){
