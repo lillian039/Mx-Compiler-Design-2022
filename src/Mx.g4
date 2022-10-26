@@ -53,7 +53,7 @@ newArrExprAtom:'['(expression)?']';
 
 newArrExpr : ('new' (INT | BOOL | STR | IDENTIFIER) (newArrExprAtom)+);
 
-newClassExpr: 'new' IDENTIFIER '('')' ;
+newClassExpr: 'new' IDENTIFIER ('('')')? ;
 
 type:(INT | BOOL | STR | IDENTIFIER)('['']')*;
 

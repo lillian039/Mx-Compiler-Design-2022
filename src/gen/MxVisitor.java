@@ -24,6 +24,13 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitNewExpr(MxParser.NewExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code arrayExpr}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayExpr(MxParser.ArrayExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code delayCellExpr}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
@@ -139,12 +146,6 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSuite(MxParser.SuiteContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MxParser#arrayelement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitArrayelement(MxParser.ArrayelementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#paralistVarDef}.
 	 * @param ctx the parse tree

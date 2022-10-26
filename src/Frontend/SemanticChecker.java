@@ -65,10 +65,9 @@ public class SemanticChecker implements ASTVisitor {
     }
 
     @Override
-    public void visit(ArrVarExprNode node) {
-        SingleVarDefNode var = currentScope.getVar(node.name);
-        if (var == null) throw new SemanticError("variable undefine", node.pos);
-        node.type=new TypeNode(node.pos,var.typeNode);
+    public void visit(ArrExprNode node) {
+        node.ls.accept(this);
+        node.type=new TypeNode(node.pos,node.ls.type);
         for (ExprNode expr : node.arrDimension) {
             expr.accept(this);
             node.type.layer--;
@@ -194,9 +193,11 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(BlockStmtNode node) {
+        currentScope=new BlockScope(currentScope);
         for (StmtNode stmt : node.statements) {
             stmt.accept(this);
         }
+        currentScope=currentScope.parentScope;
     }
 
     @Override
@@ -260,7 +261,12 @@ public class SemanticChecker implements ASTVisitor {
                 throw new SemanticError("only bool in condition", node.pos);
         }
         if (node.stepNode != null) node.stepNode.accept(this);
-        node.body.accept(this);
+        if(node.body instanceof BlockStmtNode){
+            for(StmtNode stmt:((BlockStmtNode)node.body).statements){
+                stmt.accept(this);
+            }
+        }
+        else node.body.accept(this);
         currentScope = currentScope.parentScope;
     }
 
@@ -307,7 +313,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(SingleVarDefNode node) {
         if (node.expression != null) {
             node.expression.accept(this);
-            if (!node.expression.type.sameType(node.typeNode)) throw new SemanticError("type not match", node.pos);
+            if (!node.expression.type.sameType(node.typeNode)&&node.expression.type.type!=nullType) throw new SemanticError("type not match", node.pos);
         }
     }
 

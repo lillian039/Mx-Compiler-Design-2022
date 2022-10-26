@@ -6,18 +6,17 @@ import Util.Position;
 
 import java.util.ArrayList;
 
-public class ArrVarExprNode extends ExprNode {
-    public String name;
-
+public class ArrExprNode extends ExprNode {
+    public ExprNode ls;
     public ArrayList<ExprNode> arrDimension=new ArrayList<>();
-    public ArrVarExprNode(Position pos){
+    public ArrExprNode(Position pos){
         super(pos);
     }
 
-    public ArrVarExprNode(String name,Position pos){
+/*    public ArrExprNode(String name, Position pos){
         super(pos);
         this.name=name;
-    }
+    }*/
 
     @Override
     public boolean isAssignable() {

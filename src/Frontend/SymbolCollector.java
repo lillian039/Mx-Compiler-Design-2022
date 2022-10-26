@@ -51,7 +51,7 @@ public class SymbolCollector implements ASTVisitor {
     }
 
     @Override
-    public void visit(ArrVarExprNode node) {
+    public void visit(ArrExprNode node) {
 
     }
 

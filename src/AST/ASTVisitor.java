@@ -58,6 +58,6 @@ public interface ASTVisitor {
 
     void visit(NewClassExprNode node);
 
-    void visit(ArrVarExprNode node);
+    void visit(ArrExprNode node);
 
 }

@@ -157,8 +157,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitVariable(MxParser.VariableContext ctx) {
         if(ctx.IDENTIFIER()!=null)return new VarExprNode(ctx.IDENTIFIER().toString(), new Position(ctx));
-        else if(ctx.THIS()!=null)return new VarExprNode("this", new Position(ctx));
-        else return visit(ctx.arrayelement());
+        else return new VarExprNode("this", new Position(ctx));
     }
 
     @Override
@@ -199,10 +198,11 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitArrayelement(MxParser.ArrayelementContext ctx) {
-        ArrVarExprNode arr = new ArrVarExprNode(ctx.IDENTIFIER().toString(), new Position(ctx));
-        for (var exp : ctx.expression()) {
-            arr.arrDimension.add((ExprNode) visit(exp));
+    public ASTNode visitArrayExpr(MxParser.ArrayExprContext ctx) {
+        ArrExprNode arr=new ArrExprNode(new Position(ctx));
+        arr.ls=(ExprNode) visit(ctx.expression(0));
+        for(int i=1;i<ctx.expression().size();i++){
+            arr.arrDimension.add((ExprNode) visit(ctx.expression(i)));
         }
         return arr;
     }
@@ -249,7 +249,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         ForStmtNode forStmtNode=new ForStmtNode(new Position(ctx));
         if(ctx.statement(0)!=null)forStmtNode.initializeStmt=(StmtNode)visit(ctx.statement(0));
         if(ctx.expression(0)!=null)forStmtNode.conditionNode=(ExprNode)visit(ctx.expression(0));
-        if(ctx.expression(1)!=null)forStmtNode.conditionNode=(ExprNode)visit(ctx.expression(1));
+        if(ctx.expression(1)!=null)forStmtNode.stepNode=(ExprNode)visit(ctx.expression(1));
         forStmtNode.body=(StmtNode) visit(ctx.statement(1));
         return forStmtNode;
     }
