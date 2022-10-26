@@ -64,7 +64,7 @@ NULL:'null';
 BREAK : 'break';
 CONTINUE : 'continue';
 
-IDENTIFIER : ('_'|[a-zA-Z])([0-9a-zA-Z]|'_')*;//定义变量名
+IDENTIFIER : ([a-zA-Z])([0-9a-zA-Z]|'_')*;//定义变量名
 
 LineComment
     :   '//' ~[\r\n]*

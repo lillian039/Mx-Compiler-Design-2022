@@ -18,7 +18,7 @@ import java.io.InputStream;
 public class Compiler {
 
     public static void main(String[] args) throws Exception{
-   /*     String name="test.mx";
+       /* String name="test.mx";
         InputStream input=new FileInputStream(name);*/
         InputStream input = System.in;
         try {
@@ -43,7 +43,7 @@ public class Compiler {
             semanticChecker.visit(root);
            // System.out.println("0");
         }catch (Error err){
-           // System.out.println(err.errorMsg());
+            //System.out.println(err.errorMsg());
             throw err;
         }
     }

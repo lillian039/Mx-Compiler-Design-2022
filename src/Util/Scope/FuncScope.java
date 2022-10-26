@@ -8,6 +8,7 @@ public class FuncScope extends Scope {
     public TypeNode returnType;
     public FunctionParameterListNode parameter;
 
+    public boolean isConstruction=false;
     public FuncScope(Scope parentScope,TypeNode returnType,FunctionParameterListNode parameter) {
         super(parentScope);
         this.parameter=parameter;

@@ -77,8 +77,8 @@ statement
     | 'while' '('expression ')' statement                                   #whileStmt
     |  If  '('  expression  ')'trueStmt=statement
                       ( Else falseStmt=statement)?                          #ifStmt
-    | 'for' '(' (statement)?
-      expression? ';' (expression)? ')' statement                           #forStmt
+    | 'for' '(' initStmt=statement?
+      condition=expression? ';' step=expression? ')' body=statement        #forStmt
     | 'return' expression? ';'                                              #returnStmt
     | expression';'                                                         #exprStmt
     | funcdefine                                                            #funcdefineStmt

@@ -10,6 +10,8 @@ import Util.Type;
 import Util.Entity;
 import gen.MxBaseVisitor;
 import gen.MxParser;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
+
 public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     private GlobalScope gScope;
 
@@ -122,7 +124,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitFunVal(MxParser.FunValContext ctx) {
-        if (visit(ctx.callfunction()) != null) return visit(ctx.callfunction());
+        if (ctx.callfunction() != null) return visit(ctx.callfunction());
         else return visit(ctx.lamdaExpr());
 
     }
@@ -148,9 +150,9 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         Position pos = new Position(ctx);
         LambdaExprNode lambda = new LambdaExprNode(pos);
         if (ctx.And() != null) lambda.isGlobe = true;
-        lambda.functionParameterList=(FunctionParameterListNode)visit(ctx.functionParameterList());
-        lambda.functionParameterValue=(FunctionParameterValueNode)visit(ctx.functionParameterValue());
-        lambda.funcBody = (BlockStmtNode) visit(ctx.suite());
+        if(ctx.functionParameterList()!=null)lambda.functionParameterList=(FunctionParameterListNode)visit(ctx.functionParameterList());
+        if(ctx.functionParameterValue()!=null)lambda.functionParameterValue=(FunctionParameterValueNode)visit(ctx.functionParameterValue());
+        if(ctx.suite()!=null)lambda.funcBody = (BlockStmtNode) visit(ctx.suite());
         return lambda;
     }
 
@@ -247,10 +249,10 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitForStmt(MxParser.ForStmtContext ctx) {
         ForStmtNode forStmtNode=new ForStmtNode(new Position(ctx));
-        if(ctx.statement(0)!=null)forStmtNode.initializeStmt=(StmtNode)visit(ctx.statement(0));
-        if(ctx.expression(0)!=null)forStmtNode.conditionNode=(ExprNode)visit(ctx.expression(0));
-        if(ctx.expression(1)!=null)forStmtNode.stepNode=(ExprNode)visit(ctx.expression(1));
-        forStmtNode.body=(StmtNode) visit(ctx.statement(1));
+        if(ctx.initStmt!=null)forStmtNode.initializeStmt=(StmtNode)visit(ctx.initStmt);
+        if(ctx.condition!=null)forStmtNode.conditionNode=(ExprNode)visit(ctx.condition);
+        if(ctx.step!=null)forStmtNode.stepNode=(ExprNode)visit(ctx.step);
+        if(ctx.body!=null)forStmtNode.body=(StmtNode) visit(ctx.body);
         return forStmtNode;
     }
 

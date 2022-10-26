@@ -24,7 +24,8 @@ public class MxParser extends Parser {
 		LessEqual=28, NotEqual=29, AndAnd=30, Oror=31, Return=32, For=33, If=34, 
 		Else=35, While=36, Semi=37, Comma=38, Dot=39, INT=40, BOOL=41, STR=42, 
 		VOID=43, NEW=44, TRUE=45, FALSE=46, INTEGER=47, STRING=48, THIS=49, NULL=50, 
-		BREAK=51, CONTINUE=52, IDENTIFIER=53, WS=54, LINE_COMMENT=55, COMMENT=56;
+		BREAK=51, CONTINUE=52, IDENTIFIER=53, LineComment=54, BlockComment=55, 
+		WS=56, COMMENT=57;
 	public static final int
 		RULE_program = 0, RULE_expression = 1, RULE_primary = 2, RULE_constant = 3, 
 		RULE_variable = 4, RULE_funVal = 5, RULE_newArrExprAtom = 6, RULE_newArrExpr = 7, 
@@ -63,7 +64,7 @@ public class MxParser extends Parser {
 			"NotEqual", "AndAnd", "Oror", "Return", "For", "If", "Else", "While", 
 			"Semi", "Comma", "Dot", "INT", "BOOL", "STR", "VOID", "NEW", "TRUE", 
 			"FALSE", "INTEGER", "STRING", "THIS", "NULL", "BREAK", "CONTINUE", "IDENTIFIER", 
-			"WS", "LINE_COMMENT", "COMMENT"
+			"LineComment", "BlockComment", "WS", "COMMENT"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -1824,6 +1825,10 @@ public class MxParser extends Parser {
 		}
 	}
 	public static class ForStmtContext extends StatementContext {
+		public StatementContext initStmt;
+		public ExpressionContext condition;
+		public ExpressionContext step;
+		public StatementContext body;
 		public TerminalNode For() { return getToken(MxParser.For, 0); }
 		public TerminalNode LeftParen() { return getToken(MxParser.LeftParen, 0); }
 		public TerminalNode Semi() { return getToken(MxParser.Semi, 0); }
@@ -2128,7 +2133,7 @@ public class MxParser extends Parser {
 				case 1:
 					{
 					setState(232);
-					statement();
+					((ForStmtContext)_localctx).initStmt = statement();
 					}
 					break;
 				}
@@ -2138,7 +2143,7 @@ public class MxParser extends Parser {
 				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LeftParen) | (1L << LeftBracket) | (1L << Sub) | (1L << Not) | (1L << Invert) | (1L << AddSelf) | (1L << SubSelf) | (1L << NEW) | (1L << TRUE) | (1L << FALSE) | (1L << INTEGER) | (1L << STRING) | (1L << THIS) | (1L << NULL) | (1L << IDENTIFIER))) != 0)) {
 					{
 					setState(235);
-					expression(0);
+					((ForStmtContext)_localctx).condition = expression(0);
 					}
 				}
 
@@ -2150,14 +2155,14 @@ public class MxParser extends Parser {
 				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LeftParen) | (1L << LeftBracket) | (1L << Sub) | (1L << Not) | (1L << Invert) | (1L << AddSelf) | (1L << SubSelf) | (1L << NEW) | (1L << TRUE) | (1L << FALSE) | (1L << INTEGER) | (1L << STRING) | (1L << THIS) | (1L << NULL) | (1L << IDENTIFIER))) != 0)) {
 					{
 					setState(239);
-					expression(0);
+					((ForStmtContext)_localctx).step = expression(0);
 					}
 				}
 
 				setState(242);
 				match(RightParen);
 				setState(243);
-				statement();
+				((ForStmtContext)_localctx).body = statement();
 				}
 				break;
 			case 6:
@@ -2657,7 +2662,7 @@ public class MxParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u00018\u0132\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u00019\u0132\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002"+
 		"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002"+
