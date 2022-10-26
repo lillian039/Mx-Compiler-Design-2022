@@ -16,12 +16,6 @@ public class DelayCellExpr extends ExprNode {
         this.expression=expression;
         this.option=option;
     }
-
-    @Override
-    public boolean isAssignable() {
-        return false;
-    }
-
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);

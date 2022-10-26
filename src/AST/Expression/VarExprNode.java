@@ -18,10 +18,6 @@ public class VarExprNode extends ExprNode {
         this.name = name;
     }
 
-    @Override
-    public boolean isAssignable() {
-        return true;
-    }
 
     @Override
     public void accept(ASTVisitor visitor) {

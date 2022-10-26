@@ -195,7 +195,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitNewClassExpr(MxParser.NewClassExprContext ctx) {
         NewClassExprNode newExprNode = new NewClassExprNode(new Position(ctx));
-        newExprNode.type= new TypeNode(new Position(ctx),new Type(ctx.IDENTIFIER().toString()),false);
+        newExprNode.type= new TypeNode(new Position(ctx),new Type(ctx.IDENTIFIER().toString()),false,true);
         return newExprNode;
     }
 
