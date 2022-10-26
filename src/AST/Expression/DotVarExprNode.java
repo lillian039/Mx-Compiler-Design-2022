@@ -6,13 +6,13 @@ import Util.Position;
 
 public class DotVarExprNode extends ExprNode {
     public ExprNode lhs;
-    public VarExprNode rhs;
+    public ExprNode rhs;
 
     public DotVarExprNode(Position pos){
         super(pos);
     }
 
-    public DotVarExprNode(ExprNode ls,VarExprNode var,Position pos){
+    public DotVarExprNode(ExprNode ls,ExprNode var,Position pos){
         super(pos);
         this.lhs=ls;
         this.rhs=var;

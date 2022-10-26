@@ -30,7 +30,9 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(RootNode node) {
-        for (VarDefStmtNode stmt : node.varDef) stmt.accept(this);
+        for (StmtNode stmt : node.statements) {
+            stmt.accept(this);
+        }
     }
 
 
@@ -66,15 +68,15 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(ArrVarExprNode node) {
         SingleVarDefNode var = currentScope.getVar(node.name);
         if (var == null) throw new SemanticError("variable undefine", node.pos);
-        node.type = var.typeNode;
+        node.type=new TypeNode(node.pos,var.typeNode);
         for (ExprNode expr : node.arrDimension) {
             expr.accept(this);
             node.type.layer--;
             if (expr.type.type != intType || expr.type.isArr)
                 throw new SemanticError("expression in [] can only be int", node.pos);
         }
-        if (node.type.layer<1)throw new SemanticError("[] not match", node.pos);
-        if(node.type.layer==1)node.type.isArr=false;
+        if (node.type.layer < 1) throw new SemanticError("[] not match", node.pos);
+        if (node.type.layer == 1) node.type.isArr = false;
     }
 
     @Override
@@ -163,25 +165,31 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(DotFuncExprNode node) {
         node.lhs.accept(this);
-        Type varType=node.lhs.type.type;
-        if(node.lhs.type.isArr)throw new SemanticError("No such method",node.pos);
-        if(varType.classDef==null)throw new SemanticError("No such method",node.pos);
-        currentScope=new ClassScope(currentScope,varType);
-        node.rhs.accept(this);
-        currentScope=currentScope.parentScope;
-        node.type=node.rhs.type;
+        Type varType = node.lhs.type.type;
+        if (node.lhs.type.isArr) {
+            if (node.rhs.parameterValueNode != null || !node.rhs.name.equals("size"))
+                throw new SemanticError("No such method", node.pos);
+            node.type = new TypeNode(node.pos, intType, false);
+        }
+        else {
+            if (varType.classDef == null) throw new SemanticError("No such method", node.pos);
+            currentScope = new ClassScope(currentScope, varType);
+            node.rhs.accept(this);
+            currentScope = currentScope.parentScope;
+            node.type = node.rhs.type;
+        }
     }
 
     @Override
     public void visit(DotVarExprNode node) {
         node.lhs.accept(this);
-        Type varType=node.lhs.type.type;
-        if(node.lhs.type.isArr)throw new SemanticError("No such member",node.pos);
-        if(varType.classDef==null)throw new SemanticError("No such member",node.pos);
-        currentScope=new ClassScope(currentScope,varType);
+        Type varType = node.lhs.type.type;
+        if (node.lhs.type.isArr) throw new SemanticError("No such member", node.pos);
+        if (varType.classDef == null) throw new SemanticError("No such member", node.pos);
+        currentScope = new ClassScope(currentScope, varType);
         node.rhs.accept(this);
-        currentScope=currentScope.parentScope;
-        node.type=node.rhs.type;
+        currentScope = currentScope.parentScope;
+        node.type = node.rhs.type;
     }
 
     @Override
@@ -193,9 +201,10 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(VarDefStmtNode node) {
-        if (node.typeNode != null) node.typeNode.accept(this);
+        node.typeNode.accept(this);
         for (SingleVarDefNode var : node.varDef) {
             var.typeNode = node.typeNode;
+            var.accept(this);
             currentScope.addVarDefine(var.name, var);
         }
     }
@@ -204,7 +213,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(FunDefStmtNode node) {
         if (currentScope != gScope && !(currentScope instanceof ClassScope))
             throw new SyntaxError("can't define function here", node.pos);
-        currentScope = new FuncScope(currentScope, node.returnTypeNode);
+        currentScope = new FuncScope(currentScope, node.returnTypeNode,node.parameterList);
         for (var stmt : node.funcBody.statements) {
             stmt.accept(this);
         }
@@ -230,9 +239,11 @@ public class SemanticChecker implements ASTVisitor {
         currentScope = new BlockScope(currentScope);
         node.thenStmt.accept(this);
         currentScope = currentScope.parentScope;
-        currentScope = new BlockScope(currentScope);
-        node.elseStmt.accept(this);
-        currentScope = currentScope.parentScope;
+        if (node.elseStmt != null) {
+            currentScope = new BlockScope(currentScope);
+            node.elseStmt.accept(this);
+            currentScope = currentScope.parentScope;
+        }
     }
 
     @Override
@@ -265,7 +276,7 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(CtrlStmtNode node) {
-        if (!(currentScope instanceof LoopScope)) throw new SyntaxError("break continue only in loop!", node.pos);
+        if (!currentScope.inLoop()) throw new SyntaxError("break continue only in loop!", node.pos);
     }
 
     @Override
@@ -279,22 +290,25 @@ public class SemanticChecker implements ASTVisitor {
             node.returnExpr.accept(this);
             node.returnType = node.returnExpr.type;
         } else node.returnType = new TypeNode(node.pos, gScope.getType("void"), false);
-        if (!(currentScope instanceof LambdaScope)) {
-            TypeNode funcReturnType = currentScope.getFuncTypeNode();
-            if (funcReturnType == null) throw new SemanticError("only function can return", node.pos);
-            if (!node.returnType.sameType(((FuncScope) currentScope).returnType))
+        Scope funcScope=currentScope.GetCurrentFuncScope();
+        if(funcScope==null)throw new SyntaxError("return only in func",node.pos);
+        if (funcScope instanceof FuncScope) {
+            if (!node.returnType.sameType(((FuncScope) funcScope).returnType))
                 throw new SemanticError("returnType not match", node.pos);
         } else {
-            if (((LambdaScope) currentScope).returnType == null)
-                ((LambdaScope) currentScope).returnType = node.returnType;
-            else if (!((LambdaScope) currentScope).returnType.sameType(node.returnType))
+            if (((LambdaScope) funcScope).returnType == null)
+                ((LambdaScope) funcScope).returnType = node.returnType;
+            else if (!((LambdaScope) funcScope).returnType.sameType(node.returnType))
                 throw new SemanticError("returnType not match", node.pos);
         }
     }
 
     @Override
     public void visit(SingleVarDefNode node) {
-        node.expression.accept(this);
+        if (node.expression != null) {
+            node.expression.accept(this);
+            if (!node.expression.type.sameType(node.typeNode)) throw new SemanticError("type not match", node.pos);
+        }
     }
 
     @Override

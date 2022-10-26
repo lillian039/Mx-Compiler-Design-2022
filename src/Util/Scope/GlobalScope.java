@@ -33,8 +33,8 @@ public class GlobalScope extends Scope{
         stringClassDefNode.funcDef.put("length",stringLength);
 
         FunDefStmtNode stringSubString=new FunDefStmtNode(innerPos,"substring",stringType);
-        stringSubString.parameterList.add(new SingleVarDefNode(innerPos,"left",intType));
-        stringSubString.parameterList.add(new SingleVarDefNode(innerPos,"right",intType));
+        stringSubString.add(new SingleVarDefNode(innerPos,"left",intType));
+        stringSubString.add(new SingleVarDefNode(innerPos,"right",intType));
         stringClassDefNode.funcDef.put("substring",stringSubString);
 
         FunDefStmtNode stringParseInt=new FunDefStmtNode(innerPos,"parseInt",intType);
@@ -48,19 +48,19 @@ public class GlobalScope extends Scope{
 
 
         FunDefStmtNode innerPrint=new FunDefStmtNode(innerPos,"print", voidType);
-        innerPrint.parameterList.add(new SingleVarDefNode(innerPos,"str",stringType));
+        innerPrint.add(new SingleVarDefNode(innerPos,"str",stringType));
         addFunDefine("print",innerPrint);
 
         FunDefStmtNode innerPrintln=new FunDefStmtNode(innerPos,"println",voidType);
-        innerPrint.parameterList.add(new SingleVarDefNode(innerPos,"str",stringType));
+        innerPrintln.add(new SingleVarDefNode(innerPos,"str",stringType));
         addFunDefine("println",innerPrintln);
 
         FunDefStmtNode innerPrintInt=new FunDefStmtNode(innerPos,"printInt",voidType);
-        innerPrintInt.parameterList.add(new SingleVarDefNode(innerPos,"n",intType));
+        innerPrintInt.add(new SingleVarDefNode(innerPos,"n",intType));
         addFunDefine("printInt",innerPrintInt);
 
         FunDefStmtNode innerPrintlnInt=new FunDefStmtNode(innerPos,"printlnInt",voidType);
-        innerPrintlnInt.parameterList.add(new SingleVarDefNode(innerPos,"n",intType));
+        innerPrintlnInt.add(new SingleVarDefNode(innerPos,"n",intType));
         addFunDefine("printlnInt",innerPrintlnInt);
 
         FunDefStmtNode innerGetString=new FunDefStmtNode(innerPos,"getString",stringType);
@@ -70,7 +70,7 @@ public class GlobalScope extends Scope{
         addFunDefine("getInt",innerGetInt);
 
         FunDefStmtNode innerToString =new FunDefStmtNode(innerPos,"toString",stringType);
-        innerToString.parameterList.add(new SingleVarDefNode(innerPos,"i",intType));
+        innerToString.add(new SingleVarDefNode(innerPos,"i",intType));
         addFunDefine("toString",innerToString);
     }
 

@@ -59,5 +59,22 @@ abstract public class Scope {
         return null;
     }
 
+    public boolean inLoop(){
+        Scope now=this;
+        while (now!=null){
+            if(now instanceof LoopScope)return true;
+            now=now.parentScope;
+        }
+        return false;
+    }
+
+    public Scope GetCurrentFuncScope(){
+        Scope now=this;
+        while (now!=null){
+            if(now instanceof FuncScope||now instanceof LambdaScope)return now;
+            now=now.parentScope;
+        }
+        return null;
+    }
 
 }

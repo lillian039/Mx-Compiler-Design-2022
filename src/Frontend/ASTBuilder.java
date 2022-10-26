@@ -29,6 +29,9 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         nullType=gScope.getType("null");
         RootNode rootNode = new RootNode(new Position(ctx));
         for(var Stmt : ctx.children){
+            if(!(Stmt instanceof MxParser.ClassdefineContext)
+                    &&!(Stmt instanceof MxParser.FuncdefineContext)
+                    &&!(Stmt instanceof MxParser.VardefContext))break;
             StmtNode stmtNode=(StmtNode) visit(Stmt);
             rootNode.statements.add(stmtNode);
             if(Stmt instanceof MxParser.ClassdefineContext)rootNode.classDef.add((ClassDefStmtNode) stmtNode);
@@ -49,7 +52,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         Position pos = new Position(ctx);
         ExprNode ls = (ExprNode) visit(ctx.expression(0));
         ExprNode rs = (ExprNode) visit(ctx.expression(1));
-        String op = ctx.op.toString();
+        String op = ctx.op.getText().toString();
         //System.out.println(op);
         return new BinaryExprNode(ls, rs, op, pos);
     }
@@ -66,7 +69,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     public ASTNode visitDotVarExpr(MxParser.DotVarExprContext ctx) {
         Position pos = new Position(ctx);
         ExprNode ls = (ExprNode) visit(ctx.expression());
-        VarExprNode rs = (VarExprNode) visit(ctx.variable());
+        ExprNode rs = (ExprNode) visit(ctx.variable());
         return new DotVarExprNode(ls, rs, pos);
     }
 
@@ -87,14 +90,14 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitCellExpr(MxParser.CellExprContext ctx) {
         ExprNode exprNode = (ExprNode) visit(ctx.expression());
-        String op = ctx.op.toString();
+        String op = ctx.op.getText().toString();
         return new CellExprNode(exprNode, op, new Position(ctx));
     }
 
     @Override
     public ASTNode visitDelayCellExpr(MxParser.DelayCellExprContext ctx) {
         ExprNode exprNode = (ExprNode) visit(ctx.expression());
-        String op = ctx.op.toString();
+        String op = ctx.op.getText().toString();
         return new DelayCellExpr(exprNode, op, new Position(ctx));
     }
 

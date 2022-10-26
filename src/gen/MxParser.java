@@ -24,7 +24,7 @@ public class MxParser extends Parser {
 		LessEqual=28, NotEqual=29, AndAnd=30, Oror=31, Return=32, For=33, If=34, 
 		Else=35, While=36, Semi=37, Comma=38, Dot=39, INT=40, BOOL=41, STR=42, 
 		VOID=43, NEW=44, TRUE=45, FALSE=46, INTEGER=47, STRING=48, THIS=49, NULL=50, 
-		IDENTIFIER=51, WS=52, LINE_COMMENT=53, COMMENT=54, BREAK=55, CONTINUE=56;
+		BREAK=51, CONTINUE=52, IDENTIFIER=53, WS=54, LINE_COMMENT=55, COMMENT=56;
 	public static final int
 		RULE_program = 0, RULE_expression = 1, RULE_primary = 2, RULE_constant = 3, 
 		RULE_variable = 4, RULE_funVal = 5, RULE_newArrExprAtom = 6, RULE_newArrExpr = 7, 
@@ -51,8 +51,7 @@ public class MxParser extends Parser {
 			"'>>'", "'~'", "'++'", "'--'", "'<'", "'>'", "'=='", "'>='", "'<='", 
 			"'!='", "'&&'", "'||'", "'return'", "'for'", "'if'", "'else'", "'while'", 
 			"';'", "','", "'.'", "'int'", "'bool'", "'string'", "'void'", "'new'", 
-			"'true'", "'false'", null, null, "'this'", "'null'", null, null, null, 
-			null, "'break'", "'continue'"
+			"'true'", "'false'", null, null, "'this'", "'null'", "'break'", "'continue'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -64,8 +63,8 @@ public class MxParser extends Parser {
 			"SubSelf", "Less", "Greater", "Equals", "GreaterEqual", "LessEqual", 
 			"NotEqual", "AndAnd", "Oror", "Return", "For", "If", "Else", "While", 
 			"Semi", "Comma", "Dot", "INT", "BOOL", "STR", "VOID", "NEW", "TRUE", 
-			"FALSE", "INTEGER", "STRING", "THIS", "NULL", "IDENTIFIER", "WS", "LINE_COMMENT", 
-			"COMMENT", "BREAK", "CONTINUE"
+			"FALSE", "INTEGER", "STRING", "THIS", "NULL", "BREAK", "CONTINUE", "IDENTIFIER", 
+			"WS", "LINE_COMMENT", "COMMENT"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -1488,7 +1487,7 @@ public class MxParser extends Parser {
 			setState(179);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LeftParen) | (1L << LeftBracket) | (1L << LeftBrace) | (1L << Sub) | (1L << Not) | (1L << Invert) | (1L << AddSelf) | (1L << SubSelf) | (1L << Return) | (1L << For) | (1L << If) | (1L << While) | (1L << Semi) | (1L << INT) | (1L << BOOL) | (1L << STR) | (1L << VOID) | (1L << NEW) | (1L << TRUE) | (1L << FALSE) | (1L << INTEGER) | (1L << STRING) | (1L << THIS) | (1L << NULL) | (1L << IDENTIFIER) | (1L << BREAK) | (1L << CONTINUE))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LeftParen) | (1L << LeftBracket) | (1L << LeftBrace) | (1L << Sub) | (1L << Not) | (1L << Invert) | (1L << AddSelf) | (1L << SubSelf) | (1L << Return) | (1L << For) | (1L << If) | (1L << While) | (1L << Semi) | (1L << INT) | (1L << BOOL) | (1L << STR) | (1L << VOID) | (1L << NEW) | (1L << TRUE) | (1L << FALSE) | (1L << INTEGER) | (1L << STRING) | (1L << THIS) | (1L << NULL) | (1L << BREAK) | (1L << CONTINUE) | (1L << IDENTIFIER))) != 0)) {
 				{
 				{
 				setState(176);
@@ -1702,18 +1701,15 @@ public class MxParser extends Parser {
 	}
 
 	public static class FunctionParameterListContext extends ParserRuleContext {
-		public SingleVarDefContext singleVarDef() {
-			return getRuleContext(SingleVarDefContext.class,0);
-		}
-		public List<TerminalNode> Comma() { return getTokens(MxParser.Comma); }
-		public TerminalNode Comma(int i) {
-			return getToken(MxParser.Comma, i);
-		}
 		public List<ParalistVarDefContext> paralistVarDef() {
 			return getRuleContexts(ParalistVarDefContext.class);
 		}
 		public ParalistVarDefContext paralistVarDef(int i) {
 			return getRuleContext(ParalistVarDefContext.class,i);
+		}
+		public List<TerminalNode> Comma() { return getTokens(MxParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(MxParser.Comma, i);
 		}
 		public FunctionParameterListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1742,7 +1738,7 @@ public class MxParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(201);
-			singleVarDef();
+			paralistVarDef();
 			setState(206);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -2389,7 +2385,7 @@ public class MxParser extends Parser {
 			setState(272);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (_la==IDENTIFIER) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INT) | (1L << BOOL) | (1L << STR) | (1L << IDENTIFIER))) != 0)) {
 				{
 				setState(271);
 				functionParameterList();
@@ -2600,7 +2596,7 @@ public class MxParser extends Parser {
 				setState(296);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if (_la==IDENTIFIER) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INT) | (1L << BOOL) | (1L << STR) | (1L << IDENTIFIER))) != 0)) {
 					{
 					setState(295);
 					functionParameterList();
@@ -2739,7 +2735,7 @@ public class MxParser extends Parser {
 		"\u0000\u000b\u000b\u0012\u0012\u0001\u0000\u0015\u0017\u0001\u0000\f\u000e"+
 		"\u0001\u0000\n\u000b\u0001\u0000\u0013\u0014\u0002\u0000\u0018\u0019\u001b"+
 		"\u001c\u0002\u0000\u001a\u001a\u001d\u001d\u0001\u0000\u0016\u0017\u0001"+
-		"\u0000-.\u0002\u0000(*33\u0001\u000078\u015b\u00003\u0001\u0000\u0000"+
+		"\u0000-.\u0002\u0000(*55\u0001\u000034\u015b\u00003\u0001\u0000\u0000"+
 		"\u0000\u0002F\u0001\u0000\u0000\u0000\u0004y\u0001\u0000\u0000\u0000\u0006"+
 		"\u007f\u0001\u0000\u0000\u0000\b\u0084\u0001\u0000\u0000\u0000\n\u0088"+
 		"\u0001\u0000\u0000\u0000\f\u008a\u0001\u0000\u0000\u0000\u000e\u0090\u0001"+
@@ -2789,7 +2785,7 @@ public class MxParser extends Parser {
 		"\u00050\u0000\u0000}\u0080\u0007\b\u0000\u0000~\u0080\u00052\u0000\u0000"+
 		"\u007f{\u0001\u0000\u0000\u0000\u007f|\u0001\u0000\u0000\u0000\u007f}"+
 		"\u0001\u0000\u0000\u0000\u007f~\u0001\u0000\u0000\u0000\u0080\u0007\u0001"+
-		"\u0000\u0000\u0000\u0081\u0085\u00053\u0000\u0000\u0082\u0085\u00051\u0000"+
+		"\u0000\u0000\u0000\u0081\u0085\u00055\u0000\u0000\u0082\u0085\u00051\u0000"+
 		"\u0000\u0083\u0085\u0003\u0018\f\u0000\u0084\u0081\u0001\u0000\u0000\u0000"+
 		"\u0084\u0082\u0001\u0000\u0000\u0000\u0084\u0083\u0001\u0000\u0000\u0000"+
 		"\u0085\t\u0001\u0000\u0000\u0000\u0086\u0089\u0003*\u0015\u0000\u0087"+
@@ -2802,7 +2798,7 @@ public class MxParser extends Parser {
 		"\u0000\u0000\u0092\u0094\u0003\f\u0006\u0000\u0093\u0092\u0001\u0000\u0000"+
 		"\u0000\u0094\u0095\u0001\u0000\u0000\u0000\u0095\u0093\u0001\u0000\u0000"+
 		"\u0000\u0095\u0096\u0001\u0000\u0000\u0000\u0096\u000f\u0001\u0000\u0000"+
-		"\u0000\u0097\u0098\u0005,\u0000\u0000\u0098\u0099\u00053\u0000\u0000\u0099"+
+		"\u0000\u0097\u0098\u0005,\u0000\u0000\u0098\u0099\u00055\u0000\u0000\u0099"+
 		"\u009a\u0005\u0003\u0000\u0000\u009a\u009b\u0005\u0004\u0000\u0000\u009b"+
 		"\u0011\u0001\u0000\u0000\u0000\u009c\u00a1\u0007\t\u0000\u0000\u009d\u009e"+
 		"\u0005\u0005\u0000\u0000\u009e\u00a0\u0005\u0006\u0000\u0000\u009f\u009d"+
@@ -2819,35 +2815,35 @@ public class MxParser extends Parser {
 		"\u00b2\u00b5\u0001\u0000\u0000\u0000\u00b3\u00b1\u0001\u0000\u0000\u0000"+
 		"\u00b3\u00b4\u0001\u0000\u0000\u0000\u00b4\u00b6\u0001\u0000\u0000\u0000"+
 		"\u00b5\u00b3\u0001\u0000\u0000\u0000\u00b6\u00b7\u0005\b\u0000\u0000\u00b7"+
-		"\u0017\u0001\u0000\u0000\u0000\u00b8\u00bd\u00053\u0000\u0000\u00b9\u00ba"+
+		"\u0017\u0001\u0000\u0000\u0000\u00b8\u00bd\u00055\u0000\u0000\u00b9\u00ba"+
 		"\u0005\u0005\u0000\u0000\u00ba\u00bb\u0003\u0002\u0001\u0000\u00bb\u00bc"+
 		"\u0005\u0006\u0000\u0000\u00bc\u00be\u0001\u0000\u0000\u0000\u00bd\u00b9"+
 		"\u0001\u0000\u0000\u0000\u00be\u00bf\u0001\u0000\u0000\u0000\u00bf\u00bd"+
 		"\u0001\u0000\u0000\u0000\u00bf\u00c0\u0001\u0000\u0000\u0000\u00c0\u0019"+
 		"\u0001\u0000\u0000\u0000\u00c1\u00c2\u0003\u0012\t\u0000\u00c2\u00c3\u0005"+
-		"3\u0000\u0000\u00c3\u001b\u0001\u0000\u0000\u0000\u00c4\u00c7\u00053\u0000"+
+		"5\u0000\u0000\u00c3\u001b\u0001\u0000\u0000\u0000\u00c4\u00c7\u00055\u0000"+
 		"\u0000\u00c5\u00c6\u0005\t\u0000\u0000\u00c6\u00c8\u0003\u0002\u0001\u0000"+
 		"\u00c7\u00c5\u0001\u0000\u0000\u0000\u00c7\u00c8\u0001\u0000\u0000\u0000"+
-		"\u00c8\u001d\u0001\u0000\u0000\u0000\u00c9\u00ce\u0003\u001c\u000e\u0000"+
-		"\u00ca\u00cb\u0005&\u0000\u0000\u00cb\u00cd\u0003\u001a\r\u0000\u00cc"+
-		"\u00ca\u0001\u0000\u0000\u0000\u00cd\u00d0\u0001\u0000\u0000\u0000\u00ce"+
-		"\u00cc\u0001\u0000\u0000\u0000\u00ce\u00cf\u0001\u0000\u0000\u0000\u00cf"+
-		"\u001f\u0001\u0000\u0000\u0000\u00d0\u00ce\u0001\u0000\u0000\u0000\u00d1"+
-		"\u00d6\u0003\u0002\u0001\u0000\u00d2\u00d3\u0005&\u0000\u0000\u00d3\u00d5"+
-		"\u0003\u0002\u0001\u0000\u00d4\u00d2\u0001\u0000\u0000\u0000\u00d5\u00d8"+
-		"\u0001\u0000\u0000\u0000\u00d6\u00d4\u0001\u0000\u0000\u0000\u00d6\u00d7"+
-		"\u0001\u0000\u0000\u0000\u00d7!\u0001\u0000\u0000\u0000\u00d8\u00d6\u0001"+
-		"\u0000\u0000\u0000\u00d9\u0105\u0003\u0016\u000b\u0000\u00da\u0105\u0003"+
-		"\u0014\n\u0000\u00db\u00dc\u0005$\u0000\u0000\u00dc\u00dd\u0005\u0003"+
-		"\u0000\u0000\u00dd\u00de\u0003\u0002\u0001\u0000\u00de\u00df\u0005\u0004"+
-		"\u0000\u0000\u00df\u00e0\u0003\"\u0011\u0000\u00e0\u0105\u0001\u0000\u0000"+
-		"\u0000\u00e1\u00e2\u0005\"\u0000\u0000\u00e2\u00e3\u0005\u0003\u0000\u0000"+
-		"\u00e3\u00e4\u0003\u0002\u0001\u0000\u00e4\u00e5\u0005\u0004\u0000\u0000"+
-		"\u00e5\u00e8\u0003\"\u0011\u0000\u00e6\u00e7\u0005#\u0000\u0000\u00e7"+
-		"\u00e9\u0003\"\u0011\u0000\u00e8\u00e6\u0001\u0000\u0000\u0000\u00e8\u00e9"+
-		"\u0001\u0000\u0000\u0000\u00e9\u0105\u0001\u0000\u0000\u0000\u00ea\u00eb"+
-		"\u0005!\u0000\u0000\u00eb\u00ed\u0005\u0003\u0000\u0000\u00ec\u00ee\u0003"+
-		"\"\u0011\u0000\u00ed\u00ec\u0001\u0000\u0000\u0000\u00ed\u00ee\u0001\u0000"+
+		"\u00c8\u001d\u0001\u0000\u0000\u0000\u00c9\u00ce\u0003\u001a\r\u0000\u00ca"+
+		"\u00cb\u0005&\u0000\u0000\u00cb\u00cd\u0003\u001a\r\u0000\u00cc\u00ca"+
+		"\u0001\u0000\u0000\u0000\u00cd\u00d0\u0001\u0000\u0000\u0000\u00ce\u00cc"+
+		"\u0001\u0000\u0000\u0000\u00ce\u00cf\u0001\u0000\u0000\u0000\u00cf\u001f"+
+		"\u0001\u0000\u0000\u0000\u00d0\u00ce\u0001\u0000\u0000\u0000\u00d1\u00d6"+
+		"\u0003\u0002\u0001\u0000\u00d2\u00d3\u0005&\u0000\u0000\u00d3\u00d5\u0003"+
+		"\u0002\u0001\u0000\u00d4\u00d2\u0001\u0000\u0000\u0000\u00d5\u00d8\u0001"+
+		"\u0000\u0000\u0000\u00d6\u00d4\u0001\u0000\u0000\u0000\u00d6\u00d7\u0001"+
+		"\u0000\u0000\u0000\u00d7!\u0001\u0000\u0000\u0000\u00d8\u00d6\u0001\u0000"+
+		"\u0000\u0000\u00d9\u0105\u0003\u0016\u000b\u0000\u00da\u0105\u0003\u0014"+
+		"\n\u0000\u00db\u00dc\u0005$\u0000\u0000\u00dc\u00dd\u0005\u0003\u0000"+
+		"\u0000\u00dd\u00de\u0003\u0002\u0001\u0000\u00de\u00df\u0005\u0004\u0000"+
+		"\u0000\u00df\u00e0\u0003\"\u0011\u0000\u00e0\u0105\u0001\u0000\u0000\u0000"+
+		"\u00e1\u00e2\u0005\"\u0000\u0000\u00e2\u00e3\u0005\u0003\u0000\u0000\u00e3"+
+		"\u00e4\u0003\u0002\u0001\u0000\u00e4\u00e5\u0005\u0004\u0000\u0000\u00e5"+
+		"\u00e8\u0003\"\u0011\u0000\u00e6\u00e7\u0005#\u0000\u0000\u00e7\u00e9"+
+		"\u0003\"\u0011\u0000\u00e8\u00e6\u0001\u0000\u0000\u0000\u00e8\u00e9\u0001"+
+		"\u0000\u0000\u0000\u00e9\u0105\u0001\u0000\u0000\u0000\u00ea\u00eb\u0005"+
+		"!\u0000\u0000\u00eb\u00ed\u0005\u0003\u0000\u0000\u00ec\u00ee\u0003\""+
+		"\u0011\u0000\u00ed\u00ec\u0001\u0000\u0000\u0000\u00ed\u00ee\u0001\u0000"+
 		"\u0000\u0000\u00ee\u00f0\u0001\u0000\u0000\u0000\u00ef\u00f1\u0003\u0002"+
 		"\u0001\u0000\u00f0\u00ef\u0001\u0000\u0000\u0000\u00f0\u00f1\u0001\u0000"+
 		"\u0000\u0000\u00f1\u00f2\u0001\u0000\u0000\u0000\u00f2\u00f4\u0005%\u0000"+
@@ -2869,14 +2865,14 @@ public class MxParser extends Parser {
 		"\u0109\u0005+\u0000\u0000\u0108\u0106\u0001\u0000\u0000\u0000\u0108\u0107"+
 		"\u0001\u0000\u0000\u0000\u0109%\u0001\u0000\u0000\u0000\u010a\u010c\u0003"+
 		"$\u0012\u0000\u010b\u010a\u0001\u0000\u0000\u0000\u010b\u010c\u0001\u0000"+
-		"\u0000\u0000\u010c\u010d\u0001\u0000\u0000\u0000\u010d\u010e\u00053\u0000"+
+		"\u0000\u0000\u010c\u010d\u0001\u0000\u0000\u0000\u010d\u010e\u00055\u0000"+
 		"\u0000\u010e\u0110\u0005\u0003\u0000\u0000\u010f\u0111\u0003\u001e\u000f"+
 		"\u0000\u0110\u010f\u0001\u0000\u0000\u0000\u0110\u0111\u0001\u0000\u0000"+
 		"\u0000\u0111\u0112\u0001\u0000\u0000\u0000\u0112\u0113\u0005\u0004\u0000"+
 		"\u0000\u0113\u0114\u0003\u0016\u000b\u0000\u0114\'\u0001\u0000\u0000\u0000"+
-		"\u0115\u0116\u0005\u0001\u0000\u0000\u0116\u0117\u00053\u0000\u0000\u0117"+
+		"\u0115\u0116\u0005\u0001\u0000\u0000\u0116\u0117\u00055\u0000\u0000\u0117"+
 		"\u0118\u0003\u0016\u000b\u0000\u0118\u0119\u0005%\u0000\u0000\u0119)\u0001"+
-		"\u0000\u0000\u0000\u011a\u011b\u00053\u0000\u0000\u011b\u011d\u0005\u0003"+
+		"\u0000\u0000\u0000\u011a\u011b\u00055\u0000\u0000\u011b\u011d\u0005\u0003"+
 		"\u0000\u0000\u011c\u011e\u0003 \u0010\u0000\u011d\u011c\u0001\u0000\u0000"+
 		"\u0000\u011d\u011e\u0001\u0000\u0000\u0000\u011e\u011f\u0001\u0000\u0000"+
 		"\u0000\u011f\u0120\u0005\u0004\u0000\u0000\u0120+\u0001\u0000\u0000\u0000"+

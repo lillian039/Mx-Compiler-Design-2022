@@ -103,7 +103,7 @@ public class SymbolCollector implements ASTVisitor {
         if (!gScope.hasType(node.typeNode.type.name)) throw new SyntaxError("Type not exsit", node.pos);
         node.typeNode.type = gScope.getType(node.typeNode.type.name);
         for (SingleVarDefNode var : node.varDef) {
-            var.typeNode.type = node.type;
+            var.typeNode= node.typeNode;
         }
         if (TmpClass != null) {
             if (TmpClass.memberDef.containsKey(node.varDef.get(0).name))
@@ -116,24 +116,27 @@ public class SymbolCollector implements ASTVisitor {
     public void visit(FunDefStmtNode node) {
         if(TmpClass!=null&&TmpClass.name.equals(node.name)){
             if(TmpClass.constructor!=null)throw new SemanticError("Constructor already exist",node.pos);
-            if(!node.parameterList.isEmpty())throw new SemanticError("Constructor cannot have parameter",node.pos);
+            if(node.parameterList!=null)throw new SemanticError("Constructor cannot have parameter",node.pos);
             node.returnTypeNode=new TypeNode(node.pos,gScope.getType(TmpClass.name),false);
             TmpClass.constructor=node;
         }
         else if(node.name.equals("main")){
             if(!node.returnTypeNode.type.name.equals("int"))throw new SemanticError("main can only return int",node.pos);
             if(node.returnTypeNode.isArr)throw new SemanticError("main can not return arr",node.pos);
-            if(!node.parameterList.isEmpty())throw new SemanticError("main function cannot have parameter",node.pos);
+            if(!(node.parameterList==null))throw new SemanticError("main function cannot have parameter",node.pos);
+            node.returnTypeNode.type=gScope.getType("int");
         }
         else {
             if (gScope.hasType(node.name)) throw new SyntaxError("Class name already exist", node.pos);
             if (!gScope.hasType(node.returnTypeNode.type.name))
                 throw new SyntaxError("Return type not exist", node.pos);
             node.returnTypeNode.type = gScope.getType(node.returnTypeNode.type.name);
-            for (SingleVarDefNode varDef : node.parameterList.parameterList) {
-                if (!gScope.hasType(varDef.typeNode.type.name))
-                    throw new SyntaxError("Variable type not exist", node.pos);
-                varDef.typeNode.type = gScope.getType(varDef.typeNode.type.name);
+            if(node.parameterList!=null) {
+                for (SingleVarDefNode varDef : node.parameterList.parameterList) {
+                    if (!gScope.hasType(varDef.typeNode.type.name))
+                        throw new SyntaxError("Variable type not exist", node.pos);
+                    varDef.typeNode.type = gScope.getType(varDef.typeNode.type.name);
+                }
             }
         if (firstVisit) {
             gScope.addFunDefine(node.name, node);

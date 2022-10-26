@@ -28,6 +28,13 @@ public class TypeNode extends ASTNode {
         this.isArr=isArr;
     }
 
+    public TypeNode(Position pos,TypeNode other){
+        super(pos);
+        layer=other.layer;
+        isArr= other.isArr;
+        type=other.type;
+    }
+
     public boolean sameType(TypeNode other){
         return other.layer == this.layer && other.type == this.type;
     }

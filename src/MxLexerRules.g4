@@ -58,7 +58,11 @@ STRING:'"' (ESC | .)*? '"';//定义string值
 fragment
 ESC : '\\"'| '\\\\' | '\\n';
 
+THIS:'this';
 NULL:'null';
+
+BREAK : 'break';
+CONTINUE : 'continue';
 
 IDENTIFIER : ('_'|[a-zA-Z])([0-9a-zA-Z]|'_')*;//定义变量名
 
@@ -66,6 +70,5 @@ WS : ([ \r\n\t]+ ) -> skip;     //跳过空白类字符
 LINE_COMMENT:'//' .*? '\r'? '\n' ->skip ;//跳过'//'
 COMMENT : '/*' .*? '*/'->skip;//跳过'/* */'
 
-BREAK : 'break';
-CONTINUE : 'continue';
+
 

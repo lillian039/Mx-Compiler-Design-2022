@@ -1,5 +1,6 @@
 import AST.RootNode;
 import Frontend.ASTBuilder;
+import Frontend.SemanticChecker;
 import Frontend.SymbolCollector;
 import Util.Err.Error;
 import Util.Scope.GlobalScope;
@@ -14,11 +15,12 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 
 
-public class main {
+public class Compiler {
 
     public static void main(String[] args) throws Exception{
-        String name="test.mx";
-        InputStream input=new FileInputStream(name);
+       /* String name="test.mx";
+        InputStream input=new FileInputStream(name);*/
+        InputStream input = System.in;
         try {
             RootNode root;
             GlobalScope globalScope=new GlobalScope(null);
@@ -37,6 +39,8 @@ public class main {
             root=(RootNode) astBuilder.visit(parseTreeRoot);
             SymbolCollector symbolCollector=new SymbolCollector(globalScope);
             symbolCollector.visit(root);
+            SemanticChecker semanticChecker=new SemanticChecker(globalScope);
+            semanticChecker.visit(root);
             System.out.println("0");
         }catch (Error err){
             System.out.println(err.errorMsg());

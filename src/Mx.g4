@@ -65,7 +65,7 @@ arrayelement: IDENTIFIER ('[' expression ']')+;
 
 paralistVarDef: type IDENTIFIER;
 singleVarDef:IDENTIFIER ('=' expression)?;
-functionParameterList: singleVarDef(','paralistVarDef)*;
+functionParameterList: paralistVarDef(','paralistVarDef)*;
 functionParameterValue:(expression(','expression)*);
 
 
