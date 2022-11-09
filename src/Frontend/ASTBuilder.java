@@ -17,7 +17,6 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     public Type intType, boolType, stringType, voidType, nullType;
 
-
     public ASTBuilder(GlobalScope gScope_) {
         gScope = gScope_;
     }

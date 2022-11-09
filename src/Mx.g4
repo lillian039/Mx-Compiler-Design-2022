@@ -41,7 +41,6 @@ constant
 variable
     : IDENTIFIER
     | THIS
- //   | arrayelement
     ;
 
 funVal
@@ -61,7 +60,6 @@ vardef: type singleVarDef(','singleVarDef)*';';
 
 suite: '{' statement* '}';
 //=======definitions=======
-//arrayelement: expression ('[' expression ']')+;
 
 
 paralistVarDef: type IDENTIFIER;

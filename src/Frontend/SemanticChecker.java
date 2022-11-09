@@ -403,7 +403,6 @@ public class SemanticChecker implements ASTVisitor {
                 throw new SemanticError("parameter list not match", node.pos);
             for (int i = 0; i < parameterValue.size(); i++) {
                 if (!parameterList.get(i).typeNode.sameType(parameterValue.get(i).type)) {
-                    int b=1;
                     throw new SemanticError("parameter list not match", node.pos);
                 }
             }
