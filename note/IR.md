@@ -60,28 +60,46 @@ SSA 静态单一变量赋值
 
 ### LLVM
 
-LLVM function definitions consist of the “`define`” keyword, an optional [linkage type](https://releases.llvm.org/11.0.0/docs/LangRef.html#linkage), an optional [runtime preemption specifier](https://releases.llvm.org/11.0.0/docs/LangRef.html#runtime-preemption-model), an optional [visibility style](https://releases.llvm.org/11.0.0/docs/BitCodeFormat.html#visibility), an optional [DLL storage class](https://releases.llvm.org/11.0.0/docs/LangRef.html#dllstorageclass), an optional [calling convention](https://releases.llvm.org/11.0.0/docs/LangRef.html#callingconv), an optional `unnamed_addr` attribute, a return type, an optional [parameter attribute](https://releases.llvm.org/11.0.0/docs/LangRef.html#paramattrs) for the return type, a function name, a (possibly empty) argument list (each with optional [parameter attributes](https://releases.llvm.org/11.0.0/docs/LangRef.html#paramattrs)), optional [function attributes](https://releases.llvm.org/11.0.0/docs/LangRef.html#fnattrs), an optional address space, an optional section, an optional alignment, an optional [comdat](https://releases.llvm.org/11.0.0/docs/LangRef.html#langref-comdats), an optional [garbage collector name](https://releases.llvm.org/11.0.0/docs/LangRef.html#gc), an optional [prefix](https://releases.llvm.org/11.0.0/docs/LangRef.html#prefixdata), an optional [prologue](https://releases.llvm.org/11.0.0/docs/LangRef.html#prologuedata), an optional [personality](https://releases.llvm.org/11.0.0/docs/LangRef.html#personalityfn), an optional list of attached [metadata](https://releases.llvm.org/11.0.0/docs/LangRef.html#metadata), an opening curly brace, a list of basic blocks, and a closing curly brace.
+编译 lang：
 
+c 语言
 
+`clang -S -emit-llvm A.c`
 
-A function definition contains a list of basic blocks, forming the CFG (Control Flow Graph) for the function. Each basic block may optionally **start with a label** (giving the basic block a symbol table entry), contains a list of instructions, and **ends with a [terminator](https://releases.llvm.org/11.0.0/docs/LangRef.html#terminators)** instruction (such as a branch or function return). If an explicit label name is not provided, a block is assigned an implicit numbered label, using the next value from the same counter as used for unnamed temporaries ([see above](https://releases.llvm.org/11.0.0/docs/LangRef.html#identifiers)). For example, if a function entry block does not have an explicit label, it will be assigned label “%0”, then the first unnamed temporary in that block will be “%1”, etc. If a numeric label is explicitly specified, it must match the numeric label that would be used implicitly.
+ c++ 语言
 
-看上去函数需要一个label？
+`clang++ -S -emit-llvm A.cpp`
 
-The first basic block in a function is special in two ways: it is immediately executed on entrance to the function, and it is not allowed to have predecessor basic blocks (i.e. there can not be any branches to the entry block of a function). Because the block can have no predecessors, it also cannot have any [PHI nodes](https://releases.llvm.org/11.0.0/docs/LangRef.html#i-phi).
+#### Type System
 
-```
-define [linkage] [PreemptionSpecifier] [visibility] [DLLStorageClass]
-       [cconv] [ret attrs]
-       <ResultType> @<FunctionName> ([argument list])
-       [(unnamed_addr|local_unnamed_addr)] [AddrSpace] [fn Attrs]
-       [section "name"] [comdat [($name)]] [align N] [gc] [prefix Constant]
-       [prologue Constant] [personality Constant] (!name !N)* { ... }
-```
+- Void Type
 
-```
-<type> [parameter Attrs] [name]
-```
+  no size no value
+
+- Function Type
+
+  ```
+  <returntype> (<parameter list>)
+  ```
+
+- Array Type
+
+  The array type requires a size (number of elements) and an underlying data type.
+
+  ```
+  [<# elements> x <elementtype>]
+  ```
+
+  但是貌似 Mx 的 Array 要动态分配
+
+- Structure Type
+
+  Structures in memory are accessed using ‘`load`’ and ‘`store`’ by getting a pointer to a field with the ‘`getelementptr`’ instruction. Structures in registers are accessed using the ‘`extractvalue`’ and ‘`insertvalue`’ instructions.
+
+  ```
+  %T1 = type { <type list> }     ; Identified normal struct type
+  %T2 = type <{ <type list> }>   ; Identified packed struct type
+  ```
 
 - "ret" Instruction
 

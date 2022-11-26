@@ -13,6 +13,9 @@ abstract public class Scope {
     protected HashMap<String, SingleVarDefNode> variableMembers;//<name,type>
     protected HashMap<String, FunDefStmtNode> funcMembers;//<name,type,layer>
 
+    protected HashMap<String,Integer> mapTable;
+
+
     public Scope parentScope;
 
     public Scope(Scope parentScope_) {

@@ -1,6 +1,4 @@
-package MIR.Terminal;
-
-import MIR.Statement;
+package LLVMIR.Terminal;
 
 public class CallFunction extends TerminalStmt{
 

@@ -7,11 +7,11 @@
 - [x] 完成 Mx.g4 
 - [x] 完成 AST 的架构
 - [x] 完成SymbolCollector
-- [ ] 完成 SemanticCheck
+- [x] 完成 SemanticCheck
 
+[TOC]
 
-
-🌻**AST（abstract syntax code）架构：**
+#### 🌻**AST（abstract syntax code）架构：**
 
 ASTNode：抽象函数，用作AST节点的基类
 
@@ -73,7 +73,7 @@ ASTNode：抽象函数，用作AST节点的基类
 
 
 
-🌻**SymbolChecker 架构：**
+#### 🌻**SymbolChecker 架构：**
 
 要注意：ClassDef 和 FunctionDef 支持前向引用
 
@@ -93,3 +93,9 @@ ASTNode：抽象函数，用作AST节点的基类
 
 - Tutorial of Yx
 - Antlr 介绍：[(127条消息) ANTLR4_pourtheworld的博客-CSDN博客](https://blog.csdn.net/pourtheworld/category_10336918.html)
+
+#### **🌻IR 架构**
+
+Type 类的修改：
+
+赋予每个Type

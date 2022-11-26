@@ -1,13 +1,14 @@
-package MIR.Terminal;
+package LLVMIR.Terminal;
 
-import MIR.BasicBlock;
+import LLVMIR.BasicBlock;
 import Util.Entity;
 
-public class BranchConditional extends TerminalStmt {
+public class Branch extends TerminalStmt {
     public Entity op;
+
     public BasicBlock trueBranch, falseBranch;//if branch else branch loop true false
 
-    public BranchConditional(Entity op, BasicBlock trueBranch, BasicBlock falseBranch) {
+    public Branch(Entity op, BasicBlock trueBranch, BasicBlock falseBranch) {
         super();
         this.op = op;
         this.trueBranch = trueBranch;
