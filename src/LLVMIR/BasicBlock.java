@@ -6,16 +6,19 @@ import java.util.LinkedList;
 
 public class BasicBlock {
 
-    public  int label;
+    public int label;
 
-    public LinkedList<BasicBlock> prev=new LinkedList<>();
-    private LinkedList<IRInstruction> stmts=new LinkedList<>();
+    public LinkedList<BasicBlock> prev = new LinkedList<>();
+    private LinkedList<IRInstruction> stmts = new LinkedList<>();
     private TerminalStmt tailStmt = null;
 
-    public BasicBlock(){ }
+    public BasicBlock() {
+    }
 
-    public void push_back(IRInstruction stmt){
-        if(stmt instanceof TerminalStmt)tailStmt=(TerminalStmt)stmt;
-        else  stmts.add(stmt);
+    public void push_back(IRInstruction stmt) {
+        if (stmt instanceof TerminalStmt) {
+            if (tailStmt != null) System.out.print("double tail!");
+            tailStmt = (TerminalStmt) stmt;
+        } else stmts.add(stmt);
     }
 }

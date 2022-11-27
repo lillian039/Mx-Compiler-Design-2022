@@ -1,6 +1,6 @@
 package LLVMIR.Value;
 
-public class ConstBool extends Entity {
+public class ConstBool extends IRValue {
     public boolean value;
 
     public ConstBool(boolean value) {

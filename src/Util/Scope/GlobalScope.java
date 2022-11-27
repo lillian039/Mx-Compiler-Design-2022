@@ -13,6 +13,8 @@ public class GlobalScope extends Scope{
 
     private HashMap<String, Type> types=new HashMap<>();
 
+    private HashMap<String,FunDefStmtNode> classFunc=new HashMap<>();
+
     public void initializeGlobalScope(){
         types.put("int",new Type("int"));
         types.put("bool",new Type("bool"));
@@ -89,6 +91,10 @@ public class GlobalScope extends Scope{
 
     public Type getType(String name){
         return types.get(name);
+    }
+
+    public FunDefStmtNode getClassFunc(String name){
+        return classFunc.get(name);
     }
 
 }

@@ -73,14 +73,15 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(ArrExprNode node) {
         node.ls.accept(this);
         node.type = new TypeNode(node.pos, node.ls.type);
+        int tmpLayer=node.type.layer;
         for (ExprNode expr : node.arrDimension) {
             expr.accept(this);
-            node.type.layer--;
+            tmpLayer--;
             if (expr.type.type != intType || expr.type.isArr)
                 throw new SemanticError("expression in [] can only be int", node.pos);
         }
-        if (node.type.layer < 1) throw new SemanticError("[] not match", node.pos);
-        if (node.type.layer == 1) node.type.isArr = false;
+        if (tmpLayer < 1) throw new SemanticError("[] not match", node.pos);
+        if (tmpLayer == 1) node.type.isArr = false;
     }
 
     @Override

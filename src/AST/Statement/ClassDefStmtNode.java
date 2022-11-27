@@ -14,6 +14,11 @@ public class ClassDefStmtNode extends StmtNode {
     public HashMap<String, SingleVarDefNode> memberDef = new HashMap<>();
     public HashMap<String,FunDefStmtNode> funcDef = new HashMap<>();
 
+    public HashMap<String,Integer> funcNum=new HashMap<String, Integer>();
+
+    public HashMap<String,Integer> memberNum=new HashMap<>();
+
+
     public FunDefStmtNode constructor=null;
     public BlockStmtNode classBody;
 

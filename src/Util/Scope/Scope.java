@@ -3,6 +3,7 @@ package Util.Scope;
 import AST.Atom.SingleVarDefNode;
 import AST.Atom.TypeNode;
 import AST.Statement.FunDefStmtNode;
+import LLVMIR.Value.Register;
 import Util.Err.SemanticError;
 import Util.Err.SyntaxError;
 import Util.Type;
@@ -13,7 +14,7 @@ abstract public class Scope {
     protected HashMap<String, SingleVarDefNode> variableMembers;//<name,type>
     protected HashMap<String, FunDefStmtNode> funcMembers;//<name,type,layer>
 
-    protected HashMap<String,Integer> mapTable;
+    protected HashMap<String, Register> regMapTable;
 
 
     public Scope parentScope;
@@ -21,12 +22,26 @@ abstract public class Scope {
     public Scope(Scope parentScope_) {
         funcMembers = new HashMap<>();
         variableMembers = new HashMap<>();
+        regMapTable=new HashMap<>();
         parentScope = parentScope_;
     }
 
     public void addVarDefine(String varName, SingleVarDefNode var) {
         if (variableMembers.containsKey(varName)||funcMembers.containsKey(varName))throw new SemanticError("variable name exist",var.pos);
         else variableMembers.put(varName, var);
+    }
+
+    public void addReg(String varName,Register reg){
+        regMapTable.put(varName,reg);
+    }
+
+    public Register getReg(String name){
+        Scope now=this;
+        while(now!=null){
+            if(now.regMapTable.containsKey(name))return now.regMapTable.get(name);
+            now=now.parentScope;
+        }
+        return null;
     }
 
     public void addFunDefine(String varName, FunDefStmtNode func) {
@@ -69,6 +84,15 @@ abstract public class Scope {
             now=now.parentScope;
         }
         return false;
+    }
+
+    public LoopScope getLoopScope(){
+        Scope now=this;
+        while (now!=null){
+            if(now instanceof LoopScope)return (LoopScope) now;
+            now=now.parentScope;
+        }
+        return null;
     }
 
     public Scope GetCurrentFuncScope(){
