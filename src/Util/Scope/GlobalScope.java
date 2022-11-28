@@ -15,6 +15,8 @@ public class GlobalScope extends Scope{
 
     private HashMap<String,FunDefStmtNode> classFunc=new HashMap<>();
 
+
+
     public void initializeGlobalScope(){
         types.put("int",new Type("int"));
         types.put("bool",new Type("bool"));

@@ -2,12 +2,13 @@ package LLVMIR.Value;
 
 import AST.Atom.TypeNode;
 import LLVMIR.Expression.CallFunction;
+import LLVMIR.Expression.GetElementPtr;
 
 public class Register extends IRValue {
     public int index;
-    public TypeNode typeNode;
     public IRValue value = null;
     public CallFunction funcVal = null;
+    public GetElementPtr getElementPtr = null;
     public String name;
 
     public Register(int idx, TypeNode typeNode) {

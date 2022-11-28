@@ -5,7 +5,6 @@ import LLVMIR.Value.IRValue;
 
 public class Branch extends TerminalStmt {
     public IRValue op;
-
     public BasicBlock trueBranch, falseBranch;//if branch else branch loop true false
 
     public Branch(IRValue op, BasicBlock trueBranch, BasicBlock falseBranch) {

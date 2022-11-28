@@ -2,16 +2,17 @@ package LLVMIR.Expression;
 
 import AST.Atom.TypeNode;
 import LLVMIR.IRInstruction;
+import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
 public class GetElementPtr extends IRInstruction {
-    TypeNode typeNode;
     Register startPointer;
-    int elementNum;
+    Register tmpStore;
+    IRValue elementNum;
 
-    public GetElementPtr(TypeNode typeNode, Register startPointer, int elementNum) {
-        this.typeNode = typeNode;
+    public GetElementPtr(Register startPointer, Register tmpStore, IRValue elementNum) {
         this.startPointer = startPointer;
+        this.tmpStore = tmpStore;
         this.elementNum = elementNum;
     }
 

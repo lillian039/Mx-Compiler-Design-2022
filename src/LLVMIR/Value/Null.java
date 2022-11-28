@@ -1,4 +1,9 @@
 package LLVMIR.Value;
 
-public class Null extends IRValue{
+import AST.Atom.TypeNode;
+
+public class Null extends IRValue {
+    public Null() {
+        this.typeNode = new TypeNode("null");
+    }
 }

@@ -110,4 +110,18 @@ c 语言
 
 - "br" Instruction
 
-- 
+- "sext" Instruction
+
+  The ‘`sext`’ sign extends `value` to the type `ty2`.
+
+  ```
+  <result> = sext <ty> <value> to <ty2>             ; yields ty2
+  ```
+
+- "zext" Instruction
+
+  The ‘`zext`’ instruction zero extends its operand to type `ty2`.
+
+  ```
+  <result> = zext <ty> <value> to <ty2>             ; yields ty2
+  ```

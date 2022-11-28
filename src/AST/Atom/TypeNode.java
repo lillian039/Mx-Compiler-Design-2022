@@ -12,30 +12,37 @@ public class TypeNode extends ASTNode {
     public Type type;
 
 
-    public boolean isArr=false;
-    public int layer=1;
+    public boolean isArr = false;
+    public int layer = 1;
 
-    public Vector<ExprNode> arrLayerSize=null;
+    public Vector<ExprNode> arrLayerSize = null;
 
     public TypeNode(Position pos) {
         super(pos);
-        type=new Type();
+        type = new Type();
     }
 
-    public TypeNode(Position pos,Type type,boolean isArr){
+    public TypeNode(Position pos, Type type, boolean isArr) {
         super(pos);
-        this.type=type;
-        this.isArr=isArr;
+        this.type = type;
+        this.isArr = isArr;
     }
 
-    public TypeNode(Position pos,TypeNode other){
+    public TypeNode(Position pos, TypeNode other) {
         super(pos);
-        layer=other.layer;
-        isArr= other.isArr;
-        type=other.type;
+        layer = other.layer;
+        isArr = other.isArr;
+        type = other.type;
     }
 
-    public boolean sameType(TypeNode other){
+    public TypeNode(String name) {
+        super(new Position(0, 0));
+        layer = 0;
+        isArr = false;
+        type = new Type(name);
+    }
+
+    public boolean sameType(TypeNode other) {
         return other.layer == this.layer && other.type == this.type;
     }
 

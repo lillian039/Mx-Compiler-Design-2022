@@ -110,6 +110,7 @@ public class SymbolCollector implements ASTVisitor {
             if (TmpClass.memberDef.containsKey(node.varDef.get(0).name))
                 throw new SemanticError("renaming class member", node.pos);
             TmpClass.memberDef.put(node.varDef.get(0).name, node.varDef.get(0));
+            TmpClass.memberOrder.add(node.varDef.get(0).name);
         }
     }
 
@@ -149,6 +150,7 @@ public class SymbolCollector implements ASTVisitor {
             if (TmpClass.funcDef.containsKey(node.name))
                 throw new SyntaxError("Func name already exist in class", node.pos);
             TmpClass.funcDef.put(node.name, node);
+            TmpClass.functionOrder.add(node.name);
         }
         }
     }

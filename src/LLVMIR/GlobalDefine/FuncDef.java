@@ -8,13 +8,15 @@ import java.util.ArrayList;
 
 public class FuncDef extends GlobalDef {
     public int label;
+    public String name;
     public ArrayList<Register> parameterList = new ArrayList<>();
     public ArrayList<BasicBlock> basicBlocks = new ArrayList<>();
     public BasicBlock Entry = null;
     public BasicBlock allocate = new BasicBlock();
 
-    public FuncDef(BasicBlock block) {
+    public FuncDef(BasicBlock block,String name) {
         Entry = block;
+        this.name=name;
     }
 
     public void addAllocate(IRInstruction instruction) {
