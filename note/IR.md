@@ -125,3 +125,23 @@ c 语言
   ```
   <result> = zext <ty> <value> to <ty2>             ; yields ty2
   ```
+
+#### SSA
+
+mem to reg
+
+1+a+1 -> a+2
+
+### [Runtime Preemption Specifiers](https://releases.llvm.org/11.0.0/docs/LangRef.html#id1222)
+
+```
+dso_local
+```
+
+The compiler may assume that a function or variable marked as `dso_local` will resolve to a symbol within the same linkage unit. Direct access will be generated even if the definition is not within this compilation unit.
+
+### [Structure Types](https://releases.llvm.org/11.0.0/docs/LangRef.html#id1223)
+
+```
+%mytype = type { %mytype*, i32 }
+```

@@ -7,11 +7,11 @@ import LLVMIR.Value.Register;
 
 import java.util.ArrayList;
 
-public class CallFunction extends IRInstruction {
+public class Call extends IRInstruction {
         ArrayList<IRValue> parameterList=new ArrayList<>();
         public FuncDef target;
         public Register caller;
-        public CallFunction(){
+        public Call(){
         }
         public void addParameter(IRValue value){
             parameterList.add(value);

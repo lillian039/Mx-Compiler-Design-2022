@@ -68,14 +68,6 @@ abstract public class Scope {
         return null;
     }
 
-    public TypeNode getFuncTypeNode(){
-        Scope now=this;
-        while(now !=null){
-            if(now instanceof FuncScope)return ((FuncScope)now).returnType;
-            now=now.parentScope;
-        }
-        return null;
-    }
 
     public boolean inLoop(){
         Scope now=this;

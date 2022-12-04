@@ -1,11 +1,12 @@
 package LLVMIR.Value;
 
 import AST.Atom.TypeNode;
+import LLVMIR.IRType.IntType;
 
 public class ConstInt extends IRValue {
     int val;
     public ConstInt(int val){
         this.val=val;
-        this.typeNode=new TypeNode("int");
+        this.IRType=new IntType(32);
     }
 }
