@@ -1,6 +1,7 @@
 package AST;
 
 import AST.Atom.TypeNode;
+import LLVMIR.IRType.IRBaseType;
 import LLVMIR.Value.IRValue;
 import Util.*;
 
@@ -13,6 +14,8 @@ public abstract class ExprNode extends ASTNode{
     public Entity value;
 
     public IRValue irValue;
+
+    public IRBaseType irBaseType;
 
     public boolean isAssignable=false;
 

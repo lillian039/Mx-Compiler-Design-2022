@@ -16,4 +16,9 @@ public class IntType extends IRBaseType{
     public String typeToString() {
         return "i"+size;
     }
+
+    @Override
+    public int size() {
+        return size;
+    }
 }

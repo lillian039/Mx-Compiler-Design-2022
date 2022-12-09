@@ -3,6 +3,7 @@ package AST.Atom;
 import AST.ASTNode;
 import AST.ASTVisitor;
 import AST.ExprNode;
+import LLVMIR.IRType.IRBaseType;
 import Util.Position;
 import Util.Type;
 
@@ -50,4 +51,5 @@ public class TypeNode extends ASTNode {
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
+
 }

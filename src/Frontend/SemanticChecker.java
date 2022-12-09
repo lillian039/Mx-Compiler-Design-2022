@@ -240,6 +240,9 @@ public class SemanticChecker implements ASTVisitor {
             var.typeNode = node.typeNode;
             var.accept(this);
             currentScope.addVarDefine(var.name, var);
+            if(currentScope instanceof GlobalScope){
+                ((GlobalScope)currentScope).addGlobalVarOder(var);
+            }
         }
     }
 

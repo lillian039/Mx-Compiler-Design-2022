@@ -10,4 +10,9 @@ public class NullType extends IRBaseType {
     public String typeToString() {
         return null;
     }
+
+    @Override
+    public int size() {
+        return 0;
+    }
 }

@@ -11,14 +11,15 @@ public class BasicBlock {
     public String labelName;
 
     public LinkedList<BasicBlock> prev = new LinkedList<>();
-    private LinkedList<IRInstruction> stmts = new LinkedList<>();
+    public LinkedList<IRInstruction> stmts = new LinkedList<>();
     private TerminalStmt tailStmt = null;
 
     public BasicBlock() {
     }
 
-    public BasicBlock(String name) {
+    public BasicBlock(String name, int label) {
         this.labelName = name;
+        this.label = label;
     }
 
     public void push_back(IRInstruction stmt) {
@@ -30,5 +31,12 @@ public class BasicBlock {
 
     public void add_prev(BasicBlock basicBlock) {
         prev.add(basicBlock);
+    }
+
+    public void print() {
+        System.out.println(labelName + label);
+        for (var stmt : stmts) {
+            stmt.printInstruct();
+        }
     }
 }

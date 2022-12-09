@@ -13,4 +13,10 @@ public class Branch extends TerminalStmt {
         this.trueBranch = trueBranch;
         this.falseBranch = falseBranch;
     }
+
+    @Override
+    public void printInstruct() {
+        System.out.println("br " + op.IRType.typeToString() + " " + op.valueToString() +
+                ", label %" + trueBranch.label + ", label %" + falseBranch.label);
+    }
 }

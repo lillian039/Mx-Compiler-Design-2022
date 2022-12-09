@@ -6,4 +6,5 @@ public abstract class IRBaseType {
     public abstract String typeToString();
 
     public abstract boolean isSameType(IRBaseType irBaseType);
+    public abstract int size();
 }

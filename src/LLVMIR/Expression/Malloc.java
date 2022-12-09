@@ -2,17 +2,24 @@ package LLVMIR.Expression;
 
 import AST.Atom.TypeNode;
 import LLVMIR.IRInstruction;
+import LLVMIR.IRType.IRBaseType;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
 public class Malloc extends IRInstruction {
-    TypeNode typeNode;
     Register ptrStart;
     IRValue size;
 
-    public Malloc(TypeNode typeNode,Register ptrStart,IRValue size){
-        this.typeNode=typeNode;
-        this.ptrStart=ptrStart;
-        this.size=size;
+    IRBaseType type;
+
+    public Malloc(IRBaseType irType, Register ptrStart, IRValue size) {
+        this.type = irType;
+        this.ptrStart = ptrStart;
+        this.size = size;
+    }
+
+    @Override
+    public void printInstruct() {
+
     }
 }

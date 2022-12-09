@@ -1,5 +1,5 @@
 package LLVMIR.GlobalDefine;
 
 abstract public class GlobalDef {
-    //这样定义合理吗？
+    abstract public void print();
 }

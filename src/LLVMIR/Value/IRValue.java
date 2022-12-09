@@ -5,4 +5,6 @@ import LLVMIR.IRType.IRBaseType;
 
 public abstract class IRValue {
     public IRBaseType IRType;
+
+    public abstract String valueToString();
 }

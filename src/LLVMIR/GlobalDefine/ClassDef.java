@@ -1,30 +1,34 @@
 package LLVMIR.GlobalDefine;
 
 import AST.Atom.TypeNode;
+import LLVMIR.IRType.ClassType;
+import LLVMIR.IRType.IRBaseType;
 import LLVMIR.Value.Register;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ClassDef extends GlobalDef {
-    ArrayList<TypeNode> memberType;
-
-    HashMap<String, Integer> memberMap;
+    public ClassType classType;
+    public HashMap<String, Integer> memberMap;
     public String name;
 
-    public ClassDef(String name) {
+    public ClassDef(String name,ClassType classType) {
         this.name = name;
+        this.classType=classType;
     }
-
-    public void addMember(TypeNode typeNode) {
-        memberType.add(typeNode);
-    }
-
     public int getMap(String name) {
         return memberMap.get(name);
     }
 
-    public void addMap(String name, int num) {
-        memberMap.put(name, num);
+
+    @Override
+    public void print() {
+    System.out.print(classType.typeToString()+" = type { ");
+    for(int i=0;i<classType.members.size();i++){
+        System.out.print(classType.members.get(i).typeToString());
+        if(i<classType.members.size()-1)System.out.print(", ");
+    }
+    System.out.println(" }");
     }
 }

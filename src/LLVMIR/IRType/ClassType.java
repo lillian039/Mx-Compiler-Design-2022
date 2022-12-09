@@ -18,4 +18,14 @@ public class ClassType extends IRBaseType {
     public String typeToString() {
         return "%struct." + name;
     }
+
+    @Override
+    public int size() {
+        int size = 1, sum = 0;
+        for (var member : members) {
+            sum += member.size();
+        }
+        while (size < sum) size = (size << 1);
+        return size;
+    }
 }

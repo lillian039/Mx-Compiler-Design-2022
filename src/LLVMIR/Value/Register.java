@@ -10,7 +10,7 @@ public class Register extends IRValue {
     public IRValue value = null;
     public Call funcVal = null;
     public GetElementPtr getElementPtr = null;
-    public String name;
+    public String name=null;
 
     public Register(int idx, IRBaseType irBaseType) {
         this.index = idx;
@@ -29,4 +29,8 @@ public class Register extends IRValue {
         this.value = value;
     }
 
+    @Override
+    public String valueToString() {
+        return "%"+index;
+    }
 }

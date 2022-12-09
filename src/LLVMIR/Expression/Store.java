@@ -5,10 +5,17 @@ import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
 public class Store extends IRInstruction {
-    Register ls;
-    IRValue rs;
-    public Store(Register ls,IRValue rs){
-        this.ls=ls;
-        this.rs=rs;
+    IRValue value;
+    Register storeReg;
+
+    public Store(IRValue value, Register storeReg) {
+        this.value = value;
+        this.storeReg = storeReg;
+    }
+
+    //store from to
+    @Override
+    public void printInstruct() {
+        System.out.println("store " + value.IRType.typeToString() + " " + value.valueToString() + ", ptr " + storeReg.valueToString() + ", align " + storeReg.IRType.size() / 4);
     }
 }

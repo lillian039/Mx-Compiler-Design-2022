@@ -14,4 +14,14 @@ public class PtrType extends IRBaseType {
     public String typeToString() {
         return "ptr";
     }
+
+    public PtrType(int dimension,IRBaseType type){
+        this.dimension=dimension;
+        this.type=type;
+    }
+
+    @Override
+    public int size() {
+        return 32;
+    }
 }

@@ -4,17 +4,35 @@ import AST.Atom.SingleVarDefNode;
 import AST.Atom.TypeNode;
 import AST.Statement.ClassDefStmtNode;
 import AST.Statement.FunDefStmtNode;
+import LLVMIR.BasicBlock;
+import LLVMIR.Expression.Alloca;
+import LLVMIR.Expression.Call;
+import LLVMIR.Expression.Store;
+import LLVMIR.GlobalDefine.ClassDef;
+import LLVMIR.GlobalDefine.FuncDef;
+import LLVMIR.GlobalDefine.GlobalDef;
+import LLVMIR.GlobalDefine.VarDef;
 import LLVMIR.IRType.*;
+import LLVMIR.Value.ConstInt;
+import LLVMIR.Value.Null;
+import LLVMIR.Value.Register;
 import Util.Position;
 import Util.Type;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GlobalScope extends Scope {
     private HashMap<String, Type> types = new HashMap<>();
-    private HashMap<String, FunDefStmtNode> classFunc = new HashMap<>();
+    private HashMap<String, FuncDef> classFunc = new HashMap<>();
+
+    private HashMap<String, FuncDef> globalFunc = new HashMap<>();
+
+    private HashMap<String, FuncDef> constructFunc = new HashMap<>();
     private HashMap<String, Integer> stringCollect = new HashMap<>();
     private HashMap<String, IRBaseType> IRTypes = new HashMap<>();
+
+    public ArrayList<SingleVarDefNode> globalVarOrder = new ArrayList<>();
 
 
     public void initializeGlobalScope() {
@@ -104,19 +122,27 @@ public class GlobalScope extends Scope {
         stringCollect.put(str, stringCollect.size());
     }
 
+    public void addGlobalVarOder(SingleVarDefNode var) {
+        globalVarOrder.add(var);
+    }
+
     public int getString(String str) {
         return stringCollect.get(str);
     }
 
-    public FunDefStmtNode getClassFunc(String name) {
+    public FuncDef getClassFunc(String name) {
         return classFunc.get(name);
+    }
+
+    public FuncDef getGlobalFunc(String name) {
+        return globalFunc.get(name);
     }
 
     public void IRInitial() {
         NullType nullType = new NullType();
         VoidType voidType = new VoidType();
-        IntType intType = new IntType(32);
-        IntType boolType = new IntType(8);
+        IntType intType = new IntType(32, "int");
+        IntType boolType = new IntType(8, "bool");
         IRTypes.put("null", nullType);
         IRTypes.put("void", voidType);
         IRTypes.put("bool", boolType);
@@ -138,7 +164,63 @@ public class GlobalScope extends Scope {
                 }
             }
         }
-
-
     }
+
+    public void FuncInitial() {
+        for (var func : funcMembers.values()) {
+            BasicBlock basicBlock = new BasicBlock("entry", 0);
+            FuncDef funcDef = new FuncDef(basicBlock, func.name, toIRType(func.returnTypeNode));
+            globalFunc.put(func.name, funcDef);
+        }
+        for (var type : types.values()) {
+            if (type.classDef == null) continue;
+            ClassDefStmtNode classDef = type.classDef;
+            for (var func : classDef.funcDef.values()) {
+                BasicBlock basicBlock = new BasicBlock("entry", 0);
+                FuncDef funcDef = new FuncDef(basicBlock, "_" + classDef.name + "." + func.name, toIRType(func.returnTypeNode));
+                classFunc.put(funcDef.name, funcDef);
+            }
+            BasicBlock basicBlock = new BasicBlock("entry", 0);
+            FuncDef funcDef = new FuncDef(basicBlock, "_" + classDef.name + "." + classDef.name, IRTypes.get(classDef.name));
+            if (classDef.constructor == null) {
+                funcDef.isDefault = true;
+                constructDefault(funcDef, (ClassType) IRTypes.get(type.name));
+
+            }
+            constructFunc.put(funcDef.name, funcDef);
+        }
+    }
+
+    void constructDefault(FuncDef funcDef, ClassType classDef) {
+        int cnt = 0;
+        BasicBlock currentBlock = funcDef.Entry;
+        for (var member : classDef.members) {
+            Register register = new Register(cnt++, member);
+            Alloca alloca = new Alloca(register, member);
+            currentBlock.push_back(alloca);
+            if (member instanceof IntType) {
+                Store store = new Store(new ConstInt(0), register);
+                currentBlock.push_back(store);
+            } else if (member instanceof PtrType || member instanceof ArrType) {
+                Store store = new Store(new Null(), register);
+                currentBlock.push_back(store);
+            } else if (member instanceof ClassType) {
+                Register caller = new Register(cnt++, member);
+                Call call = new Call("_" + member.name + "." + member.name, caller);
+                Store store = new Store(caller, register);
+                currentBlock.push_back(call);
+                currentBlock.push_back(store);
+            }
+        }
+    }
+
+    IRBaseType toIRType(TypeNode node) {
+        IRBaseType base = getIRType(node.type.name);
+        IRBaseType newIRBaseType;
+        if (node.layer > 0) newIRBaseType = new PtrType(node.layer, base);
+        else newIRBaseType = base;
+        return newIRBaseType;
+    }
+
 }
+

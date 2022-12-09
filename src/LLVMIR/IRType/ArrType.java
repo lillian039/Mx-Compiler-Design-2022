@@ -14,4 +14,9 @@ public class ArrType extends IRBaseType {
     public String typeToString() {
         return '[' + dimension + " x " + type.typeToString() + ']';
     }
+
+    @Override
+    public int size() {
+        return 32;
+    }
 }

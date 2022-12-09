@@ -8,4 +8,9 @@ public class Ret extends TerminalStmt {
     public Ret(Register reg) {
         returnReg = reg;
     }
+
+    @Override
+    public void printInstruct() {
+
+    }
 }

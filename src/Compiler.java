@@ -1,7 +1,5 @@
 import AST.RootNode;
-import Frontend.ASTBuilder;
-import Frontend.SemanticChecker;
-import Frontend.SymbolCollector;
+import Frontend.*;
 import Util.Err.Error;
 import Util.Scope.GlobalScope;
 import Util.MxErrorListener;
@@ -41,6 +39,12 @@ public class Compiler {
             symbolCollector.visit(root);
             SemanticChecker semanticChecker=new SemanticChecker(globalScope);
             semanticChecker.visit(root);
+            IRCollector irCollector=new IRCollector(globalScope);
+            irCollector.visit(root);
+            IRBuilder irBuilder=new IRBuilder(globalScope);
+            irBuilder.visit(root);
+            IRPrinter irPrinter=new IRPrinter(root);
+            irPrinter.print();
            // System.out.println("0");
         }catch (Error err){
 //            System.out.println(err.errorMsg());
