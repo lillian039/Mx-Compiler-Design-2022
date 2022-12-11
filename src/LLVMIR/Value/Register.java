@@ -10,16 +10,19 @@ public class Register extends IRValue {
     public IRValue value = null;
     public Call funcVal = null;
     public GetElementPtr getElementPtr = null;
-    public String name=null;
+    public String name = null;
+
+    public String rename = null;//防止重名
+
+    public boolean isGlobe = false;
 
     public Register(int idx, IRBaseType irBaseType) {
         this.index = idx;
-        this.IRType=irBaseType;
+        this.IRType = irBaseType;
     }
 
-    public Register(int idx, IRBaseType irBaseType, String name) {
-        this.index = idx;
-        this.IRType=irBaseType;
+    public Register(IRBaseType irBaseType, String name) {
+        this.IRType = irBaseType;
         this.name = name;
     }
 
@@ -31,6 +34,9 @@ public class Register extends IRValue {
 
     @Override
     public String valueToString() {
-        return "%"+index;
+        if (isGlobe) return "@" + name;
+        else if (rename != null) return "%" + rename;
+        else if (name != null) return "%" + name;
+        return "%" + index;
     }
 }

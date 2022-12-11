@@ -2,6 +2,7 @@ package LLVMIR.GlobalDefine;
 
 import LLVMIR.BasicBlock;
 import LLVMIR.IRInstruction;
+import LLVMIR.IRType.ClassType;
 import LLVMIR.IRType.IRBaseType;
 import LLVMIR.Value.Register;
 
@@ -14,7 +15,12 @@ public class FuncDef extends GlobalDef {
     public ArrayList<Register> parameterList = new ArrayList<>();
     public ArrayList<BasicBlock> basicBlocks = new ArrayList<>();
     public BasicBlock Entry = null;
+
+    public Register retval=null;
+    public BasicBlock returnBlock=null;
     public BasicBlock allocate = new BasicBlock();
+
+    public ClassType classType=null;
 
     public IRBaseType irReturnType;
 

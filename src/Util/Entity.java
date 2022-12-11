@@ -8,26 +8,27 @@ public class Entity {
     public int intVal;
     public String stringVal;
 
-    public boolean isBoolVal=false;
-    public boolean isStringVal=false;
-    public boolean isIntVal=false;
+    public boolean isBoolVal = false;
+    public boolean isStringVal = false;
+    public boolean isIntVal = false;
 
-    public Entity (){}
-    public Entity(boolean boolVal){
-        this.boolVal=boolVal;
-        isBoolVal=true;
+    public Entity() {
     }
 
-    public Entity(int intVal){
-        this.intVal=intVal;
-        isIntVal=true;
+    public Entity(boolean boolVal) {
+        this.boolVal = boolVal;
+        isBoolVal = true;
     }
 
-    public Entity(String stringVal){
-        this.stringVal=stringVal;
-        isStringVal=true;
+    public Entity(int intVal) {
+        this.intVal = intVal;
+        isIntVal = true;
     }
 
+    public Entity(String stringVal) {
+        this.stringVal = stringVal.substring(1, stringVal.length() - 1);
+        isStringVal = true;
+    }
 
 
 }

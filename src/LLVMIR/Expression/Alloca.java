@@ -2,6 +2,7 @@ package LLVMIR.Expression;
 
 import LLVMIR.IRInstruction;
 import LLVMIR.IRType.IRBaseType;
+import LLVMIR.Value.ConstString;
 import LLVMIR.Value.Register;
 
 public class Alloca extends IRInstruction {
@@ -21,6 +22,14 @@ public class Alloca extends IRInstruction {
 
     public void printGlobalInstruct() {
         System.out.println("@" + reg.name + " = global " + irType.typeToString() + ", align " + (irType.size() + 7) / 8);
+    }
+
+    public void printString() {
+        System.out.print("@" + reg.name + " = " + ((ConstString) reg.value).toAllocate());
+    }
+
+    public Integer strNum() {
+        return ((ConstString) reg.value).number;
     }
 }
 

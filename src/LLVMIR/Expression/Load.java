@@ -15,6 +15,6 @@ public class Load extends IRInstruction {
 
     @Override
     public void printInstruct() {
-        System.out.println(ls.valueToString() + " = load " + ls.IRType.typeToString() + ", ptr" + rs.valueToString() + ", align " + rs.IRType.size() / 4);
+        System.out.println(ls.valueToString() + " = load " + ls.IRType.typeToString() + ", ptr " + rs.valueToString() + ", align " + rs.IRType.size() / 4);
     }
 }

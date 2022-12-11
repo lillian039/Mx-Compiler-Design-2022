@@ -24,12 +24,9 @@ import java.util.HashMap;
 
 public class GlobalScope extends Scope {
     private HashMap<String, Type> types = new HashMap<>();
-    private HashMap<String, FuncDef> classFunc = new HashMap<>();
 
-    private HashMap<String, FuncDef> globalFunc = new HashMap<>();
-
-    private HashMap<String, FuncDef> constructFunc = new HashMap<>();
-    private HashMap<String, Integer> stringCollect = new HashMap<>();
+    public HashMap<String, FuncDef> globalFunc = new HashMap<>();
+    public HashMap<String, Integer> stringCollect = new HashMap<>();
     private HashMap<String, IRBaseType> IRTypes = new HashMap<>();
 
     public ArrayList<SingleVarDefNode> globalVarOrder = new ArrayList<>();
@@ -129,11 +126,6 @@ public class GlobalScope extends Scope {
     public int getString(String str) {
         return stringCollect.get(str);
     }
-
-    public FuncDef getClassFunc(String name) {
-        return classFunc.get(name);
-    }
-
     public FuncDef getGlobalFunc(String name) {
         return globalFunc.get(name);
     }
@@ -142,7 +134,7 @@ public class GlobalScope extends Scope {
         NullType nullType = new NullType();
         VoidType voidType = new VoidType();
         IntType intType = new IntType(32, "int");
-        IntType boolType = new IntType(8, "bool");
+        IntType boolType = new IntType(1, "bool");
         IRTypes.put("null", nullType);
         IRTypes.put("void", voidType);
         IRTypes.put("bool", boolType);
@@ -152,7 +144,6 @@ public class GlobalScope extends Scope {
             if (classDef.classDef != null) {
                 ClassType classType = new ClassType(classDef.name);
                 IRTypes.put(classDef.name, classType);
-
             }
         }
         for (var classDef : types.values()) {
@@ -178,38 +169,14 @@ public class GlobalScope extends Scope {
             for (var func : classDef.funcDef.values()) {
                 BasicBlock basicBlock = new BasicBlock("entry", 0);
                 FuncDef funcDef = new FuncDef(basicBlock, "_" + classDef.name + "." + func.name, toIRType(func.returnTypeNode));
-                classFunc.put(funcDef.name, funcDef);
+                funcDef.classType=(ClassType)getIRType(type.name);
+                globalFunc.put(funcDef.name, funcDef);
             }
             BasicBlock basicBlock = new BasicBlock("entry", 0);
-            FuncDef funcDef = new FuncDef(basicBlock, "_" + classDef.name + "." + classDef.name, IRTypes.get(classDef.name));
-            if (classDef.constructor == null) {
-                funcDef.isDefault = true;
-                constructDefault(funcDef, (ClassType) IRTypes.get(type.name));
-
-            }
-            constructFunc.put(funcDef.name, funcDef);
-        }
-    }
-
-    void constructDefault(FuncDef funcDef, ClassType classDef) {
-        int cnt = 0;
-        BasicBlock currentBlock = funcDef.Entry;
-        for (var member : classDef.members) {
-            Register register = new Register(cnt++, member);
-            Alloca alloca = new Alloca(register, member);
-            currentBlock.push_back(alloca);
-            if (member instanceof IntType) {
-                Store store = new Store(new ConstInt(0), register);
-                currentBlock.push_back(store);
-            } else if (member instanceof PtrType || member instanceof ArrType) {
-                Store store = new Store(new Null(), register);
-                currentBlock.push_back(store);
-            } else if (member instanceof ClassType) {
-                Register caller = new Register(cnt++, member);
-                Call call = new Call("_" + member.name + "." + member.name, caller);
-                Store store = new Store(caller, register);
-                currentBlock.push_back(call);
-                currentBlock.push_back(store);
+            if (classDef.constructor != null) {
+                FuncDef funcDef = new FuncDef(basicBlock, "_" + classDef.name + "." + classDef.name, IRTypes.get(classDef.name));
+                funcDef.classType=(ClassType)getIRType(type.name);
+                globalFunc.put(funcDef.name, funcDef);
             }
         }
     }

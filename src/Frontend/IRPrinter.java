@@ -11,12 +11,13 @@ public class IRPrinter {
     public void print(){
         for(var classDef:rootNode.classDefs){
             classDef.print();
+            System.out.println();
         }
-
         rootNode.varDefs.print();
-
+        System.out.println();
         for(var funcDef:rootNode.funcDefs){
             funcDef.print();
+            System.out.println();
         }
     }
 }

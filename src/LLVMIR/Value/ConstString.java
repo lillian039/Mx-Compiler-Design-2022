@@ -8,17 +8,25 @@ import LLVMIR.IRType.PtrType;
 public class ConstString extends IRValue {
     PtrType pointer;
     String string;
-    int number;
+    public int number;
     int size;
 
     public ConstString(String string, int number) {
         this.string = string;
-        pointer=new PtrType(1, new IntType(8,"char"));
-        //.....
+        this.number = number;
+        pointer = new PtrType(1, new IntType(8, "char"));
     }
 
     @Override
     public String valueToString() {
-        return string;
+        String name;
+        if (number != 0) name = ".str." + number;
+        else name = ".str";
+        return name;
+    }
+
+    public String toAllocate() {
+        int num = string.length() + 1;
+        return "private unnamed_addr constant [" + num + " x i8] c\"" + string + "\\00\"" + ", align " + (num + 7) / 8;
     }
 }

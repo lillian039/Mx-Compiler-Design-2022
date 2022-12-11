@@ -34,9 +34,14 @@ public class BasicBlock {
     }
 
     public void print() {
-        System.out.println(labelName + label);
+        System.out.println(labelName + label + ":");
         for (var stmt : stmts) {
+            System.out.print("  ");
             stmt.printInstruct();
+        }
+        if (tailStmt != null) {
+            System.out.print("  ");
+            tailStmt.printInstruct();
         }
     }
 }

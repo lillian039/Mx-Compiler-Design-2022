@@ -16,6 +16,9 @@ public class Store extends IRInstruction {
     //store from to
     @Override
     public void printInstruct() {
-        System.out.println("store " + value.IRType.typeToString() + " " + value.valueToString() + ", ptr " + storeReg.valueToString() + ", align " + storeReg.IRType.size() / 4);
+        if (this.storeReg == null) System.out.println("Store ???");
+        else
+            System.out.println("store " + value.IRType.typeToString() + " " + value.valueToString() +
+                    ", ptr " + storeReg.valueToString() + ", align " + (storeReg.IRType.size() + 7) / 8);
     }
 }

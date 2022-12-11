@@ -20,7 +20,8 @@ public class Binary extends IRInstruction {
 
     @Override
     public void printInstruct() {
-        System.out.println(ls.valueToString() + " = " + op + rs1.IRType.typeToString() + " "
+        System.out.print("Binay: ");
+        System.out.println(ls.valueToString() + " = " + op +" "+ rs1.IRType.typeToString() + " "
                 + rs1.IRType.typeToString() + " " + rs1.valueToString() + ", " + rs2.valueToString());
     }
 }

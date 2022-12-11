@@ -22,30 +22,31 @@ abstract public class Scope {
     public Scope(Scope parentScope_) {
         funcMembers = new HashMap<>();
         variableMembers = new HashMap<>();
-        regMapTable=new HashMap<>();
+        regMapTable = new HashMap<>();
         parentScope = parentScope_;
     }
 
     public void addVarDefine(String varName, SingleVarDefNode var) {
-        if (variableMembers.containsKey(varName)||funcMembers.containsKey(varName))throw new SemanticError("variable name exist",var.pos);
+        if (variableMembers.containsKey(varName) || funcMembers.containsKey(varName))
+            throw new SemanticError("variable name exist", var.pos);
         else variableMembers.put(varName, var);
     }
 
-    public void addReg(String varName,Register reg){
-        regMapTable.put(varName,reg);
+    public void addReg(String varName, Register reg) {
+        regMapTable.put(varName, reg);
     }
 
-    public Register getReg(String name){
-        Scope now=this;
-        while(now!=null){
-            if(now.regMapTable.containsKey(name))return now.regMapTable.get(name);
-            now=now.parentScope;
+    public Register getReg(String name) {
+        Scope now = this;
+        while (now != null) {
+            if (now.regMapTable.containsKey(name)) return now.regMapTable.get(name);
+            now = now.parentScope;
         }
         return null;
     }
 
     public void addFunDefine(String varName, FunDefStmtNode func) {
-        if (variableMembers.containsKey(varName)||funcMembers.containsKey(varName)) {
+        if (variableMembers.containsKey(varName) || funcMembers.containsKey(varName)) {
             throw new SyntaxError("Func name already exist", func.pos);
         } else funcMembers.put(varName, func);
     }
@@ -69,29 +70,29 @@ abstract public class Scope {
     }
 
 
-    public boolean inLoop(){
-        Scope now=this;
-        while (now!=null){
-            if(now instanceof LoopScope)return true;
-            now=now.parentScope;
+    public boolean inLoop() {
+        Scope now = this;
+        while (now != null) {
+            if (now instanceof LoopScope) return true;
+            now = now.parentScope;
         }
         return false;
     }
 
-    public LoopScope getLoopScope(){
-        Scope now=this;
-        while (now!=null){
-            if(now instanceof LoopScope)return (LoopScope) now;
-            now=now.parentScope;
+    public LoopScope getLoopScope() {
+        Scope now = this;
+        while (now != null) {
+            if (now instanceof LoopScope) return (LoopScope) now;
+            now = now.parentScope;
         }
         return null;
     }
 
-    public Scope GetCurrentFuncScope(){
-        Scope now=this;
-        while (now!=null){
-            if(now instanceof FuncScope||now instanceof LambdaScope)return now;
-            now=now.parentScope;
+    public Scope GetCurrentFuncScope() {
+        Scope now = this;
+        while (now != null) {
+            if (now instanceof FuncScope || now instanceof LambdaScope) return now;
+            now = now.parentScope;
         }
         return null;
     }

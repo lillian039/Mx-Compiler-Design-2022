@@ -9,16 +9,17 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 
 
 public class Compiler {
 
     public static void main(String[] args) throws Exception{
-     /*   String name="test.mx";
-        InputStream input=new FileInputStream(name);*/
-        InputStream input = System.in;
+        String name="test.mx";
+        InputStream input=new FileInputStream(name);
+        PrintStream output=new PrintStream("test.out");
+        System.setOut(output);
+       // InputStream input = System.in;
         try {
             RootNode root;
             GlobalScope globalScope=new GlobalScope(null);
