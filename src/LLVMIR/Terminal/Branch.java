@@ -17,6 +17,6 @@ public class Branch extends TerminalStmt {
     @Override
     public void printInstruct() {
         System.out.println("br " + op.IRType.typeToString() + " " + op.valueToString() +
-                ", label %" + trueBranch.label + ", label %" + falseBranch.label);
+                ", label %" + trueBranch.labelName + ", label %" + falseBranch.labelName);
     }
 }

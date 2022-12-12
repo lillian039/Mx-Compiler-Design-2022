@@ -16,18 +16,18 @@ public class FuncDef extends GlobalDef {
     public ArrayList<BasicBlock> basicBlocks = new ArrayList<>();
     public BasicBlock Entry = null;
 
-    public Register retval=null;
-    public BasicBlock returnBlock=null;
+    public Register retval = null;
+    public BasicBlock returnBlock = null;
     public BasicBlock allocate = new BasicBlock();
 
-    public ClassType classType=null;
+    public ClassType classType = null;
 
     public IRBaseType irReturnType;
 
     public FuncDef(BasicBlock block, String name, IRBaseType irReturnType) {
         Entry = block;
         this.name = name;
-        this.label = 2;
+        this.label = 1;
         this.irReturnType = irReturnType;
     }
 
@@ -50,10 +50,20 @@ public class FuncDef extends GlobalDef {
         }
         System.out.println(") {");
         Entry.print();
+        System.out.println();
         for (var block : basicBlocks) {
             block.print();
             System.out.println();
         }
         System.out.println("}");
+    }
+
+    public boolean existBlock(BasicBlock block) {
+        if (Entry == block) return true;
+        else if (returnBlock == block) return true;
+        for (var blocks : basicBlocks) {
+            if (blocks == block) return true;
+        }
+        return false;
     }
 }

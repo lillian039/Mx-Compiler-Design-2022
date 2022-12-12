@@ -34,7 +34,7 @@ public class BasicBlock {
     }
 
     public void print() {
-        System.out.println(labelName + label + ":");
+        System.out.println(labelName + ":");
         for (var stmt : stmts) {
             System.out.print("  ");
             stmt.printInstruct();

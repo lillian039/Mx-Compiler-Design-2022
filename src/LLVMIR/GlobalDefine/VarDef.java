@@ -56,7 +56,6 @@ public class VarDef extends GlobalDef {
         GlobalString.sort(Comparator.comparing(Alloca::strNum));
         BasicBlock basicBlock = new BasicBlock("entry", 0);
         initializeVar = new FuncDef(basicBlock, "__mx_initialize_globalVar", new VoidType());
-
     }
 
     @Override

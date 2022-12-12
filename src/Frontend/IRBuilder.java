@@ -25,7 +25,6 @@ import java.util.HashMap;
 
 //new
 //this 指针
-//&& || 存值
 public class IRBuilder implements ASTVisitor {
     GlobalScope gScope;
 
@@ -33,12 +32,9 @@ public class IRBuilder implements ASTVisitor {
     BasicBlock currentBlock;
     int regCnt;
     //   int labelNumber;
-    FuncDef mainFunc, currentFunc;
-    BasicBlock targetBlock;
+    FuncDef currentFunc;
     IRBaseType i32Type;
     RootNode root;
-
-    Register PhiReg;
 
     HashMap<String, Integer> renameTable;
 
@@ -61,6 +57,22 @@ public class IRBuilder implements ASTVisitor {
         BasicBlock basicBlock = new BasicBlock("entry", 0);
         FuncDef mainFuncDef = new FuncDef(basicBlock, "main", i32Type);
         gScope.globalFunc.put("main", mainFuncDef);
+        FuncDef initializeVar = root.varDefs.initializeVar;
+        gScope.globalFunc.put(initializeVar.name, initializeVar);
+        root.funcDefs.add(initializeVar);
+        ArrayList<SingleVarDefNode> varDef = root.varDefs.varDef;
+        currentBlock = initializeVar.Entry;
+        for (var vars : varDef) {
+            if (vars.expression != null) {
+                AssignExprNode assignExprNode = new AssignExprNode(new VarExprNode(vars.name, vars.pos), vars.expression, vars.pos);
+                assignExprNode.accept(this);
+            }
+        }
+        Call callInitializeVar = new Call(initializeVar.name, initializeVar.irReturnType);
+        mainFuncDef.Entry.push_back(callInitializeVar);
+        Register phi = new Register(gScope.getIRType("bool"), ".phi");
+        mainFuncDef.Entry.push_back(new Alloca(phi, gScope.getIRType("bool")));
+        gScope.addReg(".phi", phi);
         for (var funcDef : node.funcDef) {
             funcDef.accept(this);
         }
@@ -91,6 +103,10 @@ public class IRBuilder implements ASTVisitor {
         GetElementPtr getPtr = new GetElementPtr(ls, newLs, number);
         newLs.getElementPtr = getPtr;
         currentBlock.push_back(getPtr);
+        if (inCircuit && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
+            Store store = new Store(newLs, gScope.getReg(".phi"));
+            currentBlock.push_back(store);
+        }
         node.irValue = newLs;
     }
 
@@ -124,12 +140,12 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(VarExprNode node) {
         Register var = currentScope.getReg(node.name);
-        Register newReg = new Register(regCnt++, var.IRType);
         node.irBaseType = var.IRType;
-        newReg.value = var;
-        Load loadInstruction = new Load(newReg, var);
-        currentBlock.push_back(loadInstruction);
-        node.irValue = newReg;
+        node.irValue = var;
+        if (inCircuit && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
+            Store store = new Store(var, gScope.getReg(".phi"));
+            currentBlock.push_back(store);
+        }
     }
 
     @Override
@@ -162,6 +178,10 @@ public class IRBuilder implements ASTVisitor {
             Zext zext = new Zext(new IntType(1, "bool"), currentEntity.IRType, reg2, reg3);
             currentBlock.push_back(zext);
             node.irValue = reg3;
+            if (inCircuit) {
+                Store store = new Store(reg3, gScope.getReg(".phi"));
+                currentBlock.push_back(store);
+            }
             return;
         } else if (node.option.equals("-")) {
             Binary binary = new Binary(new ConstInt(0), currentEntity, newLs, "sub nsw");
@@ -185,10 +205,11 @@ public class IRBuilder implements ASTVisitor {
     public void visit(IfStmtNode node) {
         node.condition.accept(this);
         IRValue ConditionValue = node.condition.irValue;
-        BasicBlock thenBlock = new BasicBlock("if.then", currentFunc.label++);
-        BasicBlock elseBlock = new BasicBlock("if.else", currentFunc.label++);
-        BasicBlock newBlock = new BasicBlock("if.end", currentFunc.label++);
-        BasicBlock target = node.elseStmt == null ? elseBlock : newBlock;
+        int label = currentFunc.label++;
+        BasicBlock thenBlock = new BasicBlock("if.then" + label, label);
+        BasicBlock newBlock = new BasicBlock("if.end" + label, label);
+        BasicBlock elseBlock = new BasicBlock("if.else" + label, label);
+        BasicBlock target = node.elseStmt == null ? newBlock : elseBlock;
         Branch branch = new Branch(ConditionValue, thenBlock, target);
         currentBlock.push_back(branch);
         currentBlock = thenBlock;
@@ -350,21 +371,27 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ForStmtNode node) {
         if (node.initializeStmt != null) node.initializeStmt.accept(this);
-        BasicBlock newBlock = new BasicBlock("whileBegin", currentFunc.label++);
+        int label = currentFunc.label++;
+        BasicBlock newBlock = new BasicBlock("for.begin" + label, label);
+        currentFunc.addBlock(newBlock);
         currentBlock.push_back(new Jump(newBlock));
         currentBlock = newBlock;
         node.stepNode.accept(this);
         node.conditionNode.accept(this);
         LoopScope loopScope = new LoopScope(currentScope);
         loopScope.continueLoop = currentBlock;
-        loopScope.breakLoop = new BasicBlock("whileEnd", currentFunc.label++);
-        BasicBlock body = new BasicBlock("whileBody", currentFunc.label++);
+        loopScope.breakLoop = new BasicBlock("for.end" + label, label);
+        BasicBlock body = new BasicBlock("for.body" + label, label);
+        currentFunc.addBlock(body);
         currentBlock.push_back(new Branch(node.conditionNode.irValue, body, loopScope.breakLoop));
         currentBlock = body;
         currentScope = loopScope;
         if (node.body != null) node.body.accept(this);
+        Jump jumpBegin = new Jump(newBlock);
+        currentBlock.push_back(jumpBegin);
         currentScope = currentScope.parentScope;
         currentBlock = loopScope.breakLoop;
+        currentFunc.addBlock(loopScope.breakLoop);
     }
 
     @Override
@@ -389,11 +416,13 @@ public class IRBuilder implements ASTVisitor {
         node.irBaseType = toIRType(node.type);
         Call callFunction;
         Register caller = null;
-        if (node.irBaseType instanceof VoidType) callFunction = new Call(node.name, node.irBaseType);
-        else {
+        if (node.irBaseType instanceof VoidType) {
+            callFunction = new Call(node.name, node.irBaseType);
+        } else {
             caller = new Register(regCnt++, node.irBaseType);
             callFunction = new Call(node.name, caller, node.irBaseType);
         }
+        node.irValue = caller;
         if (node.parameterValueNode != null) {
             ArrayList<ExprNode> value = node.parameterValueNode.parameters;
             for (int i = 0; i < value.size(); i++) {
@@ -401,11 +430,6 @@ public class IRBuilder implements ASTVisitor {
                 callFunction.addParameter(value.get(i).irValue);
             }
         }
-        if (!node.type.type.name.equals("void")) {
-            Register newVal = new Register(regCnt++, node.irBaseType);
-            newVal.funcVal = callFunction;
-            node.irValue = newVal;
-        } else node.irValue = null;
         currentBlock.push_back(callFunction);
         node.irValue = caller;
     }
@@ -426,6 +450,10 @@ public class IRBuilder implements ASTVisitor {
         IRValue newVal;
         if (node.value.isBoolVal) {
             newVal = new ConstBool(node.value.boolVal);
+            if (inCircuit) {
+                Store store = new Store(newVal, gScope.getReg(".phi"));
+                currentBlock.push_back(store);
+            }
         } else if (node.value.isStringVal) {
             String str = node.value.stringVal;
             int num = gScope.getString(str);
@@ -441,77 +469,119 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(WhileStmtNode node) {
-        BasicBlock newBlock = new BasicBlock();
+        int label = currentFunc.label++;
+        BasicBlock newBlock = new BasicBlock("while.begin" + label, label);
         Jump jump = new Jump(newBlock);
         currentBlock.push_back(jump);
         currentBlock = newBlock;
+        currentFunc.addBlock(currentBlock);
         node.condition.accept(this);
-        BasicBlock trueBlock = new BasicBlock();
-        BasicBlock falseBlock = new BasicBlock();
-        Branch branch = new Branch(node.condition.irValue, newBlock, falseBlock);
+        BasicBlock trueBlock = new BasicBlock("while.body" + label, label);
+        BasicBlock falseBlock = new BasicBlock("while.end" + label, label);
+        Branch branch = new Branch(node.condition.irValue, trueBlock, falseBlock);
         currentBlock.push_back(branch);
         LoopScope newLoop = new LoopScope(currentScope);
         newLoop.breakLoop = falseBlock;
         newLoop.continueLoop = currentBlock;
         currentScope = newLoop;
         currentBlock = trueBlock;
+        currentFunc.addBlock(currentBlock);
         if (node.body != null) node.body.accept(this);
         Jump jumpWhileStart = new Jump(newBlock);
         trueBlock.push_back(jumpWhileStart);
         currentScope = currentScope.parentScope;
         currentBlock = falseBlock;
+        currentFunc.addBlock(currentBlock);
     }
+
 
     @Override
     public void visit(AssignExprNode node) {
         node.lhs.accept(this);
-        Register ls = (Register) node.lhs.irValue;
         node.rhs.accept(this);
         IRValue rs = node.rhs.irValue;
+        Register ls = (Register) node.lhs.irValue;
         Store storeIns = new Store(rs, ls);
         node.irValue = ls;
         currentBlock.push_back(storeIns);
     }
 
+    boolean inCircuit;
+
+    void BinaryString(BinaryExprNode node) {
+        node.ls.accept(this);
+        node.rs.accept(this);
+        Call call;
+        if (node.option.equals("+")) {
+        Register register=new Register(regCnt++, gScope.getIRType("string"));
+        }
+        if (node.option.equals("==")) {//比较两个字符串内容是否完全一致（不是内存地址）
+
+        } else if (node.option.equals("!=")) {
+
+        } else if (node.option.equals("<")) {
+
+        } else if (node.option.equals(">")) {
+
+        } else if (node.option.equals(">=")) {
+
+        } else if (node.option.equals("<=")) {
+
+        }
+
+
+    }
+
     @Override
     public void visit(BinaryExprNode node) {
+        if (node.ls.type.type.name.equals("string")) {
+            BinaryString(node);
+            return;
+        }
         //把phi的值存在栈上 就可以不用phi指令了
         if (node.option.equals("||") || node.option.equals("&&")) {
-            if (targetBlock == null) targetBlock = new BasicBlock("end", currentFunc.label++);
-            BasicBlock recordEnd = targetBlock;
-            String name = node.option.equals("||") ? "or.rhs" : "and.rhs";
-            BasicBlock rhsBlock = new BasicBlock(name, currentFunc.label++);
-            targetBlock = rhsBlock;
-            if (PhiReg == null) {
-                PhiReg = new Register(new IntType(1, "bool"), "phi");//phi1,phi2...
-            }
+            inCircuit = true;
             node.ls.accept(this);
-            targetBlock = recordEnd;
-            BasicBlock endBlock = targetBlock;
-            endBlock.add_prev(currentBlock);
-            rhsBlock.add_prev(currentBlock);
-            if (node.option.equals("||")) {
-                Branch orBr = new Branch(node.ls.irValue, endBlock, rhsBlock);
-                currentBlock.push_back(orBr);
-            } else if (node.option.equals("&&")) {
-                Branch andBr = new Branch(node.ls.irValue, rhsBlock, endBlock);
-                currentBlock.push_back(andBr);
-            }
-            currentFunc.addBlock(recordEnd);
+            String name = node.option.equals("||") ? "or" : "and";
+            int label = currentFunc.label++;
+            BasicBlock befBlock = currentBlock;
+            BasicBlock rhsBlock = new BasicBlock(name + ".rhs" + label, label);
+            BasicBlock endBlock = new BasicBlock(name + ".end" + label, label);
             currentFunc.addBlock(rhsBlock);
             currentBlock = rhsBlock;
-            Store store = new Store(node.ls.irValue, PhiReg);
-            currentBlock.push_back(store);
             node.rs.accept(this);
+            currentBlock.push_back(new Jump(endBlock));
+            if (node.option.equals("||")) {
+                Branch orBr = new Branch(node.ls.irValue, endBlock, rhsBlock);
+                befBlock.push_back(orBr);
+            } else if (node.option.equals("&&")) {
+                Branch andBr = new Branch(node.ls.irValue, rhsBlock, endBlock);
+                befBlock.push_back(andBr);
+            }
+            currentFunc.addBlock(endBlock);
             currentBlock = endBlock;
-            node.irValue = PhiReg;
+            node.irValue = gScope.getReg(".phi");
+            inCircuit = false;
         } else {
             node.ls.accept(this);
             IRValue lvalue = node.ls.irValue;
+            if (node.ls instanceof VarExprNode) {
+                Register lsReg = new Register(regCnt++, lvalue.IRType);
+                Load lsLoad = new Load(lsReg, lvalue);
+                currentBlock.push_back(lsLoad);
+                lvalue = lsReg;
+            }
             node.rs.accept(this);
             IRValue rvalue = node.rs.irValue;
+            if (node.rs instanceof VarExprNode) {
+                Register rsReg = new Register(regCnt++, lvalue.IRType);
+                Load rsLoad = new Load(rsReg, rvalue);
+                currentBlock.push_back(rsLoad);
+                rvalue = rsReg;
+            }
             Register reg = new Register(regCnt++, node.ls.irValue.IRType);
-            if (reg.IRType.isSameType(gScope.getIRType("bool"))) {
+            if (node.option.equals("<") || node.option.equals(">") || node.option.equals("<=") || node.option.equals(">=")
+                    || node.option.equals("==") || node.option.equals("!=")) {
                 String op = null;
                 switch (node.option) {
                     case "<" -> op = "slt";
@@ -523,7 +593,13 @@ public class IRBuilder implements ASTVisitor {
                 }
                 IRInstruction currentInstruction = new Icmp(lvalue, rvalue, reg, op);
                 node.irValue = reg;
+                node.irValue.IRType = gScope.getIRType("bool");
+                node.irBaseType = gScope.getIRType("bool");
                 currentBlock.push_back(currentInstruction);
+                if (inCircuit) {
+                    Store storePhi = new Store(reg, gScope.getReg(".phi"));
+                    currentBlock.push_back(storePhi);
+                }
             } else {
                 String op = null;
                 switch (node.option) {

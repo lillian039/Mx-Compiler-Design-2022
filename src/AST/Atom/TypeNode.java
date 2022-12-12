@@ -14,7 +14,7 @@ public class TypeNode extends ASTNode {
 
 
     public boolean isArr = false;
-    public int layer = 1;
+    public int layer = 0;
 
     public Vector<ExprNode> arrLayerSize = null;
 
