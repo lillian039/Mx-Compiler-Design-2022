@@ -36,7 +36,7 @@ public class IRBuilder implements ASTVisitor {
     IRBaseType i32Type;
     RootNode root;
 
-    HashMap<String, Integer> renameTable;
+    HashMap<String, Integer> renameTable = new HashMap<>();
 
     public IRBuilder(GlobalScope gScope) {
         this.gScope = gScope;
@@ -54,9 +54,12 @@ public class IRBuilder implements ASTVisitor {
             classDef.accept(this);
         }
 
+        //放入main函数
         BasicBlock basicBlock = new BasicBlock("entry", 0);
         FuncDef mainFuncDef = new FuncDef(basicBlock, "main", i32Type);
         gScope.globalFunc.put("main", mainFuncDef);
+
+        //用来初始化全局变量
         FuncDef initializeVar = root.varDefs.initializeVar;
         gScope.globalFunc.put(initializeVar.name, initializeVar);
         root.funcDefs.add(initializeVar);
@@ -68,11 +71,34 @@ public class IRBuilder implements ASTVisitor {
                 assignExprNode.accept(this);
             }
         }
+        currentBlock.tailStmt = new Ret(new Register(new VoidType(), "ret"));
         Call callInitializeVar = new Call(initializeVar.name, initializeVar.irReturnType);
+
+        //main函数第一句话调用初始化构造全局变量的函数
         mainFuncDef.Entry.push_back(callInitializeVar);
-        Register phi = new Register(gScope.getIRType("bool"), ".phi");
-        mainFuncDef.Entry.push_back(new Alloca(phi, gScope.getIRType("bool")));
+
+        //构造存短路求值的寄存器phi
+        Register phi = new Register(new PtrType(gScope.getIRType("bool")), ".phi");
+        mainFuncDef.Entry.push_back(new Alloca(phi));
         gScope.addReg(".phi", phi);
+
+        //内建函数
+        root.InnerFunc = gScope.externalFunc;
+        for (int i = 0; i < root.InnerFunc.size(); i++) {
+            root.InnerFunc.get(i).originFunc.accept(this);
+        }
+
+        //str相关自定义内建函数
+        addStrGlobalInner();
+
+        //将IR版本的内建函数放进GScope
+        for (int i = 0; i < root.InnerFunc.size(); i++) {
+            FuncDef cur = root.InnerFunc.get(i);
+            if (gScope.getFunc(cur.name) != null) continue;
+            gScope.addIRFunc(cur);
+        }
+
+        //跑每个function
         for (var funcDef : node.funcDef) {
             funcDef.accept(this);
         }
@@ -80,12 +106,43 @@ public class IRBuilder implements ASTVisitor {
 
     }
 
+    void addStrGlobalInner() {
+        ClassType stringType = (ClassType) gScope.getIRType("string");
+        IntType boolType = (IntType) gScope.getIRType("bool");
+        Register regS1 = new Register(stringType, "s1");
+        Register regS2 = new Register(stringType, "s2");
+        ArrayList<FuncDef> strFunc = new ArrayList<>();
+
+        FuncDef str_eq = new FuncDef("__str_eq", boolType, true);
+        strFunc.add(str_eq);
+        FuncDef str_ne = new FuncDef("__str_ne", boolType, true);
+        strFunc.add(str_ne);
+        FuncDef str_slt = new FuncDef("__str_slt", boolType, true);
+        strFunc.add(str_slt);
+        FuncDef str_sle = new FuncDef("__str_sle", boolType, true);
+        strFunc.add(str_sle);
+        FuncDef str_sgt = new FuncDef("__str_sgt", boolType, true);
+        strFunc.add(str_sgt);
+        FuncDef str_sge = new FuncDef("__str_sge", boolType, true);
+        strFunc.add(str_sge);
+
+        FuncDef str_add = new FuncDef("__str_add", stringType, true);
+        strFunc.add(str_add);
+
+        for (int i = 0; i < strFunc.size(); i++) {
+            FuncDef cur = strFunc.get(i);
+            cur.parameterList.add(regS1);
+            cur.parameterList.add(regS2);
+            root.InnerFunc.add(cur);
+        }
+    }
+
     //默认构造函数？
     @Override
     public void visit(NewClassExprNode node) {
         node.irBaseType = gScope.getIRType(node.type.type.name);
         Register register = new Register(regCnt++, node.irBaseType);
-        Malloc malloc = new Malloc(node.irBaseType, register, new ConstInt(node.irBaseType.size()));
+        Malloc malloc = new Malloc(register, new ConstInt(node.irBaseType.size()));
         currentBlock.push_back(malloc);
         Call call = new Call("_" + node.type.type.name + "." + node.type.type.name, register, node.irBaseType);
         currentBlock.push_back(call);
@@ -101,7 +158,6 @@ public class IRBuilder implements ASTVisitor {
         VarExprNode var = (VarExprNode) node.rhs;
         ConstInt number = new ConstInt(root.getClass(className).getMap(var.name));
         GetElementPtr getPtr = new GetElementPtr(ls, newLs, number);
-        newLs.getElementPtr = getPtr;
         currentBlock.push_back(getPtr);
         if (inCircuit && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
             Store store = new Store(newLs, gScope.getReg(".phi"));
@@ -118,6 +174,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(SingleVarDefNode node) {
         IRBaseType irType = toIRType(node.typeNode);
+        irType = new PtrType(irType);
         Register allocReg = new Register(irType, node.name);
         if (renameTable.containsKey(node.name)) {
             int num = renameTable.get(node.name);
@@ -125,7 +182,7 @@ public class IRBuilder implements ASTVisitor {
             renameTable.remove(node.name);
             renameTable.put(node.name, num + 1);
         } else renameTable.put(node.name, 1);
-        Alloca allocateInstruction = new Alloca(allocReg, irType);
+        Alloca allocateInstruction = new Alloca(allocReg);
         currentScope.addReg(node.name, allocReg);
         currentFunc.addAllocate(allocateInstruction);
         currentBlock.push_back(allocateInstruction);
@@ -234,119 +291,90 @@ public class IRBuilder implements ASTVisitor {
         currentFunc.addBlock(newBlock);
     }
 
+    Register newArrCreate(ArrayList<IRValue> dimensions, int layer, IRBaseType ptrType) {
+        IRValue dimen = dimensions.get(layer);
+        Register dimenLen = new Register(regCnt++, i32Type);
+        Binary mulDimen = new Binary(dimen, new ConstInt(32), dimenLen, "mul");
+        currentBlock.push_back(mulDimen);
+        Register length = new Register(regCnt++, i32Type);
+        Binary addSize = new Binary(dimenLen, new ConstInt(32), length, "add");
+        currentBlock.push_back(addSize);
+        //mallocNew 最终要返回的ptr
+        Register mallocNew = new Register(regCnt++, new PtrType(ptrType));
+        Malloc mallocArr = new Malloc(mallocNew, length);
+        currentBlock.push_back(mallocArr);
+        //将size存进第一位
+        Register sizeReg = new Register(regCnt++, i32Type);
+        GetElementPtr getSizePtr = new GetElementPtr(sizeReg, mallocNew, new ConstInt(0));
+        currentBlock.push_back(getSizePtr);
+        //最后一层 直接返回
+        if (layer == dimensions.size() - 1) return mallocNew;
+        //捏一个for循环
+        int label = currentFunc.label++;
+        BasicBlock conditionBlock = new BasicBlock("array.for.begin" + label, label);
+        BasicBlock bodyBlock = new BasicBlock("array.for.body" + label, label);
+        BasicBlock endBlock = new BasicBlock("array.for.end" + label, label);
+        Register iReg = new Register(i32Type, "_new_i." + layer + "." + label);
+        Store storeiReg = new Store(new ConstInt(1), iReg);
+        currentBlock.push_back(storeiReg);
+        currentBlock.push_back(new Jump(conditionBlock));
+        currentBlock = conditionBlock;
+        currentFunc.addBlock(conditionBlock);
+        Register cmpI = new Register(regCnt++, i32Type);
+        Icmp icmpI = new Icmp(iReg, length, cmpI, "slt"); // i < length
+        conditionBlock.push_back(icmpI);
+        Branch branchBody = new Branch(cmpI, bodyBlock, endBlock);
+        currentBlock.push_back(branchBody);
+        currentBlock = bodyBlock;
+        currentFunc.addBlock(bodyBlock);
+        //body
+        PtrType ptr = (PtrType) ptrType;
+        IRBaseType nextLayerType = ptr.type;
+//        if (ptr.dimension == 1) {
+//            nextLayerType = ptr.type;
+//        } else {
+//            nextLayerType = new PtrType(ptr.dimension - 1, ptr.type);
+//        }
+        Register lowerReg = new Register(regCnt++, nextLayerType);
+        GetElementPtr getElementPtr = new GetElementPtr(lowerReg, mallocNew, iReg);
+        currentBlock.push_back(getElementPtr);
+        Register newLayerReg = newArrCreate(dimensions, layer + 1, nextLayerType);
+        Store store = new Store(newLayerReg, lowerReg);
+        currentBlock.push_back(store);
+
+        //i=i+1
+        Register tmpI = new Register(regCnt++, i32Type);
+        Load load = new Load(tmpI, iReg);
+        currentBlock.push_back(load);
+        Binary binaryAdd = new Binary(iReg, new ConstInt(1), tmpI, "add");
+        currentBlock.push_back(binaryAdd);
+
+        //go to condition
+        Jump jumpOut = new Jump(conditionBlock);
+        currentBlock.push_back(jumpOut);
+        currentBlock = endBlock;
+        currentFunc.addBlock(endBlock);
+        return mallocNew;
+    }
+
     @Override
     public void visit(NewArrNode node) {
-        node.irBaseType = gScope.getIRType(node.type.type.name);
+        PtrType ptr = (PtrType) toIRType(node.type);
+        node.irBaseType = ptr;
         ArrayList<IRValue> newArrExpr = new ArrayList<>();
         newArrExpr.add(new ConstInt(1));
-        int layer = 0;
         for (NewArrDemNode arrNode : node.arrList) {
             arrNode.accept(this);
             if (arrNode.arrDimension != null) {
-                layer++;
                 newArrExpr.add(arrNode.arrDimension.irValue);
             }
         }
-        if (layer == 1) {
-            Register regArr = new Register(regCnt++, new PtrType(layer, node.irBaseType));
-            Malloc malloc = new Malloc(node.irBaseType, regArr, newArrExpr.get(1));
-            currentBlock.push_back(malloc);
-            node.irValue = regArr;
-            return;
-        }
-
-        //%1 = call ptr @malloc(i32 of layer+1)
-        node.irBaseType = gScope.getIRType(node.type.type.name);
-        Register newDemReg = new Register(regCnt++, new PtrType(1, i32Type));
-        Malloc malloc = new Malloc(node.irBaseType, newDemReg, new ConstInt((layer + 1) * 32));//手动加第一层为1
-        currentBlock.push_back(malloc);
-        for (int i = 0; i <= layer; i++) {
-            Register loadPtr = new Register(regCnt++, newDemReg.IRType);
-            Load load = new Load(loadPtr, newDemReg);
-            currentBlock.push_back(load);
-            Register getEle = new Register(regCnt++, i32Type);
-            GetElementPtr getElementPtr = new GetElementPtr(getEle, loadPtr, new ConstInt(i));
-            currentBlock.push_back(getElementPtr);
-            Store store = new Store(newArrExpr.get(i), getEle);
-            currentBlock.push_back(store);
-        }
-        //拥有了层数
-        //ptr arr tmp
-        //i32 sum=1
-        Register regArr = new Register(regCnt++, new PtrType(layer, node.irBaseType));
-        Alloca allocaarr = new Alloca(regArr, regArr.IRType);
-        currentBlock.push_back(allocaarr);
-        Register regTmp = new Register(regCnt++, new PtrType(layer - 1, node.irBaseType));
-        Alloca allocatmp = new Alloca(regTmp, regTmp.IRType);
-        currentBlock.push_back(allocatmp);
-        Register regSum = new Register(regCnt++, i32Type);
-        Alloca allocaSum = new Alloca(regSum, i32Type);
-        currentBlock.push_back(allocaSum);
-        Store storeSum = new Store(new ConstInt(1), regSum);
-        currentBlock.push_back(storeSum);
-
-        //开始下一层for循环
-        //先 alloca i和j
-        Register regi = new Register(regCnt++, new IntType(32, "int"));
-        Alloca allocai = new Alloca(regi, regi.IRType);
-        currentFunc.addAllocate(allocai);
-        Register regj = new Register(regCnt++, new IntType(32, "int"));
-        Alloca allocaj = new Alloca(regj, regj.IRType);
-        currentFunc.addAllocate(allocaj);
-        Store storei = new Store(new ConstInt(0), regi);
-        currentBlock.push_back(storei);
-        BasicBlock newBlock = new BasicBlock("forLoop", currentFunc.label++);
-        Jump jump = new Jump(newBlock);
-        currentBlock.push_back(jump);
-        currentBlock = newBlock;
-        currentFunc.addBlock(newBlock);
-
-        //i < layer
-        Register cmpi = new Register(regCnt++, i32Type);
-        Icmp icmpi = new Icmp(regi, new ConstInt(layer), cmpi, "slt");
-        currentBlock.push_back(icmpi);
-        BasicBlock trueBlockI = new BasicBlock("forTrue", currentFunc.label++);
-        BasicBlock falseBlockI = new BasicBlock("forFalse", currentFunc.label++);
-        Branch branchi = new Branch(cmpi, trueBlockI, falseBlockI);
-        currentBlock.push_back(branchi);
-        currentBlock = trueBlockI;
-
-        //sum=sum*p[i+1];
-        Register regMul = new Register(regCnt++, i32Type);
-        Register regStep = new Register(regCnt++, i32Type);
-        Register addIPlusOne = new Register(regCnt++, i32Type);
-        Binary binaryIPlusOne = new Binary(new ConstInt(1), regi, addIPlusOne, "add nsw");
-        GetElementPtr getElementPtr = new GetElementPtr(regStep, newDemReg, addIPlusOne);
-        currentBlock.push_back(binaryIPlusOne);
-        currentBlock.push_back(getElementPtr);
-        Binary binaryMul = new Binary(regSum, regStep, regMul, "mul");
-        currentBlock.push_back(binaryMul);
-        Store storeMul = new Store(regMul, regSum);
-        currentBlock.push_back(storeMul);
-
-        //tmp=(T*)malloc(sum*sizeof(T));
-        Malloc mallocT = new Malloc(regTmp.IRType, regTmp, regSum);
-        currentBlock.push_back(mallocT);
-        Store storej = new Store(new ConstInt(0), regj);
-        currentBlock.push_back(storej);
-        newBlock = new BasicBlock("forTrue", currentFunc.label++);
-        jump = new Jump(newBlock);
-        currentBlock.push_back(jump);
-
-        //j<p[i]
-        Register Pi = new Register(regCnt++, i32Type);
-        getElementPtr = new GetElementPtr(Pi, newDemReg, regi);
-        currentBlock.push_back(getElementPtr);
-        Register cmpj = new Register(regCnt++, i32Type);
-        Icmp icmpj = new Icmp(regj, Pi, cmpj, "slt");
-        currentBlock.push_back(icmpj);
-        BasicBlock trueBlockJ = new BasicBlock("forTrue", currentFunc.label++);
-        Branch branchj = new Branch(cmpj, trueBlockJ, falseBlockI);
-        currentBlock.push_back(branchj);
-        currentBlock = trueBlockJ;
+        Register regArr = new Register(regCnt++, ptr);
+        Store store = new Store(newArrCreate(newArrExpr, 0, ptr), regArr);
+        currentBlock.push_back(store);
+        node.irValue = regArr;
 
 
-        //怎么 new 呀我不会写qwq
     }
 
     @Override
@@ -357,9 +385,10 @@ public class IRBuilder implements ASTVisitor {
         for (ExprNode exp : node.arrDimension) {
             exp.accept(this);
             IRValue elementNum = exp.irValue;
-            if (((PtrType) irBaseType).dimension > 1)
+            irBaseType = ((PtrType) irBaseType).type;
+           /* if (((PtrType) irBaseType).dimension > 1)
                 irBaseType = new PtrType(((PtrType) irBaseType).dimension - 1, ((PtrType) irBaseType).type);
-            else irBaseType = ((PtrType) irBaseType).type;
+            else irBaseType = ((PtrType) irBaseType).type;*/
             Register newReg = new Register(regCnt++, irBaseType);
             GetElementPtr getElementPtr = new GetElementPtr(newReg, ls, elementNum);
             currentBlock.push_back(getElementPtr);
@@ -415,14 +444,14 @@ public class IRBuilder implements ASTVisitor {
     public void visit(FuncExprNode node) {
         node.irBaseType = toIRType(node.type);
         Call callFunction;
-        Register caller = null;
+        Register caller;
         if (node.irBaseType instanceof VoidType) {
             callFunction = new Call(node.name, node.irBaseType);
+            caller = new Register(node.irBaseType, "tmpstore");
         } else {
             caller = new Register(regCnt++, node.irBaseType);
             callFunction = new Call(node.name, caller, node.irBaseType);
         }
-        node.irValue = caller;
         if (node.parameterValueNode != null) {
             ArrayList<ExprNode> value = node.parameterValueNode.parameters;
             for (int i = 0; i < value.size(); i++) {
@@ -431,6 +460,7 @@ public class IRBuilder implements ASTVisitor {
             }
         }
         currentBlock.push_back(callFunction);
+        caller.callFunc = callFunction;
         node.irValue = caller;
     }
 
@@ -511,25 +541,38 @@ public class IRBuilder implements ASTVisitor {
     void BinaryString(BinaryExprNode node) {
         node.ls.accept(this);
         node.rs.accept(this);
-        Call call;
+        Call call = null;
         if (node.option.equals("+")) {
-        Register register=new Register(regCnt++, gScope.getIRType("string"));
+            Register register = new Register(regCnt++, gScope.getIRType("string"));
+            call = new Call("__str_sge", register, gScope.getIRType("string"));
+            call.addParameter(node.ls.irValue);
+            call.addParameter(node.rs.irValue);
+            currentBlock.push_back(call);
+            node.irValue = register;
+            return;
         }
+        IRBaseType boolType = gScope.getIRType("bool");
+        Register ls = new Register(regCnt++, boolType);
         if (node.option.equals("==")) {//比较两个字符串内容是否完全一致（不是内存地址）
-
+            call = new Call("__str_eq", ls, boolType);
         } else if (node.option.equals("!=")) {
-
+            call = new Call("__str_ne", ls, boolType);
         } else if (node.option.equals("<")) {
-
+            call = new Call("__str_slt", ls, boolType);
         } else if (node.option.equals(">")) {
-
+            call = new Call("__str_sgt", ls, boolType);
         } else if (node.option.equals(">=")) {
-
+            call = new Call("__str_sge", ls, boolType);
         } else if (node.option.equals("<=")) {
-
+            call = new Call("__str_sle", ls, boolType);
         }
-
-
+        if (call == null) System.out.println("call null");
+        else {
+            call.addParameter(node.ls.irValue);
+            call.addParameter(node.rs.irValue);
+            currentBlock.push_back(call);
+            node.irValue = ls;
+        }
     }
 
     @Override
@@ -627,20 +670,41 @@ public class IRBuilder implements ASTVisitor {
         currentFunc = gScope.getGlobalFunc(node.name);
         currentBlock = currentFunc.Entry;
         currentScope = new FuncScope(currentScope, node.returnTypeNode, node.parameterList);
+        currentFunc.returnBlock = new BasicBlock("return", 0);
+        Register retReg = new Register(new PtrType(currentFunc.irReturnType), "retval");
         if (!(currentFunc.irReturnType instanceof VoidType)) {
-            currentFunc.returnBlock = new BasicBlock("return", 0);
-            Register retReg = new Register(currentFunc.irReturnType, "retval");
-            Alloca allocaRet = new Alloca(retReg, retReg.IRType);
+            Alloca allocaRet = new Alloca(retReg);
             currentBlock.push_back(allocaRet);
             currentFunc.retval = retReg;
-            Ret ret = new Ret(retReg);
-            currentFunc.returnBlock.push_back(ret);
         }
-        root.addFunc(currentFunc);
-        if (node.parameterList != null) node.parameterList.accept(this);
-        node.funcBody.accept(this);
-        currentScope = currentScope.parentScope;
+        Ret ret = new Ret(retReg);
+        currentFunc.returnBlock.push_back(ret);
+        if (!currentFunc.isInner) root.addFunc(currentFunc);
 
+        //引用传参 指针？
+        if (node.parameterList != null) {
+            ArrayList<SingleVarDefNode> para = node.parameterList.parameterList;
+            for (var vars : para) {
+                IRBaseType varType = new PtrType(toIRType(vars.typeNode));
+                Register register = new Register(varType, vars.name);
+                currentFunc.parameterList.add(register);
+
+                //addr
+                Register allocParaReg = new Register(varType, vars.name + ".addr");
+                Alloca allocPara = new Alloca(allocParaReg);
+                currentBlock.push_back(allocPara);
+                currentScope.addReg(vars.name, allocParaReg);
+            }
+        }
+        if (currentFunc.classType != null) {
+            PtrType thisType = new PtrType(currentFunc.classType);
+            Register thisReg = new Register(thisType, "this");
+            currentFunc.parameterList.add(thisReg);
+            currentScope.addReg("this", thisReg);
+        }
+        if (node.funcBody != null) node.funcBody.accept(this);
+        if (currentBlock.tailStmt == null) currentBlock.tailStmt = new Jump(currentFunc.returnBlock);
+        currentScope = currentScope.parentScope;
     }
 
     @Override
@@ -650,9 +714,9 @@ public class IRBuilder implements ASTVisitor {
             IRValue currentEntity = node.returnExpr.irValue;
             Store store = new Store(currentEntity, currentFunc.retval);
             currentBlock.push_back(store);
-            Jump jump = new Jump(currentFunc.returnBlock);
-            currentBlock.push_back(jump);
         }
+        Jump jump = new Jump(currentFunc.returnBlock);
+        currentBlock.push_back(jump);
     }
 
     @Override
@@ -665,9 +729,11 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(DotFuncExprNode node) {
         node.lhs.accept(this);
-        Register ls = (Register) node.lhs.irValue;
         node.rhs.name = "_" + node.lhs.irBaseType.name + "." + node.rhs.name;
         node.rhs.accept(this);
+        Call callfunc = ((Register) node.rhs.irValue).callFunc;
+        callfunc.addParameter(node.lhs.irValue);
+        node.irValue = node.rhs.irValue;
     }
 
     @Override
@@ -710,9 +776,14 @@ public class IRBuilder implements ASTVisitor {
 
     IRBaseType toIRType(TypeNode node) {
         IRBaseType base = gScope.getIRType(node.type.name);
-        IRBaseType newIRBaseType;
-        if (node.layer > 0) newIRBaseType = new PtrType(node.layer, base);
-        else newIRBaseType = base;
+        IRBaseType newIRBaseType = base;
+        int layer = node.layer;
+        while (layer > 0) {
+            layer--;
+            newIRBaseType = new PtrType(newIRBaseType);
+        }
+        //if (node.layer > 0) newIRBaseType = new PtrType(node.layer, base);
+        //else newIRBaseType = base;
         return newIRBaseType;
     }
 }

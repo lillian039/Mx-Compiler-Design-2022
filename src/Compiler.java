@@ -17,7 +17,7 @@ public class Compiler {
     public static void main(String[] args) throws Exception{
         String name="test.mx";
         InputStream input=new FileInputStream(name);
-        PrintStream output=new PrintStream("test.out");
+        PrintStream output=new PrintStream("test.ll");
         System.setOut(output);
        // InputStream input = System.in;
         try {

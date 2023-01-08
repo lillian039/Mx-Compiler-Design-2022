@@ -8,12 +8,12 @@ import LLVMIR.IRType.IRBaseType;
 public class Register extends IRValue {
     public int index;
     public IRValue value = null;
-    public Call funcVal = null;
-    public GetElementPtr getElementPtr = null;
+
     public String name = null;
 
     public String rename = null;//防止重名
 
+    public Call callFunc = null;
     public boolean isGlobe = false;
 
     public Register(int idx, IRBaseType irBaseType) {

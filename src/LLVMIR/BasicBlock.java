@@ -12,7 +12,7 @@ public class BasicBlock {
 
     public LinkedList<BasicBlock> prev = new LinkedList<>();
     public LinkedList<IRInstruction> stmts = new LinkedList<>();
-    private TerminalStmt tailStmt = null;
+    public TerminalStmt tailStmt = null;
 
     public BasicBlock() {
     }
@@ -24,8 +24,10 @@ public class BasicBlock {
 
     public void push_back(IRInstruction stmt) {
         if (stmt instanceof TerminalStmt) {
-            if (tailStmt != null) System.out.print("double tail!");
-            tailStmt = (TerminalStmt) stmt;
+            if (tailStmt != null) {
+              //  System.out.print(labelName+"double tail!");
+            }
+            else tailStmt = (TerminalStmt) stmt;
         } else stmts.add(stmt);
     }
 

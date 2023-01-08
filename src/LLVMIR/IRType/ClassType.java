@@ -16,6 +16,7 @@ public class ClassType extends IRBaseType {
 
     @Override
     public String typeToString() {
+        if(name.equals("string"))return "i8*";
         return "%struct." + name;
     }
 

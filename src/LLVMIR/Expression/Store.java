@@ -19,6 +19,6 @@ public class Store extends IRInstruction {
         if (this.storeReg == null) System.out.println("Store ???");
         else
             System.out.println("store " + value.IRType.typeToString() + " " + value.valueToString() +
-                    ", ptr " + storeReg.valueToString() + ", align " + (storeReg.IRType.size() + 7) / 8);
+                    ", "+ value.IRType.typeToString()+"* "+ storeReg.valueToString() + ", align " + (storeReg.IRType.size() + 7) / 8);
     }
 }

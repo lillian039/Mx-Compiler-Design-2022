@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 
 const int BUFFER_LENGTH = (1 << 8);
 
@@ -62,7 +64,7 @@ int __str_length(char *str) {
 
 int __str_parseInt(char *str) {
     int val;
-    sccanf(str, "%d", &val);
+    sscanf(str, "%d", &val);
     return val;
 }
 

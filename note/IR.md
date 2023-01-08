@@ -1,5 +1,17 @@
 # IR(Intermediate Representation)
 
+IR编译指令：
+
+`clang++ -S -emit-llvm main.cpp`
+
+带符号名字版本：
+
+`clang++ -S -emit-llvm main.cpp -fno-discard-value-names`
+
+测试llvm：
+
+`clang builtin.ll test.ll -o code`
+
 #### 基本块(Basic Block)
 
 基本块是满足下列性质的，最大的连续指令的有序集合。

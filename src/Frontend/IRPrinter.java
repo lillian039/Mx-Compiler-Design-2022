@@ -15,6 +15,10 @@ public class IRPrinter {
         }
         rootNode.varDefs.print();
         System.out.println();
+        for(var funcInner:rootNode.InnerFunc){
+            funcInner.print();
+            System.out.println();
+        }
         for(var funcDef:rootNode.funcDefs){
             funcDef.print();
             System.out.println();

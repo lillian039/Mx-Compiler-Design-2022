@@ -14,7 +14,8 @@ public class ConstString extends IRValue {
     public ConstString(String string, int number) {
         this.string = string;
         this.number = number;
-        pointer = new PtrType(1, new IntType(8, "char"));
+        this.size=string.length();
+        pointer = new PtrType( new IntType(8, "char"));
     }
 
     @Override

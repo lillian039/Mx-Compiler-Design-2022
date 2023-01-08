@@ -10,16 +10,14 @@ public class Malloc extends IRInstruction {
     Register ptrStart;
     IRValue size;
 
-    IRBaseType type;
 
-    public Malloc(IRBaseType irType, Register ptrStart, IRValue size) {
-        this.type = irType;
+    public Malloc(Register ptrStart, IRValue size) {
         this.ptrStart = ptrStart;
         this.size = size;
     }
 
     @Override
     public void printInstruct() {
-
+        System.out.println(ptrStart.valueToString() + " = @__malloc(" + size.valueToString() + ")");
     }
 }

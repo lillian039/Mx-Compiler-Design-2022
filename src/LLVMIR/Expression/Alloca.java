@@ -2,6 +2,7 @@ package LLVMIR.Expression;
 
 import LLVMIR.IRInstruction;
 import LLVMIR.IRType.IRBaseType;
+import LLVMIR.IRType.PtrType;
 import LLVMIR.Value.ConstString;
 import LLVMIR.Value.Register;
 
@@ -10,9 +11,9 @@ public class Alloca extends IRInstruction {
 
     public IRBaseType irType;
 
-    public Alloca(Register register, IRBaseType irType) {
+    public Alloca(Register register) {
         this.reg = register;
-        this.irType = irType;
+        this.irType=((PtrType)register.IRType).type;
     }
 
     @Override
@@ -21,7 +22,7 @@ public class Alloca extends IRInstruction {
     }
 
     public void printGlobalInstruct() {
-        System.out.println("@" + reg.name + " = global " + irType.typeToString() + ", align " + (irType.size() + 7) / 8);
+        System.out.println("@" + reg.name + " = global " + irType.typeToString() + " 0" +", align " + (irType.size() + 7) / 8);
     }
 
     public void printString() {

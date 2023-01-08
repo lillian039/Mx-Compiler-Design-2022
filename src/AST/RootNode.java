@@ -25,6 +25,8 @@ public class RootNode extends ASTNode {
     public ArrayList<ClassDef> classDefs = new ArrayList<>();
     public ArrayList<FuncDef> funcDefs = new ArrayList<>();
 
+    public ArrayList<FuncDef> InnerFunc=new ArrayList<>();
+
     public ArrayList<StmtNode> statements = new ArrayList<>();
 
     public RootNode(Position pos) {
