@@ -80,6 +80,6 @@ public class FuncDef extends GlobalDef {
             System.out.print(reg.IRType.typeToString());
             if (i < parameterList.size() - 1) System.out.print(", ");
         }
-        System.out.println(") #0");
+        System.out.println(")");
     }
 }

@@ -1,21 +1,26 @@
 package LLVMIR.Expression;
 
 import LLVMIR.IRInstruction;
+import LLVMIR.IRType.IRBaseType;
+import LLVMIR.IRType.PtrType;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
 public class Load extends IRInstruction {
-    public Register ls;
-    public IRValue rs;
+    public Register desReg;
+    public Register ptr;
 
-    public Load(Register ls, IRValue rs) {
-        this.ls = ls;
-        this.rs = rs;
+    public IRBaseType loadType;
+
+    public Load(Register desReg, Register ptr) {
+        this.desReg = desReg;
+        this.ptr = ptr;
+        loadType = desReg.IRType;
     }
 
     @Override
     public void printInstruct() {
-        System.out.println(ls.valueToString() + " = load " + ls.IRType.typeToString() + ", " + ls.IRType.typeToString() + " " +
-                rs.valueToString() + ", align " + rs.IRType.size() / 4);
+        System.out.println(desReg.valueToString() + " = load " + loadType.typeToString() + ", " + ptr.IRType.typeToString() + " " +
+                ptr.valueToString() + ", align " + (loadType.size() + 7) / 8);
     }
 }

@@ -18,6 +18,6 @@ public class Malloc extends IRInstruction {
 
     @Override
     public void printInstruct() {
-        System.out.println(ptrStart.valueToString() + " = @__malloc(" + size.valueToString() + ")");
+        System.out.println(ptrStart.valueToString() + " = call i8* @__malloc(" + size.IRType.typeToString()+" "+size.valueToString() + ")");
     }
 }

@@ -11,7 +11,7 @@ public class PtrType extends IRBaseType {
 
     @Override
     public String typeToString() {
-        return "*"+type.typeToString();
+        return type.typeToString()+"*";
     }
 
     public PtrType(IRBaseType type){

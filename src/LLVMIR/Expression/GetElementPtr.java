@@ -20,7 +20,7 @@ public class GetElementPtr extends IRInstruction {
     @Override
     public void printInstruct() {
         System.out.println(tmpStore.valueToString() + " = getelementptr inbounds " +
-                ((PtrType) startPointer.IRType).type.typeToString() + ", ptr " + startPointer.valueToString()
+                ((PtrType) startPointer.IRType).type.typeToString() + ", "+startPointer.IRType.typeToString()+" " + startPointer.valueToString()
                 + ", " + elementNum.IRType.typeToString() + " " + elementNum.valueToString());//未完成
     }
 }

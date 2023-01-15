@@ -6,19 +6,24 @@ import LLVMIR.Value.Register;
 
 public class Store extends IRInstruction {
     IRValue value;
-    Register storeReg;
+    Register storeAddr;
 
-    public Store(IRValue value, Register storeReg) {
+    public Store(IRValue value, Register storeAddr) {
+        if(value==null){
+            System.out.println("??");
+        }
         this.value = value;
-        this.storeReg = storeReg;
+        this.storeAddr = storeAddr;
     }
 
     //store from to
     @Override
     public void printInstruct() {
-        if (this.storeReg == null) System.out.println("Store ???");
+        if (this.storeAddr == null) System.out.println("Store ???");
+        if (this.value == null) System.out.println("Store Value???");
+
         else
             System.out.println("store " + value.IRType.typeToString() + " " + value.valueToString() +
-                    ", "+ value.IRType.typeToString()+"* "+ storeReg.valueToString() + ", align " + (storeReg.IRType.size() + 7) / 8);
+                    ", "+ storeAddr.IRType.typeToString()+" "+ storeAddr.valueToString() + ", align " + (value.IRType.size() + 7) / 8);
     }
 }
