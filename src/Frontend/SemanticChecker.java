@@ -43,8 +43,10 @@ public class SemanticChecker implements ASTVisitor {
         if (!node.lhs.isAssignable()) throw new SemanticError("Not assignable", node.pos);
         Type rType = node.rhs.type.type;
         Type lType = node.lhs.type.type;
-        if (!node.lhs.type.sameType(node.rhs.type) && (rType != nullType))
-            throw new SemanticError("type not match", node.pos);
+        if (!node.lhs.type.sameType(node.rhs.type) && (rType != nullType)) {
+            SemanticError semanticError=new SemanticError("type not match", node.pos);
+            throw semanticError;
+        }
         if (rType == nullType && !node.lhs.type.isArr &&
                 (lType == intType || lType == boolType || lType == voidType || lType == nullType))
             throw new SemanticError("type not match", node.pos);
@@ -73,15 +75,14 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(ArrExprNode node) {
         node.ls.accept(this);
         node.type = new TypeNode(node.pos, node.ls.type);
-        int tmpLayer=node.type.layer;
         for (ExprNode expr : node.arrDimension) {
             expr.accept(this);
-            tmpLayer--;
+            node.type.layer--;
             if (expr.type.type != intType || expr.type.isArr)
                 throw new SemanticError("expression in [] can only be int", node.pos);
         }
-        if (tmpLayer < 1) throw new SemanticError("[] not match", node.pos);
-        if (tmpLayer == 1) node.type.isArr = false;
+        if (node.type.layer < 0) throw new SemanticError("[] not match", node.pos);
+        if (node.type.layer == 0) node.type.isArr = false;
     }
 
     @Override

@@ -10,15 +10,12 @@ import java.util.HashMap;
 
 public class ClassDef extends GlobalDef {
     public ClassType classType;
-    public HashMap<String, Integer> memberMap;
+
     public String name;
 
     public ClassDef(String name,ClassType classType) {
         this.name = name;
         this.classType=classType;
-    }
-    public int getMap(String name) {
-        return memberMap.get(name);
     }
 
 

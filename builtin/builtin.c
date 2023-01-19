@@ -31,26 +31,26 @@ char *toString(int i) {
     return str;
 }
 
-char __str_eq(char *s1, char *s2) { return strcmp(s1, s2) == 0; }
+char ___str_eq(char *s1, char *s2) { return strcmp(s1, s2) == 0; }
 
-char __str_ne(char *s1, char *s2) { return strcmp(s1, s2) != 0; }
+char ___str_ne(char *s1, char *s2) { return strcmp(s1, s2) != 0; }
 
-char __str_slt(char *s1, char *s2) { return strcmp(s1, s2) < 0; }
+char ___str_slt(char *s1, char *s2) { return strcmp(s1, s2) < 0; }
 
-char __str_sle(char *s1, char *s2) { return strcmp(s1, s2) <= 0; }
+char ___str_sle(char *s1, char *s2) { return strcmp(s1, s2) <= 0; }
 
-char __str_sgt(char *s1, char *s2) { return strcmp(s1, s2) > 0; }
+char ___str_sgt(char *s1, char *s2) { return strcmp(s1, s2) > 0; }
 
-char __str_sge(char *s1, char *s2) { return strcmp(s1, s2) >= 0; }
+char ___str_sge(char *s1, char *s2) { return strcmp(s1, s2) >= 0; }
 
-char *__str_add(char *s1, char *s2) {
+char *___str_add(char *s1, char *s2) {
     char *str = (char *) malloc(sizeof(char) * (strlen(s1) + strlen(s2) + 1));
     strcpy(str, s1);
     strcat(str, s2);
     return str;
 }
 
-char *__substring(char *str, int left, int right) {
+char *__string_substring(int left, int right,char *str) {
     int len = right - left + 1;
     char *substr = (char *) malloc(sizeof(char) * len);
     memcpy(substr, str + left, len);
@@ -58,17 +58,17 @@ char *__substring(char *str, int left, int right) {
     return substr;
 }
 
-int __str_length(char *str) {
+int __string_length(char *str) {
     return strlen(str);
 }
 
-int __str_parseInt(char *str) {
+int __string_parseInt(char *str) {
     int val;
     sscanf(str, "%d", &val);
     return val;
 }
 
-int __str_ord(char *str, int num) {
+int __string_ord(int num, char *str) {
     return (int) str[num];
 }
 

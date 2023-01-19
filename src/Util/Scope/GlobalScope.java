@@ -33,8 +33,6 @@ public class GlobalScope extends Scope {
 
     public ArrayList<FuncDef> externalFunc = new ArrayList<>();
 
-    ArrayList<FunDefStmtNode> stringInner = new ArrayList<>();
-
     public void initializeGlobalScope() {
         types.put("int", new Type("int"));
         types.put("bool", new Type("bool"));
@@ -48,22 +46,27 @@ public class GlobalScope extends Scope {
         Type stringClass = new Type("string");
         TypeNode stringType = new TypeNode(innerPos, stringClass, false);
 
-        ClassDefStmtNode stringClassDefNode = new ClassDefStmtNode(innerPos);
+        ClassDefStmtNode stringClassDefNode = new ClassDefStmtNode("string", innerPos);
         stringClassDefNode.classBody = null;
 
+        //开始定义内建函数
         FunDefStmtNode stringLength = new FunDefStmtNode(innerPos, "length", intType);
+        stringLength.isInner = true;
         stringClassDefNode.funcDef.put("length", stringLength);
 
         FunDefStmtNode stringSubString = new FunDefStmtNode(innerPos, "substring", stringType);
         stringSubString.add(new SingleVarDefNode(innerPos, "left", intType));
         stringSubString.add(new SingleVarDefNode(innerPos, "right", intType));
+        stringSubString.isInner = true;
         stringClassDefNode.funcDef.put("substring", stringSubString);
 
         FunDefStmtNode stringParseInt = new FunDefStmtNode(innerPos, "parseInt", intType);
+        stringParseInt.isInner = true;
         stringClassDefNode.funcDef.put("parseInt", stringParseInt);
 
         FunDefStmtNode stringOrd = new FunDefStmtNode(innerPos, "ord", intType);
         stringOrd.add(new SingleVarDefNode(innerPos, "pos", intType));
+        stringOrd.isInner = true;
         stringClassDefNode.funcDef.put("ord", stringOrd);
 
         stringClass.classDef = stringClassDefNode;
@@ -87,6 +90,7 @@ public class GlobalScope extends Scope {
 
         FunDefStmtNode innerPrintlnInt = new FunDefStmtNode(innerPos, "printlnInt", voidType);
         innerPrintlnInt.add(new SingleVarDefNode(innerPos, "n", intType));
+        innerPrintlnInt.isInner = true;
         addFunDefine("printlnInt", innerPrintlnInt);
 
         FunDefStmtNode innerGetString = new FunDefStmtNode(innerPos, "getString", stringType);
@@ -115,8 +119,8 @@ public class GlobalScope extends Scope {
         return types.containsKey(name);
     }
 
-    public void addIRFunc(FuncDef newFunc){
-        globalFunc.put(newFunc.name,newFunc);
+    public void addIRFunc(FuncDef newFunc) {
+        globalFunc.put(newFunc.name, newFunc);
     }
 
     public Type getType(String name) {
@@ -180,6 +184,7 @@ public class GlobalScope extends Scope {
             if (func.isInner) {
                 externalFunc.add(funcDef);
                 funcDef.originFunc = func;
+                InitializeInnerPara(func, funcDef,false);
             }
             globalFunc.put(func.name, funcDef);
         }
@@ -191,15 +196,20 @@ public class GlobalScope extends Scope {
             ClassDefStmtNode classDef = type.classDef;
             for (var func : classDef.funcDef.values()) {
                 BasicBlock basicBlock = new BasicBlock("entry", 0);
-                FuncDef funcDef = new FuncDef(basicBlock, "_" + classDef.name + "." + func.name, toIRType(func.returnTypeNode));
+                FuncDef funcDef = new FuncDef(basicBlock, "__" + classDef.name + "_" + func.name, toIRType(func.returnTypeNode));
                 funcDef.classType = (ClassType) getIRType(type.name);
                 funcDef.isInner = func.isInner;
+                //仅针对string
+                if (func.isInner) {
+                    InitializeInnerPara(func, funcDef,true);
+                    externalFunc.add(funcDef);
+                }
                 globalFunc.put(funcDef.name, funcDef);
             }
             //构造函数
             BasicBlock basicBlock = new BasicBlock("entry", 0);
             if (classDef.constructor != null) {
-                FuncDef funcDef = new FuncDef(basicBlock, "_" + classDef.name + "." + classDef.name, IRTypes.get(classDef.name));
+                FuncDef funcDef = new FuncDef(basicBlock, "__" + classDef.name + "_" + classDef.name, IRTypes.get(classDef.name));
                 funcDef.classType = (ClassType) getIRType(type.name);
                 globalFunc.put(funcDef.name, funcDef);
             }
@@ -208,13 +218,31 @@ public class GlobalScope extends Scope {
 
     IRBaseType toIRType(TypeNode node) {
         IRBaseType base = getIRType(node.type.name);
-        IRBaseType newIRBaseType=base;
-        int layer=node.layer;
-        while(layer>0){
+        IRBaseType newIRBaseType = base;
+        int layer = node.layer;
+        while (layer > 0) {
             layer--;
             newIRBaseType = new PtrType(newIRBaseType);
         }
         return newIRBaseType;
+    }
+
+    void InitializeInnerPara(FunDefStmtNode func, FuncDef funcDef, boolean isString) {
+
+        if (func.parameterList != null && func.parameterList.parameterList != null) {
+            ArrayList<SingleVarDefNode> originPara = func.parameterList.parameterList;
+            for (int i = 0; i < originPara.size(); i++) {
+                IRBaseType Type = toIRType(originPara.get(i).typeNode);
+                Register register = new Register(Type, "var");
+                funcDef.parameterList.add(register);
+            }
+        }
+
+        if (isString) {
+            IRBaseType type = new PtrType(new IntType(8, "char"));
+            Register register = new Register(type, "str");
+            funcDef.parameterList.add(register);
+        }
     }
 
 }

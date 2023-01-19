@@ -21,6 +21,7 @@ public class Load extends IRInstruction {
     @Override
     public void printInstruct() {
         System.out.println(desReg.valueToString() + " = load " + loadType.typeToString() + ", " + ptr.IRType.typeToString() + " " +
-                ptr.valueToString() + ", align " + (loadType.size() + 7) / 8);
+                ptr.valueToString());
+        //", align " + (loadType.size() + 7) / 8);
     }
 }

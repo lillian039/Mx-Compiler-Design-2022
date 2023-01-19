@@ -9,7 +9,7 @@ public class IntType extends IRBaseType{
     }
     @Override
     public boolean isSameType(IRBaseType irBaseType) {
-        return false;
+        return irBaseType instanceof IntType && ((IntType)irBaseType).size == size;
     }
 
     @Override

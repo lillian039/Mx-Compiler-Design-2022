@@ -20,6 +20,7 @@ import LLVMIR.Terminal.Ret;
 import LLVMIR.Value.*;
 import Util.Scope.*;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -31,12 +32,13 @@ public class IRBuilder implements ASTVisitor {
     Scope currentScope;
     BasicBlock currentBlock;
     int regCnt;
-    //   int labelNumber;
     FuncDef currentFunc;
     IRBaseType i32Type;
     RootNode root;
 
     HashMap<String, Integer> renameTable = new HashMap<>();
+
+    int inCircuit = 0;
 
     public IRBuilder(GlobalScope gScope) {
         this.gScope = gScope;
@@ -50,6 +52,7 @@ public class IRBuilder implements ASTVisitor {
         root = node;
         root.addVar(new VarDef(gScope));
         currentScope = gScope;
+
         for (var classDef : root.classDef) {
             classDef.accept(this);
         }
@@ -65,6 +68,7 @@ public class IRBuilder implements ASTVisitor {
         root.funcDefs.add(initializeVar);
         ArrayList<SingleVarDefNode> varDef = root.varDefs.varDef;
         currentBlock = initializeVar.Entry;
+        currentFunc = initializeVar;
         for (var vars : varDef) {
             if (vars.expression != null) {
                 AssignExprNode assignExprNode = new AssignExprNode(new VarExprNode(vars.name, vars.pos), vars.expression, vars.pos);
@@ -77,19 +81,12 @@ public class IRBuilder implements ASTVisitor {
         //main函数第一句话调用初始化构造全局变量的函数
         mainFuncDef.Entry.push_back(callInitializeVar);
 
-        //构造存短路求值的寄存器phi
-        Register phi = new Register(new PtrType(gScope.getIRType("bool")), ".phi");
-        mainFuncDef.Entry.push_back(new Alloca(phi));
-        gScope.addReg(".phi", phi);
-
         //内建函数
         root.InnerFunc = gScope.externalFunc;
-        for (int i = 0; i < root.InnerFunc.size(); i++) {
-            root.InnerFunc.get(i).originFunc.accept(this);
-        }
 
         //malloc 添加
         addMallocGlobalInner();
+
         //str相关自定义内建函数
         addStrGlobalInner();
 
@@ -108,12 +105,12 @@ public class IRBuilder implements ASTVisitor {
 
     }
 
-    void addMallocGlobalInner(){
-        IRBaseType i8Type=new IntType(8,"i8");
-        Register reg1=new Register(i32Type,"size");
-        FuncDef malloc=new FuncDef("__malloc",new PtrType(i8Type),true);
+    void addMallocGlobalInner() {
+        IRBaseType i8Type = new IntType(8, "i8");
+        Register reg1 = new Register(i32Type, "size");
+        FuncDef malloc = new FuncDef("__malloc", new PtrType(i8Type), true);
         malloc.parameterList.add(reg1);
-        root.InnerFunc.add(malloc);
+        root.funcDefs.add(malloc);
     }
 
     void addStrGlobalInner() {
@@ -123,54 +120,74 @@ public class IRBuilder implements ASTVisitor {
         Register regS2 = new Register(stringType, "s2");
         ArrayList<FuncDef> strFunc = new ArrayList<>();
 
-        FuncDef str_eq = new FuncDef("__str_eq", boolType, true);
+        FuncDef str_eq = new FuncDef("___str_eq", boolType, true);
         strFunc.add(str_eq);
-        FuncDef str_ne = new FuncDef("__str_ne", boolType, true);
+        FuncDef str_ne = new FuncDef("___str_ne", boolType, true);
         strFunc.add(str_ne);
-        FuncDef str_slt = new FuncDef("__str_slt", boolType, true);
+        FuncDef str_slt = new FuncDef("___str_slt", boolType, true);
         strFunc.add(str_slt);
-        FuncDef str_sle = new FuncDef("__str_sle", boolType, true);
+        FuncDef str_sle = new FuncDef("___str_sle", boolType, true);
         strFunc.add(str_sle);
-        FuncDef str_sgt = new FuncDef("__str_sgt", boolType, true);
+        FuncDef str_sgt = new FuncDef("___str_sgt", boolType, true);
         strFunc.add(str_sgt);
-        FuncDef str_sge = new FuncDef("__str_sge", boolType, true);
+        FuncDef str_sge = new FuncDef("___str_sge", boolType, true);
         strFunc.add(str_sge);
 
-        FuncDef str_add = new FuncDef("__str_add", stringType, true);
+        FuncDef str_add = new FuncDef("___str_add", stringType, true);
         strFunc.add(str_add);
 
         for (int i = 0; i < strFunc.size(); i++) {
             FuncDef cur = strFunc.get(i);
             cur.parameterList.add(regS1);
             cur.parameterList.add(regS2);
-            root.InnerFunc.add(cur);
+            root.funcDefs.add(cur);
         }
     }
 
     //默认构造函数？
     @Override
     public void visit(NewClassExprNode node) {
-        node.irBaseType = gScope.getIRType(node.type.type.name);
-        Register register = new Register(regCnt++, node.irBaseType);
-        Malloc malloc = new Malloc(register, new ConstInt(node.irBaseType.size()));
+        IRBaseType baseClassType= gScope.getIRType(node.type.type.name);
+        node.irBaseType = new PtrType(baseClassType);//todo!!! bool i1 好像不太行
+
+
+        IRBaseType i8ptr = new PtrType(new IntType(8, "char"));
+        Register register = new Register(regCnt++, i8ptr);
+      //  System.out.println(baseClassType.size());
+        Malloc malloc = new Malloc(register, new ConstInt((baseClassType.size() + 7) / 8));
         currentBlock.push_back(malloc);
-        Call call = new Call("_" + node.type.type.name + "." + node.type.type.name, register, node.irBaseType);
-        currentBlock.push_back(call);
+
+        Register classReg = new Register(regCnt++, node.irBaseType);
+        Bitcast bitcast = new Bitcast(i8ptr, node.irBaseType, classReg, register);
+        currentBlock.push_back(bitcast);
+
+        if (node.type.type.classDef.constructor != null) {
+            Call call = new Call("_" + node.type.type.name + "." + node.type.type.name, classReg, node.irBaseType);
+            currentBlock.push_back(call);
+        }
+        node.irValue = classReg;
+        //node.isAssignable = true;
     }
 
     @Override
     public void visit(DotVarExprNode node) {
-        node.irBaseType = gScope.getIRType(node.type.type.name);
+        node.irBaseType = new PtrType(toIRType(node.type));
         node.lhs.accept(this);
-        Register ls = (Register) node.lhs.irValue;
-        Register newLs = new Register(regCnt++, ls.IRType);
-        String className = ls.IRType.name;
-        VarExprNode var = (VarExprNode) node.rhs;
-        ConstInt number = new ConstInt(root.getClass(className).getMap(var.name));
-        GetElementPtr getPtr = new GetElementPtr(ls, newLs, number);
+        Register ls = (Register) LoadVal(node.lhs);
+
+        Register newLs = new Register(regCnt++, node.irBaseType);
+
+        ClassType structBaseType = (ClassType) gScope.getIRType(node.lhs.type.type.name);
+        ConstInt number = new ConstInt(structBaseType.getMap(((VarExprNode) node.rhs).name));
+        GetElementPtr getPtr = new GetElementPtr(newLs, ls, number, true);
         currentBlock.push_back(getPtr);
-        if (inCircuit && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
-            Store store = new Store(newLs, gScope.getReg(".phi"));
+
+        if (inCircuit != 0 && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
+            Register loadDataReg = new Register(regCnt++, ((PtrType) node.irBaseType).type);
+            Load loadData = new Load(loadDataReg, newLs);
+            currentBlock.push_back(loadData);
+
+            Store store = new Store(loadDataReg, currentScope.getReg(".phi"));
             currentBlock.push_back(store);
         }
         node.irValue = newLs;
@@ -178,12 +195,15 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(NewArrDemNode node) {
-        if (node.arrDimension != null) node.arrDimension.accept(this);
+        if (node.arrDimension != null) {
+            node.arrDimension.accept(this);
+        }
     }
 
     @Override
     public void visit(SingleVarDefNode node) {
         IRBaseType irType = toIRType(node.typeNode);
+        if (!node.typeNode.NotClass()) irType = new PtrType(irType);
         irType = new PtrType(irType);
         Register allocReg = new Register(irType, node.name);
         if (renameTable.containsKey(node.name)) {
@@ -211,8 +231,8 @@ public class IRBuilder implements ASTVisitor {
         node.irBaseType = var.IRType;
         node.irValue = var;
 
-        if (inCircuit && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
-            Store store = new Store(var, gScope.getReg(".phi"));
+        if (inCircuit != 0 && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
+            Store store = new Store(var, currentScope.getReg(".phi"));
             currentBlock.push_back(store);
         }
     }
@@ -242,25 +262,19 @@ public class IRBuilder implements ASTVisitor {
     public void visit(CellExprNode node) {
         node.expression.accept(this);
         IRValue currentEntity = node.expression.irValue;
-        Register newLs = new Register(regCnt++, node.irValue.IRType);
         if (node.expression.isAssignable) {
             Register loadReg = new Register(regCnt++, ((PtrType) currentEntity.IRType).type);
             Load loadVal = new Load(loadReg, (Register) node.expression.irValue);
             currentBlock.push_back(loadVal);
             currentEntity = loadReg;
         }
+        Register newLs = new Register(regCnt++, currentEntity.IRType);
         if (node.option.equals("!")) {
-            Trunc trunc = new Trunc(currentEntity.IRType, new IntType(1, "bool"), newLs, currentEntity);
-            currentBlock.push_back(trunc);
-            Register reg2 = new Register(regCnt++, new IntType(1, "bool"));//存下xor的结果 没毛病
-            Binary binary = new Binary(newLs, new ConstBool(true), reg2, "xor");
+            Binary binary = new Binary(currentEntity, new ConstBool(true), newLs, "xor");
             currentBlock.push_back(binary);
-            Register reg3 = new Register(regCnt++, new IntType(8, "bool"));
-            Zext zext = new Zext(new IntType(1, "bool"), currentEntity.IRType, reg2, reg3);
-            currentBlock.push_back(zext);
-            node.irValue = reg3;
-            if (inCircuit) {
-                Store store = new Store(reg3, gScope.getReg(".phi"));
+            node.irValue = newLs;
+            if (inCircuit != 0) {
+                Store store = new Store(newLs, currentScope.getReg(".phi"));
                 currentBlock.push_back(store);
             }
         } else if (node.option.equals("-")) {
@@ -276,7 +290,7 @@ public class IRBuilder implements ASTVisitor {
             Binary binary = new Binary(currentEntity, new ConstInt(1), newLs, option);
             currentBlock.push_back(binary);
             Register originReg = (Register) node.expression.irValue;
-            Store store = new Store(originReg, newLs);
+            Store store = new Store(newLs, originReg);
             currentBlock.push_back(store);
             node.irValue = originReg;
         }
@@ -319,28 +333,43 @@ public class IRBuilder implements ASTVisitor {
     Register newArrCreate(ArrayList<IRValue> dimensions, int layer, IRBaseType ptrType) {
         IRValue dimen = dimensions.get(layer);
 
-        //4 byte for ptr size
+        //origin length
         Register dimenLen = new Register(regCnt++, i32Type);
-        Binary mulDimen = new Binary(dimen, new ConstInt(ptrType.size()/8), dimenLen, "mul");
+        Binary mulDimen = new Binary(dimen, new ConstInt(ptrType.size() / 8), dimenLen, "mul");
         currentBlock.push_back(mulDimen);
 
         //预留4 byte 空间来记录ptr size
         Register length = new Register(regCnt++, i32Type);
-        Binary addSize = new Binary(dimenLen, new ConstInt(i32Type.size()/8), length, "add");
+        Binary addSize = new Binary(dimenLen, new ConstInt(i32Type.size() / 8), length, "add");
         currentBlock.push_back(addSize);
 
-        //mallocNew 最终要返回的ptr
-        Register mallocNew = new Register(regCnt++, new PtrType(ptrType));
-        Malloc mallocArr = new Malloc(mallocNew, length);
+        PtrType i8ptr = new PtrType(new IntType(8, "_char"));
+        //mallocConv 最终要返回的ptr
+        Register mallocOrigin = new Register(regCnt++, i8ptr);
+        Malloc mallocArr = new Malloc(mallocOrigin, length);
         currentBlock.push_back(mallocArr);
 
 
-        //将size存进第一位
-        Register sizeReg = new Register(regCnt++, i32Type);
-        GetElementPtr getSizePtr = new GetElementPtr(sizeReg, mallocNew, new ConstInt(0));
-        currentBlock.push_back(getSizePtr);
+        //把size存到开头
+        Register arrLength = new Register(regCnt++, new PtrType(i32Type));
+        Bitcast bitcastToPtrInt = new Bitcast(i8ptr, arrLength.IRType, arrLength, mallocOrigin); //将头的*i8 转成*i32
+        currentBlock.push_back(bitcastToPtrInt);
+        Store storeArrLength = new Store(dimen, arrLength);
+        currentBlock.push_back(storeArrLength);
+
+        //返回的指针要挪到size后一位，并且类型转化
+        Register mallocChar = new Register(regCnt++, i8ptr);
+        GetElementPtr getArrPtr = new GetElementPtr(mallocChar, mallocOrigin, new ConstInt(4));
+        currentBlock.push_back(getArrPtr);
+
+        Register mallocConv = new Register(regCnt++, ptrType);
+        Bitcast bitcastMallocType = new Bitcast(mallocOrigin.IRType, ptrType, mallocConv, mallocChar);
+        currentBlock.push_back(bitcastMallocType);
+
+
         //最后一层 直接返回
-        if (layer == dimensions.size() - 1) return mallocNew;
+        if (layer == dimensions.size() - 1) return mallocConv;
+
         //捏一个for循环
         int label = currentFunc.label++;
         BasicBlock conditionBlock = new BasicBlock("array.for.begin" + label, label);
@@ -350,13 +379,18 @@ public class IRBuilder implements ASTVisitor {
         Register iReg = new Register(new PtrType(i32Type), "_new_i." + layer + "." + label);
         Alloca allocaIReg = new Alloca(iReg);
         currentBlock.push_back(allocaIReg);
-        Store storeiReg = new Store(new ConstInt(1), iReg);
+        Store storeiReg = new Store(new ConstInt(0), iReg);
         currentBlock.push_back(storeiReg);
         currentBlock.push_back(new Jump(conditionBlock));
         currentBlock = conditionBlock;
         currentFunc.addBlock(conditionBlock);
-        Register cmpI = new Register(regCnt++, i32Type);
-        Icmp icmpI = new Icmp(iReg, length, cmpI, "slt"); // i < length
+
+        Register loadIReg = new Register(regCnt++, i32Type);
+        Register cmpI = new Register(regCnt++, gScope.getIRType("bool"));
+        Load loadI = new Load(loadIReg, iReg);
+        currentBlock.push_back(loadI);
+
+        Icmp icmpI = new Icmp(loadIReg, dimen, cmpI, "slt"); // i < dimenLength
         conditionBlock.push_back(icmpI);
         Branch branchBody = new Branch(cmpI, bodyBlock, endBlock);
         currentBlock.push_back(branchBody);
@@ -365,47 +399,57 @@ public class IRBuilder implements ASTVisitor {
         //body
         PtrType ptr = (PtrType) ptrType;
         IRBaseType nextLayerType = ptr.type;
-//        if (ptr.dimension == 1) {
-//            nextLayerType = ptr.type;
-//        } else {
-//            nextLayerType = new PtrType(ptr.dimension - 1, ptr.type);
-//        }
-        Register lowerReg = new Register(regCnt++, nextLayerType);
-        GetElementPtr getElementPtr = new GetElementPtr(lowerReg, mallocNew, iReg);
+
+        Register loadiRegLayer = new Register(regCnt++, i32Type);
+        Register lowerReg = new Register(regCnt++, ptrType);
+        Load loadiLayer = new Load(loadiRegLayer, iReg);
+        currentBlock.push_back(loadiLayer);
+        GetElementPtr getElementPtr = new GetElementPtr(lowerReg, mallocConv, loadiRegLayer);
         currentBlock.push_back(getElementPtr);
         Register newLayerReg = newArrCreate(dimensions, layer + 1, nextLayerType);
+
         Store store = new Store(newLayerReg, lowerReg);
         currentBlock.push_back(store);
 
         //i=i+1
         Register tmpI = new Register(regCnt++, i32Type);
-        Load load = new Load(tmpI, iReg);
-        currentBlock.push_back(load);
-        Binary binaryAdd = new Binary(iReg, new ConstInt(1), tmpI, "add");
+        Register tmpnewI = new Register(regCnt++, i32Type);
+        Load loadtmpI = new Load(tmpI, iReg);
+        currentBlock.push_back(loadtmpI);
+        Binary binaryAdd = new Binary(tmpI, new ConstInt(1), tmpnewI, "add");
         currentBlock.push_back(binaryAdd);
+        Store storeI = new Store(tmpnewI, iReg);
+        currentBlock.push_back(storeI);
 
         //go to condition
         Jump jumpOut = new Jump(conditionBlock);
         currentBlock.push_back(jumpOut);
         currentBlock = endBlock;
         currentFunc.addBlock(endBlock);
-        return mallocNew;
+        return mallocConv;
     }
 
     @Override
     public void visit(NewArrNode node) {
         PtrType ptr = (PtrType) toIRType(node.type);
+        if (!node.type.NotClass()) ptr = new PtrType(ptr);
         node.irBaseType = ptr;
         ArrayList<IRValue> newArrExpr = new ArrayList<>();
-       // newArrExpr.add(new ConstInt(1));
+
         for (NewArrDemNode arrNode : node.arrList) {
             arrNode.accept(this);
             if (arrNode.arrDimension != null) {
-                newArrExpr.add(arrNode.arrDimension.irValue);
+                IRValue demVal = arrNode.arrDimension.irValue;
+                if (arrNode.arrDimension.isAssignable) {
+                    Register loadDemReg = new Register(regCnt++, (((PtrType) demVal.IRType)).type);
+                    Load loadDem = new Load(loadDemReg, (Register) demVal);
+                    currentBlock.push_back(loadDem);
+                    newArrExpr.add(loadDemReg);
+                } else newArrExpr.add(arrNode.arrDimension.irValue);
             }
         }
 
-        node.irValue=newArrCreate(newArrExpr, 0, ptr);
+        node.irValue = newArrCreate(newArrExpr, 0, ptr);
 
 
     }
@@ -423,6 +467,12 @@ public class IRBuilder implements ASTVisitor {
             exp.accept(this);
             IRValue elementNum = exp.irValue;
             irBaseType = ((PtrType) irBaseType).type;
+            if (exp.isAssignable) {
+                Register loadReg = new Register(regCnt++, ((PtrType) elementNum.IRType).type);
+                Load loadVar = new Load(loadReg, (Register) elementNum);
+                currentBlock.push_back(loadVar);
+                elementNum = loadReg;
+            }
 
             Register newReg = new Register(regCnt++, ptrStart.IRType);
             GetElementPtr getElementPtr = new GetElementPtr(newReg, ptrStart, elementNum);//todo get出来应该是个指针
@@ -440,7 +490,6 @@ public class IRBuilder implements ASTVisitor {
         currentFunc.addBlock(newBlock);
         currentBlock.push_back(new Jump(newBlock));
         currentBlock = newBlock;
-        node.stepNode.accept(this);
         node.conditionNode.accept(this);
         LoopScope loopScope = new LoopScope(currentScope);
         loopScope.continueLoop = currentBlock;
@@ -451,6 +500,7 @@ public class IRBuilder implements ASTVisitor {
         currentBlock = body;
         currentScope = loopScope;
         if (node.body != null) node.body.accept(this);
+        node.stepNode.accept(this);
         Jump jumpBegin = new Jump(newBlock);
         currentBlock.push_back(jumpBegin);
         currentScope = currentScope.parentScope;
@@ -480,13 +530,8 @@ public class IRBuilder implements ASTVisitor {
         node.irBaseType = toIRType(node.type);
         Call callFunction;
         Register caller;
-        if (node.irBaseType instanceof VoidType) {
-            callFunction = new Call(node.name, node.irBaseType);
-            caller = new Register(node.irBaseType, "tmpstore");
-        } else {
-            caller = new Register(regCnt++, node.irBaseType);
-            callFunction = new Call(node.name, caller, node.irBaseType);
-        }
+        callFunction = new Call(node.name, node.irBaseType);
+
         if (node.parameterValueNode != null) {
             ArrayList<ExprNode> value = node.parameterValueNode.parameters;
             for (int i = 0; i < value.size(); i++) {
@@ -502,6 +547,11 @@ public class IRBuilder implements ASTVisitor {
             }
         }
         currentBlock.push_back(callFunction);
+        if (!(node.irBaseType instanceof VoidType)) {
+            caller = new Register(regCnt++, node.irBaseType);
+            callFunction.caller = caller;
+        } else caller = new Register(node.irBaseType, "tmpstore");
+
         caller.callFunc = callFunction;
         node.irValue = caller;
     }
@@ -522,8 +572,8 @@ public class IRBuilder implements ASTVisitor {
         IRValue newVal;
         if (node.value.isBoolVal) {
             newVal = new ConstBool(node.value.boolVal);
-            if (inCircuit) {
-                Store store = new Store(newVal, gScope.getReg(".phi"));
+            if (inCircuit != 0) {
+                Store store = new Store(newVal, currentScope.getReg(".phi"));
                 currentBlock.push_back(store);
             }
         } else if (node.value.isStringVal) {
@@ -532,16 +582,15 @@ public class IRBuilder implements ASTVisitor {
             String name;
             if (num == 0) name = ".str";
             else name = ".str." + num;
-            Register stringReg = gScope.getReg(name);
-          /*  newVal=new Register(regCnt++,((PtrType)stringReg.IRType).type);
-            Load loadStr=new Load((Register) newVal,stringReg);
-            currentBlock.push_back(loadStr);*/
-            newVal = stringReg;
+            Register constStringReg = gScope.getReg(name);
+
+            newVal = constStringReg.value;
 
         } else if (node.value.isIntVal) {
             newVal = new ConstInt(node.value.intVal);
         } else newVal = new Null();
         node.irValue = newVal;
+        node.irBaseType = newVal.IRType;
     }
 
     @Override
@@ -592,7 +641,6 @@ public class IRBuilder implements ASTVisitor {
         node.irBaseType = node.lhs.irBaseType;
     }
 
-    boolean inCircuit;
 
     void BinaryString(BinaryExprNode node) {
         node.ls.accept(this);
@@ -617,7 +665,7 @@ public class IRBuilder implements ASTVisitor {
         Call call = null;
         if (node.option.equals("+")) {
             Register register = new Register(regCnt++, gScope.getIRType("string"));
-            call = new Call("__str_sge", register, gScope.getIRType("string"));
+            call = new Call("___str_add", register, gScope.getIRType("string"));
             call.addParameter(lsStr);
             call.addParameter(rsStr);
             currentBlock.push_back(call);
@@ -627,17 +675,17 @@ public class IRBuilder implements ASTVisitor {
         IRBaseType boolType = gScope.getIRType("bool");
         Register ls = new Register(regCnt++, boolType);
         if (node.option.equals("==")) {//比较两个字符串内容是否完全一致（不是内存地址）
-            call = new Call("__str_eq", ls, boolType);
+            call = new Call("___str_eq", ls, boolType);
         } else if (node.option.equals("!=")) {
-            call = new Call("__str_ne", ls, boolType);
+            call = new Call("___str_ne", ls, boolType);
         } else if (node.option.equals("<")) {
-            call = new Call("__str_slt", ls, boolType);
+            call = new Call("___str_slt", ls, boolType);
         } else if (node.option.equals(">")) {
-            call = new Call("__str_sgt", ls, boolType);
+            call = new Call("___str_sgt", ls, boolType);
         } else if (node.option.equals(">=")) {
-            call = new Call("__str_sge", ls, boolType);
+            call = new Call("___str_sge", ls, boolType);
         } else if (node.option.equals("<=")) {
-            call = new Call("__str_sle", ls, boolType);
+            call = new Call("___str_sle", ls, boolType);
         }
         if (call == null) System.out.println("call null");
         else {
@@ -656,7 +704,7 @@ public class IRBuilder implements ASTVisitor {
         }
         //把phi的值存在栈上 就可以不用phi指令了
         if (node.option.equals("||") || node.option.equals("&&")) {
-            inCircuit = true;
+            inCircuit++;
             node.ls.accept(this);
             IRValue lsVal = node.ls.irValue;
             if (node.ls.isAssignable) {
@@ -683,8 +731,11 @@ public class IRBuilder implements ASTVisitor {
             }
             currentFunc.addBlock(endBlock);
             currentBlock = endBlock;
-            node.irValue = gScope.getReg(".phi");
-            inCircuit = false;
+            Register loadPhiReg = new Register(regCnt++, gScope.getIRType("bool"));
+            Load loadPhi = new Load(loadPhiReg, currentScope.getReg(".phi"));
+            currentBlock.push_back(loadPhi);
+            node.irValue = loadPhiReg;
+            inCircuit--;
         } else {
             node.ls.accept(this);
             IRValue lvalue = node.ls.irValue;
@@ -703,7 +754,7 @@ public class IRBuilder implements ASTVisitor {
                 rvalue = rsReg;
             }
 
-            Register reg = new Register(regCnt++, node.ls.irBaseType);
+            Register reg = new Register(regCnt++, lvalue.IRType);
             if (node.option.equals("<") || node.option.equals(">") || node.option.equals("<=") || node.option.equals(">=")
                     || node.option.equals("==") || node.option.equals("!=")) {
                 String op = null;
@@ -720,8 +771,8 @@ public class IRBuilder implements ASTVisitor {
                 node.irValue.IRType = gScope.getIRType("bool");
                 node.irBaseType = gScope.getIRType("bool");
                 currentBlock.push_back(currentInstruction);
-                if (inCircuit) {
-                    Store storePhi = new Store(reg, gScope.getReg(".phi"));
+                if (inCircuit != 0) {
+                    Store storePhi = new Store(reg, currentScope.getReg(".phi"));
                     currentBlock.push_back(storePhi);
                 }
             } else {
@@ -740,6 +791,7 @@ public class IRBuilder implements ASTVisitor {
                 }
                 IRInstruction currentInstruction = new Binary(lvalue, rvalue, reg, op);
                 node.irValue = reg;
+                node.irBaseType = reg.IRType;
                 currentBlock.push_back(currentInstruction);
             }
         }
@@ -758,7 +810,13 @@ public class IRBuilder implements ASTVisitor {
             currentBlock.push_back(allocaRet);
             currentFunc.retval = retReg;
         }
-        if (!currentFunc.isInner) root.addFunc(currentFunc);
+
+        //构造存短路求值的寄存器phi
+        Register phi = new Register(new PtrType(gScope.getIRType("bool")), ".phi");
+        currentFunc.Entry.push_back(new Alloca(phi));
+        gScope.addReg(".phi", phi);
+
+        root.addFunc(currentFunc);
 
         //引用传参 指针？
         if (node.parameterList != null) {
@@ -784,8 +842,10 @@ public class IRBuilder implements ASTVisitor {
         if (node.funcBody != null) node.funcBody.accept(this);
         if (currentBlock.tailStmt == null) currentBlock.tailStmt = new Jump(currentFunc.returnBlock);
         Register loadRetReg = new Register(regCnt++, currentFunc.irReturnType);
-        Load loadRet = new Load(loadRetReg, retReg);
-        currentFunc.returnBlock.push_back(loadRet);
+        if (!(currentFunc.irReturnType instanceof VoidType)) {
+            Load loadRet = new Load(loadRetReg, retReg);
+            currentFunc.returnBlock.push_back(loadRet);
+        }
         Ret ret = new Ret(loadRetReg);
         currentFunc.returnBlock.push_back(ret);
         currentScope = currentScope.parentScope;
@@ -816,14 +876,42 @@ public class IRBuilder implements ASTVisitor {
         }
     }
 
+    //???
     @Override
     public void visit(DotFuncExprNode node) {
         node.lhs.accept(this);
-        node.rhs.name = "_" + node.lhs.irBaseType.name + "." + node.rhs.name;
-        node.rhs.accept(this);
-        Call callfunc = ((Register) node.rhs.irValue).callFunc;
-        callfunc.addParameter(node.lhs.irValue);
-        node.irValue = node.rhs.irValue;
+        IRValue lhsVal = LoadVal(node.lhs);
+
+        IRBaseType charPtr = new PtrType(new IntType(8, "char"));
+        IRBaseType i32Ptr = new PtrType(i32Type);
+        IRValue rhsVal;
+
+        if (lhsVal.IRType instanceof PtrType && !lhsVal.IRType.isSameType(charPtr)) {
+            Register sizeRegPtr = new Register(regCnt++, i32Ptr);
+            Bitcast bitcast = new Bitcast(lhsVal.IRType, i32Ptr, sizeRegPtr, lhsVal);
+            currentBlock.push_back(bitcast);
+
+            Register sizeReg = new Register(regCnt++, i32Ptr);
+            GetElementPtr getElementPtr = new GetElementPtr(sizeReg, sizeRegPtr, new ConstInt(-1));
+            currentBlock.push_back(getElementPtr);
+
+            Register loadSizeReg = new Register(regCnt++, i32Type);
+            Load loadSize = new Load(loadSizeReg, sizeReg);
+            currentBlock.push_back(loadSize);
+
+            rhsVal = loadSizeReg;
+
+        } else {
+            String className = lhsVal.IRType.isSameType(charPtr) ? "string" : lhsVal.IRType.name;
+            node.rhs.name = "__" + className + "_" + node.rhs.name;
+            node.rhs.accept(this);
+            rhsVal = LoadVal(node.rhs);
+
+            //把自身当做一个指针传进去（this）放在最后一个
+            Call callfunc = ((Register) node.rhs.irValue).callFunc;
+            callfunc.addParameter(lhsVal);
+        }
+        node.irValue = rhsVal;
     }
 
     @Override
@@ -832,11 +920,11 @@ public class IRBuilder implements ASTVisitor {
         ClassType type = (ClassType) gScope.getIRType(node.name);
         ClassDef currentClass = new ClassDef(node.name, type);
         for (int i = 0; i < node.memberOrder.size(); i++) {
-            currentClass.memberMap.put(node.memberOrder.get(i), i);
+            type.memberMap.put(node.memberOrder.get(i), i);
         }
-        for (String name : node.functionOrder) {
-            FunDefStmtNode FuncNode = node.funcDef.get(name);
-            FuncNode.name = "_" + type.name + "." + FuncNode.name;
+        for (var func : node.funcDef.values()) {
+            FunDefStmtNode FuncNode = func;
+            FuncNode.name = "__" + type.name + "_" + FuncNode.name;
             FuncNode.accept(this);
         }
         root.classDefs.add(currentClass);
@@ -867,13 +955,19 @@ public class IRBuilder implements ASTVisitor {
     IRBaseType toIRType(TypeNode node) {
         IRBaseType base = gScope.getIRType(node.type.name);
         IRBaseType newIRBaseType = base;
-        int layer = node.layer;
+        int layer = node.originLayer;
         while (layer > 0) {
             layer--;
             newIRBaseType = new PtrType(newIRBaseType);
         }
-        //if (node.layer > 0) newIRBaseType = new PtrType(node.layer, base);
-        //else newIRBaseType = base;
         return newIRBaseType;
+    }
+
+    IRValue LoadVal(ExprNode expr) {
+        if (!expr.isAssignable) return expr.irValue;
+        Register loadReg = new Register(regCnt++, ((PtrType) expr.irValue.IRType).type);
+        Load loadVal = new Load(loadReg, (Register) expr.irValue);
+        currentBlock.push_back(loadVal);
+        return loadReg;
     }
 }

@@ -1,6 +1,7 @@
 package LLVMIR.GlobalDefine;
 
 import AST.Atom.SingleVarDefNode;
+import AST.Atom.TypeNode;
 import AST.RootNode;
 import LLVMIR.BasicBlock;
 import LLVMIR.Expression.Alloca;
@@ -33,7 +34,10 @@ public class VarDef extends GlobalDef {
         varDef = globalScope.globalVarOrder;
         stringCollect = globalScope.stringCollect;
         for (var vars : varDef) {
-            IRBaseType irBaseType = globalScope.getIRType(vars.typeNode.type.name);
+            IRBaseType irBaseType = toIRType(vars.typeNode);
+            if(!vars.typeNode.NotClass()){
+                irBaseType=new PtrType(irBaseType);
+            }
             Register reg = new Register(new PtrType(irBaseType), vars.name);
             reg.isGlobe = true;
             this.globalScope.addReg(vars.name, reg);
@@ -42,8 +46,7 @@ public class VarDef extends GlobalDef {
         }
         stringCollect.forEach((key, value) -> {
             ConstString constString = new ConstString(key, value);
-            IntType intType = new IntType(8, "char");
-            PtrType ptrType = new PtrType(intType);
+            PtrType ptrType = new PtrType(constString.IRType);
             String name;
             if (value == 0) name = ".str";
             else name = ".str." + value;
@@ -70,5 +73,16 @@ public class VarDef extends GlobalDef {
             strings.printString();
             System.out.println();
         }
+    }
+
+    IRBaseType toIRType(TypeNode node) {
+        IRBaseType base = globalScope.getIRType(node.type.name);
+        IRBaseType newIRBaseType = base;
+        int layer = node.originLayer;
+        while (layer > 0) {
+            layer--;
+            newIRBaseType = new PtrType(newIRBaseType);
+        }
+        return newIRBaseType;
     }
 }

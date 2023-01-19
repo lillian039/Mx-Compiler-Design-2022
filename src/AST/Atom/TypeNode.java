@@ -15,8 +15,7 @@ public class TypeNode extends ASTNode {
 
     public boolean isArr = false;
     public int layer = 0;
-
-    public Vector<ExprNode> arrLayerSize = null;
+    public int originLayer = 0;
 
     public TypeNode(Position pos) {
         super(pos);
@@ -31,7 +30,7 @@ public class TypeNode extends ASTNode {
 
     public TypeNode(Position pos, TypeNode other) {
         super(pos);
-        layer = other.layer;
+        layer = originLayer = other.layer;
         isArr = other.isArr;
         type = other.type;
     }
@@ -50,6 +49,11 @@ public class TypeNode extends ASTNode {
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);
+    }
+
+    public boolean NotClass() {
+        return type.name.equals("int") || type.name.equals("bool") || type.name.equals("string")
+                || type.name.equals("void") || type.name.equals("null");
     }
 
 }

@@ -1,6 +1,7 @@
 package LLVMIR.Expression;
 
 import LLVMIR.IRInstruction;
+import LLVMIR.IRType.ClassType;
 import LLVMIR.IRType.IRBaseType;
 import LLVMIR.IRType.PtrType;
 import LLVMIR.Value.ConstString;
@@ -13,16 +14,19 @@ public class Alloca extends IRInstruction {
 
     public Alloca(Register register) {
         this.reg = register;
-        this.irType=((PtrType)register.IRType).type;
+        this.irType = ((PtrType) register.IRType).type;
     }
 
     @Override
     public void printInstruct() {
-        System.out.println(reg.valueToString() + " = alloca " + irType.typeToString() + ", align " + (irType.size() + 7) / 8);
+        System.out.println(reg.valueToString() + " = alloca " + irType.typeToString());
+        //+ ", align " + (irType.size() + 7) / 8);
     }
 
     public void printGlobalInstruct() {
-        System.out.println("@" + reg.name + " = global " + irType.typeToString() + " 0" +", align " + (irType.size() + 7) / 8);
+        String originVal = (irType instanceof PtrType || irType instanceof ClassType) ? "null" : "0";
+        System.out.println("@" + reg.name + " = global " + irType.typeToString() + " " + originVal);
+        // +", align "+ (irType.size() + 7) / 8);
     }
 
     public void printString() {

@@ -6,3 +6,5 @@ output/
 Compiler-2021-testcases/
 test.mx
 test.out
+code
+ir_judge.py

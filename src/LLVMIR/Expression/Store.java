@@ -24,6 +24,7 @@ public class Store extends IRInstruction {
 
         else
             System.out.println("store " + value.IRType.typeToString() + " " + value.valueToString() +
-                    ", "+ storeAddr.IRType.typeToString()+" "+ storeAddr.valueToString() + ", align " + (value.IRType.size() + 7) / 8);
+                    ", "+ storeAddr.IRType.typeToString()+" "+ storeAddr.valueToString() ) ;
+        //+ ", align " + (value.IRType.size() + 7) / 8);
     }
 }

@@ -4,6 +4,11 @@ public class ArrType extends IRBaseType {
     public int dimension;
     public IRBaseType type;
 
+    public ArrType(int dimension, IRBaseType type) {
+        this.dimension = dimension;
+        this.type = type;
+    }
+
     @Override
     public boolean isSameType(IRBaseType irBaseType) {
         if (!(irBaseType instanceof ArrType)) return false;
@@ -12,7 +17,7 @@ public class ArrType extends IRBaseType {
 
     @Override
     public String typeToString() {
-        return '[' + dimension + " x " + type.typeToString() + ']';
+        return "[" + dimension + " x " + type.typeToString() + ']';
     }
 
     @Override

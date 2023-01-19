@@ -23,21 +23,21 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitProgram(MxParser.ProgramContext ctx) {
-        intType=gScope.getType("int");
-        boolType=gScope.getType("bool");
-        stringType=gScope.getType("string");
-        voidType=gScope.getType("void");
-        nullType=gScope.getType("null");
+        intType = gScope.getType("int");
+        boolType = gScope.getType("bool");
+        stringType = gScope.getType("string");
+        voidType = gScope.getType("void");
+        nullType = gScope.getType("null");
         RootNode rootNode = new RootNode(new Position(ctx));
-        for(var Stmt : ctx.children){
-            if(!(Stmt instanceof MxParser.ClassdefineContext)
-                    &&!(Stmt instanceof MxParser.FuncdefineContext)
-                    &&!(Stmt instanceof MxParser.VardefContext))break;
-            StmtNode stmtNode=(StmtNode) visit(Stmt);
+        for (var Stmt : ctx.children) {
+            if (!(Stmt instanceof MxParser.ClassdefineContext)
+                    && !(Stmt instanceof MxParser.FuncdefineContext)
+                    && !(Stmt instanceof MxParser.VardefContext)) break;
+            StmtNode stmtNode = (StmtNode) visit(Stmt);
             rootNode.statements.add(stmtNode);
-            if(Stmt instanceof MxParser.ClassdefineContext)rootNode.classDef.add((ClassDefStmtNode) stmtNode);
-            else if(Stmt instanceof MxParser.FuncdefineContext)rootNode.funcDef.add((FunDefStmtNode)stmtNode);
-            else if(Stmt instanceof MxParser.VardefContext)rootNode.varDef.add((VarDefStmtNode) stmtNode);
+            if (Stmt instanceof MxParser.ClassdefineContext) rootNode.classDef.add((ClassDefStmtNode) stmtNode);
+            else if (Stmt instanceof MxParser.FuncdefineContext) rootNode.funcDef.add((FunDefStmtNode) stmtNode);
+            else if (Stmt instanceof MxParser.VardefContext) rootNode.varDef.add((VarDefStmtNode) stmtNode);
         }
         return rootNode;
     }
@@ -104,7 +104,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitPrimary(MxParser.PrimaryContext ctx) {
-        if (ctx.constant()!=null) return visit(ctx.constant());
+        if (ctx.constant() != null) return visit(ctx.constant());
         else if (ctx.variable() != null) return visit(ctx.variable());
         else return visit(ctx.funVal());
     }
@@ -132,15 +132,16 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     public ASTNode visitCallfunction(MxParser.CallfunctionContext ctx) {
         Position pos = new Position(ctx);
         FuncExprNode funct = new FuncExprNode(ctx.IDENTIFIER().toString(), pos);
-        if(ctx.functionParameterValue()!=null)funct.parameterValueNode=(FunctionParameterValueNode) visit(ctx.functionParameterValue());
+        if (ctx.functionParameterValue() != null)
+            funct.parameterValueNode = (FunctionParameterValueNode) visit(ctx.functionParameterValue());
         return funct;
     }
 
     @Override
     public ASTNode visitFunctionParameterValue(MxParser.FunctionParameterValueContext ctx) {
         Position pos = new Position(ctx);
-        FunctionParameterValueNode functionParameterValueNode=new FunctionParameterValueNode(pos);
-        ctx.expression().forEach(cur->functionParameterValueNode.parameters.add((ExprNode)visit(cur)));
+        FunctionParameterValueNode functionParameterValueNode = new FunctionParameterValueNode(pos);
+        ctx.expression().forEach(cur -> functionParameterValueNode.parameters.add((ExprNode) visit(cur)));
         return functionParameterValueNode;
     }
 
@@ -149,15 +150,17 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
         Position pos = new Position(ctx);
         LambdaExprNode lambda = new LambdaExprNode(pos);
         if (ctx.And() != null) lambda.isGlobe = true;
-        if(ctx.functionParameterList()!=null)lambda.functionParameterList=(FunctionParameterListNode)visit(ctx.functionParameterList());
-        if(ctx.functionParameterValue()!=null)lambda.functionParameterValue=(FunctionParameterValueNode)visit(ctx.functionParameterValue());
-        if(ctx.suite()!=null)lambda.funcBody = (BlockStmtNode) visit(ctx.suite());
+        if (ctx.functionParameterList() != null)
+            lambda.functionParameterList = (FunctionParameterListNode) visit(ctx.functionParameterList());
+        if (ctx.functionParameterValue() != null)
+            lambda.functionParameterValue = (FunctionParameterValueNode) visit(ctx.functionParameterValue());
+        if (ctx.suite() != null) lambda.funcBody = (BlockStmtNode) visit(ctx.suite());
         return lambda;
     }
 
     @Override
     public ASTNode visitVariable(MxParser.VariableContext ctx) {
-        if(ctx.IDENTIFIER()!=null)return new VarExprNode(ctx.IDENTIFIER().toString(), new Position(ctx));
+        if (ctx.IDENTIFIER() != null) return new VarExprNode(ctx.IDENTIFIER().toString(), new Position(ctx));
         else return new VarExprNode("this", new Position(ctx));
     }
 
@@ -179,6 +182,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
             newExprNode.arrList.add((NewArrDemNode) visit(arr));
             newExprNode.type.layer++;
         }
+        newExprNode.type.originLayer=newExprNode.type.layer;
         return newExprNode;
     }
 
@@ -194,15 +198,15 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitNewClassExpr(MxParser.NewClassExprContext ctx) {
         NewClassExprNode newExprNode = new NewClassExprNode(new Position(ctx));
-        newExprNode.type= new TypeNode(new Position(ctx),new Type(ctx.IDENTIFIER().toString()),false);
+        newExprNode.type = new TypeNode(new Position(ctx), new Type(ctx.IDENTIFIER().toString()), false);
         return newExprNode;
     }
 
     @Override
     public ASTNode visitArrayExpr(MxParser.ArrayExprContext ctx) {
-        ArrExprNode arr=new ArrExprNode(new Position(ctx));
-        arr.ls=(ExprNode) visit(ctx.expression(0));
-        for(int i=1;i<ctx.expression().size();i++){
+        ArrExprNode arr = new ArrExprNode(new Position(ctx));
+        arr.ls = (ExprNode) visit(ctx.expression(0));
+        for (int i = 1; i < ctx.expression().size(); i++) {
             arr.arrDimension.add((ExprNode) visit(ctx.expression(i)));
         }
         return arr;
@@ -247,11 +251,11 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitForStmt(MxParser.ForStmtContext ctx) {
-        ForStmtNode forStmtNode=new ForStmtNode(new Position(ctx));
-        if(ctx.initStmt!=null)forStmtNode.initializeStmt=(StmtNode)visit(ctx.initStmt);
-        if(ctx.condition!=null)forStmtNode.conditionNode=(ExprNode)visit(ctx.condition);
-        if(ctx.step!=null)forStmtNode.stepNode=(ExprNode)visit(ctx.step);
-        if(ctx.body!=null)forStmtNode.body=(StmtNode) visit(ctx.body);
+        ForStmtNode forStmtNode = new ForStmtNode(new Position(ctx));
+        if (ctx.initStmt != null) forStmtNode.initializeStmt = (StmtNode) visit(ctx.initStmt);
+        if (ctx.condition != null) forStmtNode.conditionNode = (ExprNode) visit(ctx.condition);
+        if (ctx.step != null) forStmtNode.stepNode = (ExprNode) visit(ctx.step);
+        if (ctx.body != null) forStmtNode.body = (StmtNode) visit(ctx.body);
         return forStmtNode;
     }
 
@@ -274,7 +278,7 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitReturnStmt(MxParser.ReturnStmtContext ctx) {
-        if(ctx.expression()!=null)return new ReturnStmtNode((ExprNode) visit(ctx.expression()), new Position(ctx));
+        if (ctx.expression() != null) return new ReturnStmtNode((ExprNode) visit(ctx.expression()), new Position(ctx));
         else return new ReturnStmtNode(new Position(ctx));
     }
 
@@ -303,24 +307,25 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     public ASTNode visitFuncdefine(MxParser.FuncdefineContext ctx) {
         FunDefStmtNode funDefStmtNode = new FunDefStmtNode(new Position(ctx));
         funDefStmtNode.name = ctx.IDENTIFIER().toString();
-        if(ctx.returnType()!=null)funDefStmtNode.returnTypeNode = (TypeNode) visit(ctx.returnType());
-        if(ctx.functionParameterList()!=null)funDefStmtNode.parameterList=(FunctionParameterListNode) visit(ctx.functionParameterList());
+        if (ctx.returnType() != null) funDefStmtNode.returnTypeNode = (TypeNode) visit(ctx.returnType());
+        if (ctx.functionParameterList() != null)
+            funDefStmtNode.parameterList = (FunctionParameterListNode) visit(ctx.functionParameterList());
         funDefStmtNode.funcBody = (BlockStmtNode) visit(ctx.suite());
         return funDefStmtNode;
     }
 
     @Override
     public ASTNode visitFunctionParameterList(MxParser.FunctionParameterListContext ctx) {
-        Position pos=new Position(ctx);
-        FunctionParameterListNode parameteListNode=new FunctionParameterListNode(pos);
-        ctx.paralistVarDef().forEach(cur->parameteListNode.add((SingleVarDefNode) visit(cur)));
+        Position pos = new Position(ctx);
+        FunctionParameterListNode parameteListNode = new FunctionParameterListNode(pos);
+        ctx.paralistVarDef().forEach(cur -> parameteListNode.add((SingleVarDefNode) visit(cur)));
         return parameteListNode;
     }
 
     @Override
     public ASTNode visitParalistVarDef(MxParser.ParalistVarDefContext ctx) {
-        TypeNode typeNode=(TypeNode) visit(ctx.type());
-        SingleVarDefNode singleVarDefNode=new SingleVarDefNode(new Position(ctx),ctx.IDENTIFIER().toString(),typeNode);
+        TypeNode typeNode = (TypeNode) visit(ctx.type());
+        SingleVarDefNode singleVarDefNode = new SingleVarDefNode(new Position(ctx), ctx.IDENTIFIER().toString(), typeNode);
         return singleVarDefNode;
     }
 
@@ -336,13 +341,14 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     public ASTNode visitType(MxParser.TypeContext ctx) {
         TypeNode typeNode = new TypeNode(new Position(ctx));
         String typename;
-        if (ctx.BOOL() != null) typename="bool";
-        else if (ctx.INT() != null) typename="int";
-        else if (ctx.STR() != null) typename="string";
+        if (ctx.BOOL() != null) typename = "bool";
+        else if (ctx.INT() != null) typename = "int";
+        else if (ctx.STR() != null) typename = "string";
         else typename = ctx.IDENTIFIER().toString();
-        typeNode.layer+=ctx.RightBracket().size();
-        if(typeNode.layer>1)typeNode.isArr=true;
-        typeNode.type.name=typename;
+        typeNode.layer += ctx.RightBracket().size();
+        typeNode.originLayer = typeNode.layer;
+        if (typeNode.layer > 0) typeNode.isArr = true;
+        typeNode.type.name = typename;
         return typeNode;
     }
 }
