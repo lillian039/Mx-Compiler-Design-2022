@@ -1,1 +1,1 @@
- clang -S -emit-llvm builtin.c -fno-discard-value-names 
+ clang -S -emit-llvm builtin.c -fno-discard-value-names -m32

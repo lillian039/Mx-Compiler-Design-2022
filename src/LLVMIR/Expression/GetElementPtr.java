@@ -29,6 +29,10 @@ public class GetElementPtr extends IRInstruction {
     @Override
     public void printInstruct() {
         if(isStruct){
+            if(!(startPointer.IRType instanceof PtrType)) {
+                System.out.println("why not ptr");
+                return;
+            };
             System.out.println(tmpStore.valueToString() + " = getelementptr inbounds " +
                     ((PtrType) startPointer.IRType).type.typeToString() + ", " + startPointer.IRType.typeToString() + " " + startPointer.valueToString()
                     + ", i32 0, " + elementNum.IRType.typeToString() + " " + elementNum.valueToString());

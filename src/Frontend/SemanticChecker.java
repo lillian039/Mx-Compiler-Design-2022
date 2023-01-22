@@ -44,7 +44,7 @@ public class SemanticChecker implements ASTVisitor {
         Type rType = node.rhs.type.type;
         Type lType = node.lhs.type.type;
         if (!node.lhs.type.sameType(node.rhs.type) && (rType != nullType)) {
-            SemanticError semanticError=new SemanticError("type not match", node.pos);
+            SemanticError semanticError = new SemanticError("type not match", node.pos);
             throw semanticError;
         }
         if (rType == nullType && !node.lhs.type.isArr &&
@@ -97,7 +97,10 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(CellExprNode node) {
         node.expression.accept(this);
         node.type = node.expression.type;
-        node.isAssignable=node.expression.isAssignable;
+        node.isAssignable = node.expression.isAssignable;
+        if (!node.option.equals("++") && !node.option.equals("--")) {
+            node.isAssignable = false;
+        }
         if (!node.expression.isAssignable() && (node.option.equals("++") || node.option.equals("--")))
             throw new SemanticError("not assignable", node.pos);
         if (node.type.isArr) throw new SemanticError("no arr", node.pos);
@@ -241,8 +244,8 @@ public class SemanticChecker implements ASTVisitor {
             var.typeNode = node.typeNode;
             var.accept(this);
             currentScope.addVarDefine(var.name, var);
-            if(currentScope instanceof GlobalScope){
-                ((GlobalScope)currentScope).addGlobalVarOder(var);
+            if (currentScope instanceof GlobalScope) {
+                ((GlobalScope) currentScope).addGlobalVarOder(var);
             }
         }
     }
@@ -379,8 +382,7 @@ public class SemanticChecker implements ASTVisitor {
             if (rType == nullType && !node.typeNode.isArr &&
                     (lType == intType || lType == boolType || lType == voidType || lType == nullType))
                 throw new SemanticError("type not match", node.pos);
-        }
-        else  node.typeNode.accept(this);
+        } else node.typeNode.accept(this);
     }
 
     @Override

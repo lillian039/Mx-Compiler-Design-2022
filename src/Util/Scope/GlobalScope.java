@@ -152,7 +152,7 @@ public class GlobalScope extends Scope {
         NullType nullType = new NullType();
         VoidType voidType = new VoidType();
         IntType intType = new IntType(32, "int");
-        IntType boolType = new IntType(1, "bool");
+        IntType boolType = new IntType(8, "bool");
         IRTypes.put("null", nullType);
         IRTypes.put("void", voidType);
         IRTypes.put("bool", boolType);
@@ -168,7 +168,9 @@ public class GlobalScope extends Scope {
             if (classDef.classDef != null) {
                 IRBaseType classType = IRTypes.get(classDef.name);
                 for (var memDef : classDef.classDef.memberOrder) {
-                    IRBaseType memType = IRTypes.get(classDef.classDef.memberDef.get(memDef).typeNode.type.name);
+                    TypeNode classTypeNode=classDef.classDef.memberDef.get(memDef).typeNode;
+                    IRBaseType memType = toIRType(classTypeNode);
+                    if(!classTypeNode.NotClass())memType=new PtrType(memType);
                     ((ClassType) classType).members.add(memType);
                 }
             }
@@ -179,7 +181,12 @@ public class GlobalScope extends Scope {
         //初始化全局函数
         for (var func : funcMembers.values()) {
             BasicBlock basicBlock = new BasicBlock("entry", 0);
-            FuncDef funcDef = new FuncDef(basicBlock, func.name, toIRType(func.returnTypeNode));
+            IRBaseType returnType=toIRType(func.returnTypeNode);
+            if(!func.returnTypeNode.NotClass()){
+                returnType = new PtrType(returnType);
+            }
+            FuncDef funcDef = new FuncDef(basicBlock, func.name,returnType);
+
             funcDef.isInner = func.isInner;
             if (func.isInner) {
                 externalFunc.add(funcDef);
@@ -196,7 +203,11 @@ public class GlobalScope extends Scope {
             ClassDefStmtNode classDef = type.classDef;
             for (var func : classDef.funcDef.values()) {
                 BasicBlock basicBlock = new BasicBlock("entry", 0);
-                FuncDef funcDef = new FuncDef(basicBlock, "__" + classDef.name + "_" + func.name, toIRType(func.returnTypeNode));
+                IRBaseType returnType=toIRType(func.returnTypeNode);
+                if(!func.returnTypeNode.NotClass()){
+                    returnType = new PtrType(returnType);
+                }
+                FuncDef funcDef = new FuncDef(basicBlock, "__" + classDef.name + "_" + func.name, returnType);
                 funcDef.classType = (ClassType) getIRType(type.name);
                 funcDef.isInner = func.isInner;
                 //仅针对string
@@ -209,7 +220,7 @@ public class GlobalScope extends Scope {
             //构造函数
             BasicBlock basicBlock = new BasicBlock("entry", 0);
             if (classDef.constructor != null) {
-                FuncDef funcDef = new FuncDef(basicBlock, "__" + classDef.name + "_" + classDef.name, IRTypes.get(classDef.name));
+                FuncDef funcDef = new FuncDef(basicBlock, "__" + classDef.name + "_" + classDef.name, new VoidType());
                 funcDef.classType = (ClassType) getIRType(type.name);
                 globalFunc.put(funcDef.name, funcDef);
             }

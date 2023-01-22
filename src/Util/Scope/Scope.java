@@ -97,4 +97,13 @@ abstract public class Scope {
         return null;
     }
 
+    public ClassScope getCurrentClassScope(){
+        Scope now = this;
+        while (now != null) {
+            if (now instanceof ClassScope) return (ClassScope) now;
+            now = now.parentScope;
+        }
+        return null;
+    }
+
 }

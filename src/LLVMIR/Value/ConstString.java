@@ -13,11 +13,21 @@ public class ConstString extends IRValue {
     ArrType arrPtrType;
 
     public ConstString(String string, int number) {
-        this.string = string;
+        this.string = ReplaceString(string);
         this.number = number;
-        this.size = string.length() + 1;
+        this.size = this.string.length() + 1;
         arrPtrType = new ArrType(this.size, new IntType(8, "char"));
         this.IRType = new PtrType(new IntType(8, "char"));
+    }
+
+    String ReplaceString(String str){
+        return str.replace("\\\\","\\").replace("\\n","\n")
+                .replace("\\t","\t").replace("\\\"","\"");
+    }
+
+    String ConvertForIr(String str){
+        return  str.replace("\\", "\\5C").replace("\n", "\\0A")
+                .replace("\t", "\\09").replace("\"", "\\22");
     }
 
     @Override
@@ -29,7 +39,7 @@ public class ConstString extends IRValue {
     }
 
     public String toAllocate() {
-        return "private unnamed_addr constant " + arrPtrType.typeToString() + " c \"" + string + "\\00\"";
+        return "private unnamed_addr constant " + arrPtrType.typeToString() + " c \"" + ConvertForIr(string) + "\\00\"";
         //+ ", align " + (size * 8 + 7) / 8;
     }
 }

@@ -19,8 +19,8 @@ import LLVMIR.Terminal.Jump;
 import LLVMIR.Terminal.Ret;
 import LLVMIR.Value.*;
 import Util.Scope.*;
+import Util.Type;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -147,13 +147,12 @@ public class IRBuilder implements ASTVisitor {
     //默认构造函数？
     @Override
     public void visit(NewClassExprNode node) {
-        IRBaseType baseClassType= gScope.getIRType(node.type.type.name);
-        node.irBaseType = new PtrType(baseClassType);//todo!!! bool i1 好像不太行
+        IRBaseType baseClassType = gScope.getIRType(node.type.type.name);
+        node.irBaseType = new PtrType(baseClassType);
 
 
         IRBaseType i8ptr = new PtrType(new IntType(8, "char"));
         Register register = new Register(regCnt++, i8ptr);
-      //  System.out.println(baseClassType.size());
         Malloc malloc = new Malloc(register, new ConstInt((baseClassType.size() + 7) / 8));
         currentBlock.push_back(malloc);
 
@@ -162,16 +161,19 @@ public class IRBuilder implements ASTVisitor {
         currentBlock.push_back(bitcast);
 
         if (node.type.type.classDef.constructor != null) {
-            Call call = new Call("_" + node.type.type.name + "." + node.type.type.name, classReg, node.irBaseType);
+            Call call = new Call("__" + node.type.type.name + "_" + node.type.type.name, null, new VoidType());
+            call.addParameter(classReg);
             currentBlock.push_back(call);
         }
         node.irValue = classReg;
-        //node.isAssignable = true;
     }
 
     @Override
     public void visit(DotVarExprNode node) {
         node.irBaseType = new PtrType(toIRType(node.type));
+        if(!node.type.NotClass()){
+            node.irBaseType = new PtrType(node.irBaseType);
+        }
         node.lhs.accept(this);
         Register ls = (Register) LoadVal(node.lhs);
 
@@ -216,10 +218,16 @@ public class IRBuilder implements ASTVisitor {
         currentScope.addReg(node.name, allocReg);
         currentFunc.addAllocate(allocateInstruction);
         currentBlock.push_back(allocateInstruction);
+
         if (node.expression != null) {
             node.expression.accept(this);
-            allocReg.value = node.expression.irValue;
-            Store store = new Store(node.expression.irValue, allocReg);
+            if (node.expression.isAssignable) {
+                Register loadReg = new Register(regCnt++, ((PtrType) node.expression.irValue.IRType).type);
+                Load loadExp = new Load(loadReg, (Register) node.expression.irValue);
+                currentBlock.push_back(loadExp);
+                allocReg.value = loadReg;
+            } else allocReg.value = node.expression.irValue;
+            Store store = new Store(allocReg.value, allocReg);
             currentBlock.push_back(store);
         }
     }
@@ -228,8 +236,25 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(VarExprNode node) {
         Register var = currentScope.getReg(node.name);
+        if (var == null) {
+            //in scope turn to this
+            Register thisReg = currentScope.getReg("this");
+            Register loadThisReg = new Register(regCnt++, ((PtrType) thisReg.IRType).type);
+            Load loadThis = new Load(loadThisReg, thisReg);
+            currentBlock.push_back(loadThis);
+
+            IRBaseType nodeType = new PtrType(toIRType(node.type));
+            if (!node.type.NotClass()) nodeType = new PtrType(nodeType);
+            Register valReg = new Register(regCnt++, nodeType);
+            ClassType structType = (ClassType) gScope.getIRType(currentScope.getCurrentClassScope().ClassType.name);
+            ConstInt number = new ConstInt(structType.getMap(node.name));
+            GetElementPtr getPtr = new GetElementPtr(valReg, loadThisReg, number, true);
+            currentBlock.push_back(getPtr);
+            var = valReg;
+        }
         node.irBaseType = var.IRType;
         node.irValue = var;
+
 
         if (inCircuit != 0 && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
             Store store = new Store(var, currentScope.getReg(".phi"));
@@ -268,33 +293,44 @@ public class IRBuilder implements ASTVisitor {
             currentBlock.push_back(loadVal);
             currentEntity = loadReg;
         }
-        Register newLs = new Register(regCnt++, currentEntity.IRType);
         if (node.option.equals("!")) {
-            Binary binary = new Binary(currentEntity, new ConstBool(true), newLs, "xor");
+            Register conditionI1 = new Register(regCnt++, new IntType(1, "i1"));
+            Trunc i8Toi1 = new Trunc(gScope.getIRType("bool"), new IntType(1, "i1"), conditionI1, currentEntity);
+            currentBlock.push_back(i8Toi1);
+
+            Register xorBinary = new Register(regCnt++, new IntType(1, "i1"));
+            Binary binary = new Binary(conditionI1, new ConstBool(true), xorBinary, "xor");
             currentBlock.push_back(binary);
-            node.irValue = newLs;
+
+            Register conditionI8 = new Register(regCnt++, gScope.getIRType("bool"));
+            Zext i1Toi8 = new Zext(new IntType(1, "i1"), gScope.getIRType("bool"), conditionI8, xorBinary);
+            currentBlock.push_back(i1Toi8);
+
+            node.irValue = conditionI8;
             if (inCircuit != 0) {
-                Store store = new Store(newLs, currentScope.getReg(".phi"));
+                Store store = new Store(conditionI8, currentScope.getReg(".phi"));
                 currentBlock.push_back(store);
             }
-        } else if (node.option.equals("-")) {
-            Binary binary = new Binary(new ConstInt(0), currentEntity, newLs, "sub nsw");
-            currentBlock.push_back(binary);
-            node.irValue = newLs;
-        } else if (node.option.equals("~")) {
-            Binary binary = new Binary(currentEntity, new ConstInt(-1), newLs, "xor");
-            currentBlock.push_back(binary);
-            node.irValue = newLs;
-        } else if (node.option.equals("++") || node.option.equals("--")) {
-            String option = node.option.equals("++") ? "add" : "sub nsw";
-            Binary binary = new Binary(currentEntity, new ConstInt(1), newLs, option);
-            currentBlock.push_back(binary);
-            Register originReg = (Register) node.expression.irValue;
-            Store store = new Store(newLs, originReg);
-            currentBlock.push_back(store);
-            node.irValue = originReg;
+        } else {
+            Register newLs = new Register(regCnt++, currentEntity.IRType);
+            if (node.option.equals("-")) {
+                Binary binary = new Binary(new ConstInt(0), currentEntity, newLs, "sub nsw");
+                currentBlock.push_back(binary);
+                node.irValue = newLs;
+            } else if (node.option.equals("~")) {
+                Binary binary = new Binary(currentEntity, new ConstInt(-1), newLs, "xor");
+                currentBlock.push_back(binary);
+                node.irValue = newLs;
+            } else if (node.option.equals("++") || node.option.equals("--")) {
+                String option = node.option.equals("++") ? "add" : "sub nsw";
+                Binary binary = new Binary(currentEntity, new ConstInt(1), newLs, option);
+                currentBlock.push_back(binary);
+                Register originReg = (Register) node.expression.irValue;
+                Store store = new Store(newLs, originReg);
+                currentBlock.push_back(store);
+                node.irValue = originReg;
+            }
         }
-
     }
 
     @Override
@@ -306,8 +342,13 @@ public class IRBuilder implements ASTVisitor {
         BasicBlock newBlock = new BasicBlock("if.end" + label, label);
         BasicBlock elseBlock = new BasicBlock("if.else" + label, label);
         BasicBlock target = node.elseStmt == null ? newBlock : elseBlock;
-        Branch branch = new Branch(ConditionValue, thenBlock, target);
+
+        Register conditionI1 = new Register(regCnt++, new IntType(1, "i1"));
+        Trunc i8Toi1 = new Trunc(gScope.getIRType("bool"), new IntType(1, "i1"), conditionI1, ConditionValue);
+        currentBlock.push_back(i8Toi1);
+        Branch branch = new Branch(conditionI1, thenBlock, target);
         currentBlock.push_back(branch);
+
         currentBlock = thenBlock;
         currentFunc.addBlock(currentBlock);
         if (node.thenStmt != null) {
@@ -494,9 +535,15 @@ public class IRBuilder implements ASTVisitor {
         LoopScope loopScope = new LoopScope(currentScope);
         loopScope.continueLoop = currentBlock;
         loopScope.breakLoop = new BasicBlock("for.end" + label, label);
+        loopScope.stepNode = node.stepNode;
         BasicBlock body = new BasicBlock("for.body" + label, label);
         currentFunc.addBlock(body);
-        currentBlock.push_back(new Branch(node.conditionNode.irValue, body, loopScope.breakLoop));
+
+        Register conditionI1 = new Register(regCnt++, new IntType(1, "i1"));
+        Trunc i8Toi1 = new Trunc(gScope.getIRType("bool"), new IntType(1, "i1"), conditionI1, node.conditionNode.irValue);
+        currentBlock.push_back(i8Toi1);
+        currentBlock.push_back(new Branch(conditionI1, body, loopScope.breakLoop));
+
         currentBlock = body;
         currentScope = loopScope;
         if (node.body != null) node.body.accept(this);
@@ -515,6 +562,7 @@ public class IRBuilder implements ASTVisitor {
             Jump jumpIns = new Jump(loopScope.breakLoop);
             currentBlock.push_back(jumpIns);
         } else if (node.isContinue) {
+            if (loopScope.stepNode != null) loopScope.stepNode.accept(this);
             Jump jumpIns = new Jump(loopScope.continueLoop);
             currentBlock.push_back(jumpIns);
         }
@@ -528,8 +576,19 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(FuncExprNode node) {
         node.irBaseType = toIRType(node.type);
+        if (!node.type.NotClass()) {
+            node.irBaseType = new PtrType(node.irBaseType);
+        }
         Call callFunction;
         Register caller;
+        boolean isClassFunc = false;
+        if (currentScope.getCurrentClassScope() != null && node.name.indexOf(0) != '_') {
+            Type classType = currentScope.getCurrentClassScope().ClassType;
+            if (classType.classDef.funcDef.containsKey(node.name)) {
+                node.name = "__" + classType.name + "_" + node.name;
+                isClassFunc = true;
+            }
+        }
         callFunction = new Call(node.name, node.irBaseType);
 
         if (node.parameterValueNode != null) {
@@ -546,11 +605,23 @@ public class IRBuilder implements ASTVisitor {
                 callFunction.addParameter(paraVal);
             }
         }
+        if (isClassFunc) {
+            Register thisReg = currentScope.getReg("this");
+            Register loadThisReg = new Register(regCnt++, ((PtrType) thisReg.IRType).type);
+            Load loadThis = new Load(loadThisReg, thisReg);
+            currentBlock.push_back(loadThis);
+            callFunction.addParameter(loadThisReg);
+        }
         currentBlock.push_back(callFunction);
         if (!(node.irBaseType instanceof VoidType)) {
             caller = new Register(regCnt++, node.irBaseType);
             callFunction.caller = caller;
         } else caller = new Register(node.irBaseType, "tmpstore");
+
+        if (inCircuit != 0 && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
+            Store storePhi = new Store(caller, currentScope.getReg(".phi"));
+            currentBlock.push_back(storePhi);
+        }
 
         caller.callFunc = callFunction;
         node.irValue = caller;
@@ -604,8 +675,13 @@ public class IRBuilder implements ASTVisitor {
         node.condition.accept(this);
         BasicBlock trueBlock = new BasicBlock("while.body" + label, label);
         BasicBlock falseBlock = new BasicBlock("while.end" + label, label);
-        Branch branch = new Branch(node.condition.irValue, trueBlock, falseBlock);
+
+        Register conditionI1 = new Register(regCnt++, new IntType(1, "i1"));
+        Trunc i8Toi1 = new Trunc(gScope.getIRType("bool"), new IntType(1, "i1"), conditionI1, node.condition.irValue);
+        currentBlock.push_back(i8Toi1);
+        Branch branch = new Branch(conditionI1, trueBlock, falseBlock);
         currentBlock.push_back(branch);
+
         LoopScope newLoop = new LoopScope(currentScope);
         newLoop.breakLoop = falseBlock;
         newLoop.continueLoop = currentBlock;
@@ -615,6 +691,10 @@ public class IRBuilder implements ASTVisitor {
         if (node.body != null) node.body.accept(this);
         Jump jumpWhileStart = new Jump(newBlock);
         trueBlock.push_back(jumpWhileStart);
+        if (currentBlock.tailStmt == null) {
+            Jump jumpToWhile = new Jump(newBlock);
+            currentBlock.push_back(jumpToWhile);
+        }
         currentScope = currentScope.parentScope;
         currentBlock = falseBlock;
         currentFunc.addBlock(currentBlock);
@@ -722,11 +802,16 @@ public class IRBuilder implements ASTVisitor {
             currentBlock = rhsBlock;
             node.rs.accept(this);
             currentBlock.push_back(new Jump(endBlock));
+
+            Register conditionI1 = new Register(regCnt++, new IntType(1, "i1"));
+            Trunc i8Toi1 = new Trunc(gScope.getIRType("bool"), new IntType(1, "i1"), conditionI1, lsVal);
+            currentBlock.push_back(i8Toi1);
+
             if (node.option.equals("||")) {
-                Branch orBr = new Branch(lsVal, endBlock, rhsBlock);
+                Branch orBr = new Branch(conditionI1, endBlock, rhsBlock);
                 befBlock.push_back(orBr);
             } else if (node.option.equals("&&")) {
-                Branch andBr = new Branch(lsVal, rhsBlock, endBlock);
+                Branch andBr = new Branch(conditionI1, rhsBlock, endBlock);
                 befBlock.push_back(andBr);
             }
             currentFunc.addBlock(endBlock);
@@ -754,9 +839,10 @@ public class IRBuilder implements ASTVisitor {
                 rvalue = rsReg;
             }
 
-            Register reg = new Register(regCnt++, lvalue.IRType);
             if (node.option.equals("<") || node.option.equals(">") || node.option.equals("<=") || node.option.equals(">=")
                     || node.option.equals("==") || node.option.equals("!=")) {
+                Register i1Reg = new Register(regCnt++, new IntType(1, "i1"));
+                Register reg = new Register(regCnt++, gScope.getIRType("bool"));
                 String op = null;
                 switch (node.option) {
                     case "<" -> op = "slt";
@@ -766,16 +852,20 @@ public class IRBuilder implements ASTVisitor {
                     case "==" -> op = "eq";
                     case "!=" -> op = "ne";
                 }
-                IRInstruction currentInstruction = new Icmp(lvalue, rvalue, reg, op);
-                node.irValue = reg;
-                node.irValue.IRType = gScope.getIRType("bool");
-                node.irBaseType = gScope.getIRType("bool");
+                IRInstruction currentInstruction = new Icmp(lvalue, rvalue, i1Reg, op);
                 currentBlock.push_back(currentInstruction);
+
+                Zext zextToi8 = new Zext(new IntType(1, "i1"), new IntType(8, "bool"), reg, i1Reg);
+                currentBlock.push_back(zextToi8);
+
+                node.irValue = reg;
+                node.irBaseType = gScope.getIRType("bool");
                 if (inCircuit != 0) {
                     Store storePhi = new Store(reg, currentScope.getReg(".phi"));
                     currentBlock.push_back(storePhi);
                 }
             } else {
+                Register reg = new Register(regCnt++, lvalue.IRType);
                 String op = null;
                 switch (node.option) {
                     case "+" -> op = "add";
@@ -823,6 +913,9 @@ public class IRBuilder implements ASTVisitor {
             ArrayList<SingleVarDefNode> para = node.parameterList.parameterList;
             for (var vars : para) {
                 IRBaseType varType = toIRType(vars.typeNode);
+                if (!vars.typeNode.NotClass()) {
+                    varType = new PtrType(varType);
+                }
                 Register a_addr = new Register(new PtrType(varType), vars.name + ".addr");
                 Alloca allocPara = new Alloca(a_addr);
                 currentBlock.push_back(allocPara);
@@ -837,7 +930,12 @@ public class IRBuilder implements ASTVisitor {
             PtrType thisType = new PtrType(currentFunc.classType);
             Register thisReg = new Register(thisType, "this");
             currentFunc.parameterList.add(thisReg);
-            currentScope.addReg("this", thisReg);
+            Register allocThisReg = new Register(new PtrType(thisType), "this.addr");
+            Alloca allocaThis = new Alloca(allocThisReg);
+            currentBlock.push_back(allocaThis);
+            Store storeAlloc = new Store(thisReg, allocThisReg);
+            currentBlock.push_back(storeAlloc);
+            currentScope.addReg("this", allocThisReg);
         }
         if (node.funcBody != null) node.funcBody.accept(this);
         if (currentBlock.tailStmt == null) currentBlock.tailStmt = new Jump(currentFunc.returnBlock);
@@ -857,6 +955,9 @@ public class IRBuilder implements ASTVisitor {
             node.returnExpr.accept(this);
             IRValue currentEntity = node.returnExpr.irValue;
             if (node.returnExpr.isAssignable) {
+                if (!(currentEntity.IRType instanceof PtrType)) {
+                    System.out.println("?");
+                }
                 Register loadVarReg = new Register(regCnt++, ((PtrType) currentEntity.IRType).type);
                 Load loadVar = new Load(loadVarReg, (Register) currentEntity);
                 currentBlock.push_back(loadVar);
@@ -886,7 +987,7 @@ public class IRBuilder implements ASTVisitor {
         IRBaseType i32Ptr = new PtrType(i32Type);
         IRValue rhsVal;
 
-        if (lhsVal.IRType instanceof PtrType && !lhsVal.IRType.isSameType(charPtr)) {
+        if (node.rhs.name.equals("size") && !(lhsVal.IRType.isClassIRType())) {
             Register sizeRegPtr = new Register(regCnt++, i32Ptr);
             Bitcast bitcast = new Bitcast(lhsVal.IRType, i32Ptr, sizeRegPtr, lhsVal);
             currentBlock.push_back(bitcast);
@@ -902,7 +1003,13 @@ public class IRBuilder implements ASTVisitor {
             rhsVal = loadSizeReg;
 
         } else {
-            String className = lhsVal.IRType.isSameType(charPtr) ? "string" : lhsVal.IRType.name;
+           /* if(!(lhsVal.IRType instanceof PtrType)){
+                System.out.println("???");
+            }*/
+            String className = lhsVal.IRType.isSameType(charPtr) ? "string" : ((PtrType) lhsVal.IRType).type.name;
+            /*if(className == null){
+                System.out.println("???");
+            }*/
             node.rhs.name = "__" + className + "_" + node.rhs.name;
             node.rhs.accept(this);
             rhsVal = LoadVal(node.rhs);
@@ -919,15 +1026,24 @@ public class IRBuilder implements ASTVisitor {
         regCnt = 0;
         ClassType type = (ClassType) gScope.getIRType(node.name);
         ClassDef currentClass = new ClassDef(node.name, type);
+        currentScope = new ClassScope(currentScope, gScope.getType(node.name));
         for (int i = 0; i < node.memberOrder.size(); i++) {
             type.memberMap.put(node.memberOrder.get(i), i);
         }
+
         for (var func : node.funcDef.values()) {
             FunDefStmtNode FuncNode = func;
             FuncNode.name = "__" + type.name + "_" + FuncNode.name;
             FuncNode.accept(this);
         }
+
+        if (node.constructor != null) {
+            node.constructor.name = "__" + type.name + "_" + type.name;
+            node.constructor.accept(this);
+        }
         root.classDefs.add(currentClass);
+
+        currentScope = currentScope.parentScope;
 
     }
 
