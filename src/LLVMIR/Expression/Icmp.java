@@ -1,6 +1,7 @@
 package LLVMIR.Expression;
 
 import LLVMIR.IRInstruction;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.ConstInt;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
@@ -21,5 +22,10 @@ public class Icmp extends IRInstruction {
     public void printInstruct() {
         System.out.println(ls.valueToString() + " = icmp " + op + " " +
                 rs1.IRType.typeToString() + " " + rs1.valueToString() + ", " + rs2.valueToString());
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -1,5 +1,6 @@
 import AST.RootNode;
 import Frontend.*;
+import LLVMIR.RootIR;
 import Util.Err.Error;
 import Util.Scope.GlobalScope;
 import Util.MxErrorListener;
@@ -36,17 +37,13 @@ public class Compiler {
             ParseTree parseTreeRoot=parser.program();
             ASTBuilder astBuilder=new ASTBuilder(globalScope);
             root=(RootNode) astBuilder.visit(parseTreeRoot);
-            SymbolCollector symbolCollector=new SymbolCollector(globalScope);
-            symbolCollector.visit(root);
-            SemanticChecker semanticChecker=new SemanticChecker(globalScope);
-            semanticChecker.visit(root);
-            IRCollector irCollector=new IRCollector(globalScope);
-            irCollector.visit(root);
-            IRBuilder irBuilder=new IRBuilder(globalScope);
-            irBuilder.visit(root);
-            IRPrinter irPrinter=new IRPrinter(root);
-            irPrinter.print();
-           // System.out.println("0");
+            new SymbolCollector(globalScope).visit(root);
+            new SemanticChecker(globalScope).visit(root);
+
+            RootIR rootIR=new RootIR();
+            new IRCollector(globalScope).visit(root);
+            new IRBuilder(globalScope,rootIR).visit(root);
+            new IRPrinter(rootIR).print();
         }catch (Error err){
 //            System.out.println(err.errorMsg());
             throw err;

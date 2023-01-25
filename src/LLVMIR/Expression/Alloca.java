@@ -4,6 +4,7 @@ import LLVMIR.IRInstruction;
 import LLVMIR.IRType.ClassType;
 import LLVMIR.IRType.IRBaseType;
 import LLVMIR.IRType.PtrType;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.ConstString;
 import LLVMIR.Value.Register;
 
@@ -35,6 +36,11 @@ public class Alloca extends IRInstruction {
 
     public Integer strNum() {
         return ((ConstString) reg.value).number;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }
 

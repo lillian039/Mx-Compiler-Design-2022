@@ -1,6 +1,7 @@
 package LLVMIR.Expression;
 
 import LLVMIR.IRInstruction;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
@@ -26,5 +27,10 @@ public class Store extends IRInstruction {
             System.out.println("store " + value.IRType.typeToString() + " " + value.valueToString() +
                     ", "+ storeAddr.IRType.typeToString()+" "+ storeAddr.valueToString() ) ;
         //+ ", align " + (value.IRType.size() + 7) / 8);
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

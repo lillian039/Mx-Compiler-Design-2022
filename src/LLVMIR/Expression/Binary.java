@@ -4,6 +4,7 @@ import LLVMIR.IRInstruction;
 import LLVMIR.IRType.IRBaseType;
 import LLVMIR.IRType.IntType;
 import LLVMIR.IRType.NullType;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.ConstInt;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
@@ -28,5 +29,10 @@ public class Binary extends IRInstruction {
         // System.out.print("Binay: ");
         System.out.println(ls.valueToString() + " = " + op + " " + irBaseType.typeToString() +
                 " " + rs1.valueToString() + ", " + rs2.valueToString());
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

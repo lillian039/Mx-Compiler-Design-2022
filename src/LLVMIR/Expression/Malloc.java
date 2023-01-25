@@ -3,6 +3,7 @@ package LLVMIR.Expression;
 import AST.Atom.TypeNode;
 import LLVMIR.IRInstruction;
 import LLVMIR.IRType.IRBaseType;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
@@ -19,5 +20,10 @@ public class Malloc extends IRInstruction {
     @Override
     public void printInstruct() {
         System.out.println(ptrStart.valueToString() + " = call i8* @__malloc(" + size.IRType.typeToString()+" "+size.valueToString() + ")");
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

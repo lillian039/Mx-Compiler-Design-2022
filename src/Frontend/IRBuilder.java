@@ -14,6 +14,7 @@ import LLVMIR.GlobalDefine.FuncDef;
 import LLVMIR.GlobalDefine.VarDef;
 import LLVMIR.IRInstruction;
 import LLVMIR.IRType.*;
+import LLVMIR.RootIR;
 import LLVMIR.Terminal.Branch;
 import LLVMIR.Terminal.Jump;
 import LLVMIR.Terminal.Ret;
@@ -36,21 +37,24 @@ public class IRBuilder implements ASTVisitor {
     IRBaseType i32Type;
     RootNode root;
 
+    RootIR rootIR;
+
     HashMap<String, Integer> renameTable = new HashMap<>();
 
     int inCircuit = 0;
 
-    public IRBuilder(GlobalScope gScope) {
+    public IRBuilder(GlobalScope gScope, RootIR rootIR) {
         this.gScope = gScope;
         this.gScope.IRInitial();
         this.gScope.FuncInitial();
+        this.rootIR = rootIR;
         i32Type = gScope.getIRType("int");
     }
 
     @Override
     public void visit(RootNode node) {
         root = node;
-        root.addVar(new VarDef(gScope));
+        rootIR.addVar(new VarDef(gScope));
         currentScope = gScope;
 
         for (var classDef : root.classDef) {
@@ -63,10 +67,10 @@ public class IRBuilder implements ASTVisitor {
         gScope.globalFunc.put("main", mainFuncDef);
 
         //用来初始化全局变量
-        FuncDef initializeVar = root.varDefs.initializeVar;
+        FuncDef initializeVar = rootIR.varDefs.initializeVar;
         gScope.globalFunc.put(initializeVar.name, initializeVar);
-        root.funcDefs.add(initializeVar);
-        ArrayList<SingleVarDefNode> varDef = root.varDefs.varDef;
+        rootIR.funcDefs.add(initializeVar);
+        ArrayList<SingleVarDefNode> varDef = rootIR.varDefs.varDef;
         currentBlock = initializeVar.Entry;
         currentFunc = initializeVar;
         for (var vars : varDef) {
@@ -82,7 +86,7 @@ public class IRBuilder implements ASTVisitor {
         mainFuncDef.Entry.push_back(callInitializeVar);
 
         //内建函数
-        root.InnerFunc = gScope.externalFunc;
+        rootIR.InnerFunc = gScope.externalFunc;
 
         //malloc 添加
         addMallocGlobalInner();
@@ -91,8 +95,8 @@ public class IRBuilder implements ASTVisitor {
         addStrGlobalInner();
 
         //将IR版本的内建函数放进GScope
-        for (int i = 0; i < root.InnerFunc.size(); i++) {
-            FuncDef cur = root.InnerFunc.get(i);
+        for (int i = 0; i < rootIR.InnerFunc.size(); i++) {
+            FuncDef cur = rootIR.InnerFunc.get(i);
             if (gScope.getFunc(cur.name) != null) continue;
             gScope.addIRFunc(cur);
         }
@@ -110,7 +114,7 @@ public class IRBuilder implements ASTVisitor {
         Register reg1 = new Register(i32Type, "size");
         FuncDef malloc = new FuncDef("__malloc", new PtrType(i8Type), true);
         malloc.parameterList.add(reg1);
-        root.funcDefs.add(malloc);
+        rootIR.funcDefs.add(malloc);
     }
 
     void addStrGlobalInner() {
@@ -140,7 +144,7 @@ public class IRBuilder implements ASTVisitor {
             FuncDef cur = strFunc.get(i);
             cur.parameterList.add(regS1);
             cur.parameterList.add(regS2);
-            root.funcDefs.add(cur);
+            rootIR.funcDefs.add(cur);
         }
     }
 
@@ -343,6 +347,13 @@ public class IRBuilder implements ASTVisitor {
         BasicBlock elseBlock = new BasicBlock("if.else" + label, label);
         BasicBlock target = node.elseStmt == null ? newBlock : elseBlock;
 
+
+        if(node.condition.isAssignable){
+            Register loadReg=new Register(regCnt++,((PtrType)node.condition.irValue.IRType).type);
+            Load load=new Load(loadReg,(Register)node.condition.irValue);
+            currentBlock.push_back(load);
+            ConditionValue = loadReg;
+        }
         Register conditionI1 = new Register(regCnt++, new IntType(1, "i1"));
         Trunc i8Toi1 = new Trunc(gScope.getIRType("bool"), new IntType(1, "i1"), conditionI1, ConditionValue);
         currentBlock.push_back(i8Toi1);
@@ -906,7 +917,7 @@ public class IRBuilder implements ASTVisitor {
         currentFunc.Entry.push_back(new Alloca(phi));
         gScope.addReg(".phi", phi);
 
-        root.addFunc(currentFunc);
+        rootIR.addFunc(currentFunc);
 
         //引用传参 指针？
         if (node.parameterList != null) {
@@ -1003,13 +1014,8 @@ public class IRBuilder implements ASTVisitor {
             rhsVal = loadSizeReg;
 
         } else {
-           /* if(!(lhsVal.IRType instanceof PtrType)){
-                System.out.println("???");
-            }*/
             String className = lhsVal.IRType.isSameType(charPtr) ? "string" : ((PtrType) lhsVal.IRType).type.name;
-            /*if(className == null){
-                System.out.println("???");
-            }*/
+
             node.rhs.name = "__" + className + "_" + node.rhs.name;
             node.rhs.accept(this);
             rhsVal = LoadVal(node.rhs);
@@ -1041,7 +1047,7 @@ public class IRBuilder implements ASTVisitor {
             node.constructor.name = "__" + type.name + "_" + type.name;
             node.constructor.accept(this);
         }
-        root.classDefs.add(currentClass);
+        rootIR.classDefs.add(currentClass);
 
         currentScope = currentScope.parentScope;
 

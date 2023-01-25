@@ -1,4 +1,4 @@
 package Assembly.Operand;
 
-public class ASMReg extends ASMOperand{
+public abstract class ASMReg extends ASMOperand{
 }

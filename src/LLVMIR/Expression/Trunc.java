@@ -2,6 +2,7 @@ package LLVMIR.Expression;
 
 import LLVMIR.IRInstruction;
 import LLVMIR.IRType.IRBaseType;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
@@ -22,5 +23,10 @@ public class Trunc extends IRInstruction {
     @Override
     public void printInstruct() {
         System.out.println(storeReg.valueToString() + " = trunc " + fromType.typeToString() + " " + value.valueToString() + " to " + toType.typeToString());
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

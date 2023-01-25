@@ -1,6 +1,7 @@
 package LLVMIR.Terminal;
 
 import LLVMIR.BasicBlock;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.IRValue;
 
 public class Branch extends TerminalStmt {
@@ -18,5 +19,10 @@ public class Branch extends TerminalStmt {
     public void printInstruct() {
         System.out.println("br " + op.IRType.typeToString() + " " + op.valueToString() +
                 ", label %" + trueBranch.labelName + ", label %" + falseBranch.labelName);
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

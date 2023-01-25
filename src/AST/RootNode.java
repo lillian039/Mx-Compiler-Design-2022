@@ -20,14 +20,9 @@ public class RootNode extends ASTNode {
     public ArrayList<VarDefStmtNode> varDef = new ArrayList<>();
     public ArrayList<ClassDefStmtNode> classDef = new ArrayList<>();
 
-    public VarDef varDefs;
-
-    public ArrayList<ClassDef> classDefs = new ArrayList<>();
-    public ArrayList<FuncDef> funcDefs = new ArrayList<>();
-
-    public ArrayList<FuncDef> InnerFunc=new ArrayList<>();
-
     public ArrayList<StmtNode> statements = new ArrayList<>();
+
+
 
     public RootNode(Position pos) {
         super(pos);
@@ -38,20 +33,4 @@ public class RootNode extends ASTNode {
         visitor.visit(this);
     }
 
-    public void addFunc(FuncDef funcDef) {
-        funcDefs.add(funcDef);
-    }
-
-
-    public void addVar(VarDef varDef) {
-        this.varDefs = varDef;
-    }
-
-
-    public ClassDef getClass(String name) {
-        for (var classDef : classDefs) {
-            if (classDef.name.equals(name)) return classDef;
-        }
-        return null;
-    }
 }

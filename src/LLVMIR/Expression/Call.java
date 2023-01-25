@@ -3,6 +3,7 @@ package LLVMIR.Expression;
 import LLVMIR.GlobalDefine.FuncDef;
 import LLVMIR.IRInstruction;
 import LLVMIR.IRType.IRBaseType;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
@@ -44,5 +45,10 @@ public class Call extends IRInstruction {
                 }
                 System.out.print(")");
                 System.out.println();
+        }
+
+        @Override
+        public void accept(IRVisitor visitor) {
+                visitor.visit(this);
         }
 }

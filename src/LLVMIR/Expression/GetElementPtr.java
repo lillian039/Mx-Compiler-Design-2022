@@ -3,6 +3,7 @@ package LLVMIR.Expression;
 import AST.Atom.TypeNode;
 import LLVMIR.IRInstruction;
 import LLVMIR.IRType.PtrType;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
@@ -42,5 +43,10 @@ public class GetElementPtr extends IRInstruction {
                     ((PtrType) startPointer.IRType).type.typeToString() + ", " + startPointer.IRType.typeToString() + " " + startPointer.valueToString()
                     + ", " + elementNum.IRType.typeToString() + " " + elementNum.valueToString());
         }
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }
