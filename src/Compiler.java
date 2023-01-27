@@ -1,4 +1,6 @@
 import AST.RootNode;
+import Assembly.ASMFn;
+import Backend.InstructionSelector;
 import Frontend.*;
 import LLVMIR.RootIR;
 import Util.Err.Error;
@@ -44,6 +46,9 @@ public class Compiler {
             new IRCollector(globalScope).visit(root);
             new IRBuilder(globalScope,rootIR).visit(root);
             new IRPrinter(rootIR).print();
+
+            ASMFn asmFn = new ASMFn();
+            new InstructionSelector(asmFn).visit(rootIR);
         }catch (Error err){
 //            System.out.println(err.errorMsg());
             throw err;

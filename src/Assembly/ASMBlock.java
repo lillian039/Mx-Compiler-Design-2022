@@ -12,6 +12,10 @@ public class ASMBlock {
         this.blockName = name;
     }
 
+    public void push_back(ASMInst inst){
+        insts.add(inst);
+    }
+
     public void print() {
         System.out.println(blockName + ":");
         for (var stmt : insts) {

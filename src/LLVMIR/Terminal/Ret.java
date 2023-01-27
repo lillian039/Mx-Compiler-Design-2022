@@ -5,7 +5,7 @@ import LLVMIR.IRVisitor;
 import LLVMIR.Value.Register;
 
 public class Ret extends TerminalStmt {
-    Register returnReg;
+    public Register returnReg;
 
     public Ret(Register reg) {
         returnReg = reg;

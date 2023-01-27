@@ -2,9 +2,11 @@ package LLVMIR.GlobalDefine;
 
 import AST.Statement.FunDefStmtNode;
 import LLVMIR.BasicBlock;
+import LLVMIR.Expression.Alloca;
 import LLVMIR.IRInstruction;
 import LLVMIR.IRType.ClassType;
 import LLVMIR.IRType.IRBaseType;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.Register;
 
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ public class FuncDef extends GlobalDef {
     }
 
 
-    public void addAllocate(IRInstruction instruction) {
+    public void addAllocate(Alloca instruction) {
         allocate.push_back(instruction);
     }
 
@@ -62,6 +64,8 @@ public class FuncDef extends GlobalDef {
             if (i < parameterList.size() - 1) System.out.print(", ");
         }
         System.out.println(") {");
+        System.out.println("entry:");
+        allocate.print();
         Entry.print();
         System.out.println();
         for (var block : basicBlocks) {
@@ -81,5 +85,10 @@ public class FuncDef extends GlobalDef {
             if (i < parameterList.size() - 1) System.out.print(", ");
         }
         System.out.println(")");
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

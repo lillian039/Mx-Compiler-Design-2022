@@ -221,7 +221,7 @@ public class IRBuilder implements ASTVisitor {
         Alloca allocateInstruction = new Alloca(allocReg);
         currentScope.addReg(node.name, allocReg);
         currentFunc.addAllocate(allocateInstruction);
-        currentBlock.push_back(allocateInstruction);
+       // currentBlock.push_back(allocateInstruction);
 
         if (node.expression != null) {
             node.expression.accept(this);
@@ -430,7 +430,8 @@ public class IRBuilder implements ASTVisitor {
 
         Register iReg = new Register(new PtrType(i32Type), "_new_i." + layer + "." + label);
         Alloca allocaIReg = new Alloca(iReg);
-        currentBlock.push_back(allocaIReg);
+        currentFunc.addAllocate(allocaIReg);
+        //currentBlock.push_back(allocaIReg);
         Store storeiReg = new Store(new ConstInt(0), iReg);
         currentBlock.push_back(storeiReg);
         currentBlock.push_back(new Jump(conditionBlock));
@@ -908,13 +909,15 @@ public class IRBuilder implements ASTVisitor {
         Register retReg = new Register(new PtrType(currentFunc.irReturnType), "retval");
         if (!(currentFunc.irReturnType instanceof VoidType)) {
             Alloca allocaRet = new Alloca(retReg);
-            currentBlock.push_back(allocaRet);
+            currentFunc.addAllocate(allocaRet);
+            //currentBlock.push_back(allocaRet);
             currentFunc.retval = retReg;
         }
 
         //构造存短路求值的寄存器phi
         Register phi = new Register(new PtrType(gScope.getIRType("bool")), ".phi");
-        currentFunc.Entry.push_back(new Alloca(phi));
+        currentFunc.addAllocate(new Alloca(phi));
+       // currentFunc.Entry.push_back(new Alloca(phi));
         gScope.addReg(".phi", phi);
 
         rootIR.addFunc(currentFunc);
@@ -929,7 +932,8 @@ public class IRBuilder implements ASTVisitor {
                 }
                 Register a_addr = new Register(new PtrType(varType), vars.name + ".addr");
                 Alloca allocPara = new Alloca(a_addr);
-                currentBlock.push_back(allocPara);
+                currentFunc.addAllocate(allocPara);
+              //  currentBlock.push_back(allocPara);
                 Register a = new Register(varType, vars.name);
                 currentFunc.parameterList.add(a);
                 Store storeVal = new Store(a, a_addr);
@@ -943,7 +947,8 @@ public class IRBuilder implements ASTVisitor {
             currentFunc.parameterList.add(thisReg);
             Register allocThisReg = new Register(new PtrType(thisType), "this.addr");
             Alloca allocaThis = new Alloca(allocThisReg);
-            currentBlock.push_back(allocaThis);
+            currentFunc.addAllocate(allocaThis);
+            //currentBlock.push_back(allocaThis);
             Store storeAlloc = new Store(thisReg, allocThisReg);
             currentBlock.push_back(storeAlloc);
             currentScope.addReg("this", allocThisReg);

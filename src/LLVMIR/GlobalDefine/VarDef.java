@@ -9,6 +9,7 @@ import LLVMIR.IRType.IRBaseType;
 import LLVMIR.IRType.IntType;
 import LLVMIR.IRType.PtrType;
 import LLVMIR.IRType.VoidType;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.ConstString;
 import LLVMIR.Value.Register;
 import Util.Scope.GlobalScope;
@@ -84,5 +85,10 @@ public class VarDef extends GlobalDef {
             newIRBaseType = new PtrType(newIRBaseType);
         }
         return newIRBaseType;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

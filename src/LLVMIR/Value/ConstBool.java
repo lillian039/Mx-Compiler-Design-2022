@@ -3,7 +3,7 @@ package LLVMIR.Value;
 import AST.Atom.TypeNode;
 import LLVMIR.IRType.IntType;
 
-public class ConstBool extends IRValue {
+public class ConstBool extends ConstVal {
     public int value;
 
     public ConstBool(boolean value) {

@@ -9,11 +9,17 @@ import LLVMIR.Value.ConstInt;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class Binary extends IRInstruction {
     public IRValue rs1, rs2;
     public Register ls;
     public String op;
     public IRBaseType irBaseType;
+
+    public static ArrayList<String> opName = new ArrayList<>(Arrays.asList(
+            "add","sub nsw","mul","sdiv","srem","shl nsw","ashr","and","or","xor"));
 
     public Binary(IRValue rs1, IRValue rs2, Register ls, String op) {
         this.rs1 = rs1;
@@ -23,6 +29,7 @@ public class Binary extends IRInstruction {
         if (rs1.IRType instanceof NullType) irBaseType = rs2.IRType;
         else irBaseType = rs1.IRType;
     }
+
 
     @Override
     public void printInstruct() {

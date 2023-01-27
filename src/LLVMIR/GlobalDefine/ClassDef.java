@@ -3,6 +3,7 @@ package LLVMIR.GlobalDefine;
 import AST.Atom.TypeNode;
 import LLVMIR.IRType.ClassType;
 import LLVMIR.IRType.IRBaseType;
+import LLVMIR.IRVisitor;
 import LLVMIR.Value.Register;
 
 import java.util.ArrayList;
@@ -27,5 +28,10 @@ public class ClassDef extends GlobalDef {
         if(i<classType.members.size()-1)System.out.print(", ");
     }
     System.out.println(" }");
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

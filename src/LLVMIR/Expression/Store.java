@@ -6,8 +6,8 @@ import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
 public class Store extends IRInstruction {
-    IRValue value;
-    Register storeAddr;
+    public IRValue value;
+    public Register storeAddr;
 
     public Store(IRValue value, Register storeAddr) {
         if(value==null){

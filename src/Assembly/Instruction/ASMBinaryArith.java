@@ -1,14 +1,15 @@
 package Assembly.Instruction;
 
-import Assembly.Operand.ASMImm;
+import Assembly.Operand.ASMOperand;
 import Assembly.Operand.ASMReg;
 
-public class ASMBinaryReg extends ASMInst {
-    public ASMReg rd, rs1, rs2;
+public class ASMBinaryArith extends ASMInst {
+    public ASMReg rd, rs1;
+    public ASMOperand rs2;
 
     public String typeName;
 
-    public  ASMBinaryReg(ASMReg rd, ASMReg rs1,ASMReg rs2,String typeName){
+    public ASMBinaryArith(ASMReg rd, ASMReg rs1, ASMOperand rs2, String typeName){
         this.rd = rd;
         this.rs1 = rs1;
         this.rs2 = rs2;

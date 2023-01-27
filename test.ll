@@ -51,10 +51,12 @@ declare i8* @___str_add (i8*, i8*)
 
 define i32 @main () {
 entry:
-  call void @__mx_initialize_globalVar()
   %retval = alloca i32
   %.phi = alloca i8
   %x = alloca i8*
+  %i = alloca i32
+  %_i1 = alloca i32
+  call void @__mx_initialize_globalVar()
   %0 = mul i32 100, 4
   %1 = add i32 %0, 4
   %2 = call i8* @__malloc(i32 %1)
@@ -63,7 +65,6 @@ entry:
   %4 = getelementptr inbounds i8, i8* %2, i32 4
   %5 = bitcast i8* %4 to i8*
   store i8* %5, i8** %x
-  %i = alloca i32
   store i32 0, i32* %i
   br label %for.begin1
 
@@ -103,7 +104,6 @@ if.end2:
   br label %for.begin1
 
 for.end1:
-  %_i1 = alloca i32
   store i32 0, i32* %_i1
   br label %for.begin3
 

@@ -3,14 +3,14 @@ package Assembly.Instruction;
 import Assembly.ASMBlock;
 
 public class ASMCallInst extends ASMInst {
-    public ASMBlock func;
+    public String funcName;
 
-    public ASMCallInst(ASMBlock func) {
-        this.func = func;
+    public ASMCallInst(String funcName) {
+        this.funcName = funcName;
     }
 
     @Override
     public void printASMInst() {
-        System.out.println("call    " + func.blockName);
+        System.out.println("call    " + funcName);
     }
 }

@@ -1,6 +1,9 @@
 package LLVMIR;
 
 import LLVMIR.Expression.*;
+import LLVMIR.GlobalDefine.ClassDef;
+import LLVMIR.GlobalDefine.FuncDef;
+import LLVMIR.GlobalDefine.VarDef;
 import LLVMIR.Terminal.Branch;
 import LLVMIR.Terminal.Jump;
 import LLVMIR.Terminal.Ret;
@@ -34,4 +37,13 @@ public interface IRVisitor {
 
     void visit(Ret it);
 
+    void visit(FuncDef it);
+
+    void visit(ClassDef it);
+
+    void visit(VarDef it);
+
+    void visit(BasicBlock it);
+
+    void visit(RootIR it);
 }

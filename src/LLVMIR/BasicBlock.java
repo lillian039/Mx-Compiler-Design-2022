@@ -25,9 +25,8 @@ public class BasicBlock {
     public void push_back(IRInstruction stmt) {
         if (stmt instanceof TerminalStmt) {
             if (tailStmt != null) {
-              //  System.out.print(labelName+"double tail!");
-            }
-            else tailStmt = (TerminalStmt) stmt;
+                //  System.out.print(labelName+"double tail!");
+            } else tailStmt = (TerminalStmt) stmt;
         } else stmts.add(stmt);
     }
 
@@ -36,7 +35,7 @@ public class BasicBlock {
     }
 
     public void print() {
-        System.out.println(labelName + ":");
+        if (labelName != null && !labelName.equals("entry")) System.out.println(labelName + ":");
         for (var stmt : stmts) {
             System.out.print("  ");
             stmt.printInstruct();
@@ -45,5 +44,9 @@ public class BasicBlock {
             System.out.print("  ");
             tailStmt.printInstruct();
         }
+    }
+
+    public void accept(IRVisitor visitor){
+        visitor.visit(this);
     }
 }
