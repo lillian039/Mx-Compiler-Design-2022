@@ -1,5 +1,6 @@
 package Assembly.Instruction;
 
+import Assembly.ASMVisitor;
 import Assembly.Operand.ASMAddress;
 import Assembly.Operand.ASMReg;
 
@@ -17,7 +18,12 @@ public class ASMMemoryInst extends ASMInst {
 
     @Override
     public void printASMInst() {
-        System.out.println(loadName + "  " + "      " +address.toString());
+        System.out.println(loadName + "  " + "\t" + rd.toString() + ", " + address.toString());
+    }
+
+    @Override
+    public void accept(ASMVisitor visitor) {
+        visitor.visit(this);
     }
 }
 

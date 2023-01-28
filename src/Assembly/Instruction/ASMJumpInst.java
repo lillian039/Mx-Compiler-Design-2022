@@ -1,16 +1,22 @@
 package Assembly.Instruction;
 
 import Assembly.ASMBlock;
+import Assembly.ASMVisitor;
 
 public class ASMJumpInst extends ASMInst {
-    public ASMBlock dest;
+    public String dest;
 
-    public ASMJumpInst(ASMBlock dest) {
+    public ASMJumpInst(String dest) {
         this.dest = dest;
     }
 
     @Override
     public void printASMInst() {
-        System.out.println("j   " + "     " + dest.blockName);
+        System.out.println("j    " + "\t" + dest);
+    }
+
+    @Override
+    public void accept(ASMVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -4,7 +4,6 @@ import AST.Atom.TypeNode;
 import LLVMIR.IRType.IntType;
 
 public class ConstBool extends ConstVal {
-    public int value;
 
     public ConstBool(boolean value) {
         this.value = value ? 1 : 0;

@@ -1,5 +1,6 @@
 package Assembly.Instruction;
 
+import Assembly.ASMVisitor;
 import Assembly.Operand.ASMOperand;
 import Assembly.Operand.ASMReg;
 
@@ -21,6 +22,11 @@ public class ASMBinaryArith extends ASMInst {
         System.out.print(typeName);
         int length = typeName.length();
         while (length++ != 4) System.out.print(" ");
-        System.out.println("    "+rd.toString() + ", " + rs1.toString() + ", " + rs2.toString());
+        System.out.println("\t"+rd.toString() + ", " + rs1.toString() + ", " + rs2.toString());
+    }
+
+    @Override
+    public void accept(ASMVisitor visitor) {
+        visitor.visit(this);
     }
 }

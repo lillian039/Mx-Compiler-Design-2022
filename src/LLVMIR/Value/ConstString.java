@@ -38,6 +38,10 @@ public class ConstString extends IRValue {
         return "getelementptr inbounds ([" + size + " x i8], [" + size + " x i8]* @" + name + ", i32 0, i32 0)";
     }
 
+    public String getStr(){
+        return string;
+    }
+
     public String toAllocate() {
         return "private unnamed_addr constant " + arrPtrType.typeToString() + " c \"" + ConvertForIr(string) + "\\00\"";
         //+ ", align " + (size * 8 + 7) / 8;

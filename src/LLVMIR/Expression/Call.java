@@ -10,7 +10,7 @@ import LLVMIR.Value.Register;
 import java.util.ArrayList;
 
 public class Call extends IRInstruction {
-        ArrayList<IRValue> parameterList=new ArrayList<>();
+        public ArrayList<IRValue> parameterList=new ArrayList<>();
         public FuncDef target;
 
         public IRBaseType returnType;

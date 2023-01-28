@@ -1,19 +1,21 @@
 package Assembly.Instruction;
 
 import Assembly.ASMVisitor;
+import Assembly.Operand.ASMImm;
 import Assembly.Operand.ASMReg;
 
-public class ASMMoveInst extends ASMInst {
-    public ASMReg rd, rs1;
+public class ASMLiInst extends ASMInst {
+    public ASMReg rd;
+    public ASMImm imm;
 
-    public ASMMoveInst(ASMReg rd, ASMReg rs1) {
+    public ASMLiInst(ASMReg rd, ASMImm imm) {
+        this.imm = imm;
         this.rd = rd;
-        this.rs1 = rs1;
     }
 
     @Override
     public void printASMInst() {
-        System.out.println("mv  " + "\t" + rd.toString() + ", " + rs1.toString());
+            System.out.println("li  " + "\t" + rd.toString() + ", " + imm.toString());
     }
 
     @Override

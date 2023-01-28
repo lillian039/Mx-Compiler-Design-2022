@@ -1,12 +1,17 @@
 package Assembly.Operand;
 
-public class ASMAddress extends ASMOperand{
+public class ASMAddress extends ASMOperand {
     public boolean isGlobal;
     public ASMReg asmReg;
-    public ASMImm asmImm;
+    public ASMOperand offset;
+
+    public ASMAddress(ASMOperand offset, ASMReg startReg) {
+        this.asmReg = startReg;
+        this.offset = offset;
+    }
 
     @Override
     public String toString() {
-        return null;
+        return offset.toString() + "(" + asmReg.toString() + ")";
     }
 }

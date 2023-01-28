@@ -4,29 +4,28 @@ import LLVMIR.IRType.ClassType;
 import LLVMIR.IRType.IRBaseType;
 import LLVMIR.IRType.IntType;
 import LLVMIR.IRType.PtrType;
+import LLVMIR.Value.ConstString;
 import LLVMIR.Value.Register;
 
 public class ASMGlobalVarDef {
-    String varName;
+    public String varName;
     String varType;
     int value;
     String strVal;
 
     public ASMGlobalVarDef(Register val) {
         IRBaseType type = ((PtrType) val.IRType).type;
-        varName = val.rename;
-        if (type instanceof ClassType) {
-            if (type.name.equals("string")) {
-                strVal = val.value.valueToString();
-                varType = ".asciz";
-            }
+        varName = val.name;
+        if (type.isSameType(new PtrType(new IntType(8, "char")))) {
+            strVal = "\"" + ((ConstString) val.value).getStr() + "\"";
+            varType = ".asciz";
         } else if (type instanceof PtrType) {
             varType = ".word";
             value = 0;
 
         } else if (type instanceof IntType) {
             varType = type.size() == 32 ? ".word" : ".byte";
-            value = Integer.parseInt(val.value.valueToString());
+            value = 0;
         }
     }
 

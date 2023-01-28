@@ -8,9 +8,9 @@ import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
 
 public class GetElementPtr extends IRInstruction {
-    Register startPointer;
-    Register tmpStore;
-    IRValue elementNum;
+    public Register startPointer;
+    public Register tmpStore;
+    public IRValue elementNum;
 
     boolean isStruct = false;
 

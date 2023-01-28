@@ -1,5 +1,7 @@
 import AST.RootNode;
 import Assembly.ASMFn;
+import Backend.ASMPrinter;
+import Backend.ASMRegAlloc;
 import Backend.InstructionSelector;
 import Frontend.*;
 import LLVMIR.RootIR;
@@ -17,39 +19,42 @@ import java.io.*;
 
 public class Compiler {
 
-    public static void main(String[] args) throws Exception{
-        String name="test.mx";
-        InputStream input=new FileInputStream(name);
-        PrintStream output=new PrintStream("test.ll");
+    public static void main(String[] args) throws Exception {
+        String name = "test.mx";
+        InputStream input = new FileInputStream(name);
+        PrintStream output = new PrintStream("test.s");
         System.setOut(output);
-       // InputStream input = System.in;
+        // InputStream input = System.in;
         try {
             RootNode root;
-            GlobalScope globalScope=new GlobalScope(null);
+            GlobalScope globalScope = new GlobalScope(null);
             globalScope.initializeGlobalScope();
 
-            MxLexer lexer=new MxLexer(CharStreams.fromStream(input));
+            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxErrorListener());
 
-            MxParser parser=new MxParser(new CommonTokenStream(lexer));
+            MxParser parser = new MxParser(new CommonTokenStream(lexer));
             parser.removeErrorListeners();
             parser.addErrorListener(new MxErrorListener());
 
-            ParseTree parseTreeRoot=parser.program();
-            ASTBuilder astBuilder=new ASTBuilder(globalScope);
-            root=(RootNode) astBuilder.visit(parseTreeRoot);
+            ParseTree parseTreeRoot = parser.program();
+            ASTBuilder astBuilder = new ASTBuilder(globalScope);
+            root = (RootNode) astBuilder.visit(parseTreeRoot);
             new SymbolCollector(globalScope).visit(root);
             new SemanticChecker(globalScope).visit(root);
 
-            RootIR rootIR=new RootIR();
+            RootIR rootIR = new RootIR();
             new IRCollector(globalScope).visit(root);
-            new IRBuilder(globalScope,rootIR).visit(root);
-            new IRPrinter(rootIR).print();
+            new IRBuilder(globalScope, rootIR).visit(root);
+            // new IRPrinter(rootIR).print();
 
             ASMFn asmFn = new ASMFn();
             new InstructionSelector(asmFn).visit(rootIR);
-        }catch (Error err){
+            // new ASMPrinter(asmFn).printOrigin();
+            new ASMRegAlloc(asmFn).alloc();
+            new ASMPrinter(asmFn).printAlloc();
+        } catch (Error err) {
 //            System.out.println(err.errorMsg());
             throw err;
         }

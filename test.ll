@@ -1,9 +1,16 @@
 target datalayout = "e-m:e-p:32:32-p270:32:32-p271:32:32-p272:64:64-f64:32:64-f80:32-n8:16:32-S128"
 target triple = "i386-pc-linux-gnu"
 
+@n = global i32 0
+@p = global i32 0
+@k = global i32 0
+@i = global i32 0
 
-@.str = private unnamed_addr constant [5 x i8] c "true\00"
-@.str.1 = private unnamed_addr constant [6 x i8] c "false\00"
+@.str = private unnamed_addr constant [4 x i8] c "<< \00"
+@.str.1 = private unnamed_addr constant [2 x i8] c "(\00"
+@.str.2 = private unnamed_addr constant [3 x i8] c ") \00"
+@.str.3 = private unnamed_addr constant [2 x i8] c " \00"
+@.str.4 = private unnamed_addr constant [4 x i8] c ">> \00"
 
 declare i32 @getInt ()
 
@@ -53,95 +60,114 @@ define i32 @main () {
 entry:
   %retval = alloca i32
   %.phi = alloca i8
-  %x = alloca i8*
-  %i = alloca i32
-  %_i1 = alloca i32
   call void @__mx_initialize_globalVar()
-  %0 = mul i32 100, 4
-  %1 = add i32 %0, 4
-  %2 = call i8* @__malloc(i32 %1)
-  %3 = bitcast i8* %2 to i32*
-  store i32 100, i32* %3
-  %4 = getelementptr inbounds i8, i8* %2, i32 4
-  %5 = bitcast i8* %4 to i8*
-  store i8* %5, i8** %x
-  store i32 0, i32* %i
-  br label %for.begin1
+  %0 = call i32 @getInt()
+  store i32 %0, i32* @n
+  %1 = call i32 @getInt()
+  store i32 %1, i32* @p
+  %2 = call i32 @getInt()
+  store i32 %2, i32* @k
+  %3 = load i32, i32* @p
+  %4 = load i32, i32* @k
+  %5 = sub nsw i32 %3, %4
+  %6 = icmp sgt i32 %5, 1
+  %7 = zext i1 %6 to i8
+  %8 = trunc i8 %7 to i1
+  br i1 %8, label %if.then1, label %if.end1
 
-for.begin1:
-  %6 = load i32, i32* %i
-  %7 = icmp slt i32 %6, 100
-  %8 = zext i1 %7 to i8
-  %9 = trunc i8 %8 to i1
-  br i1 %9, label %for.body1, label %for.end1
+if.then1:
+  call void @print(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0))
+  br label %if.end1
 
-for.body1:
-  %10 = load i32, i32* %i
-  %11 = srem i32 %10, 2
-  %12 = icmp eq i32 %11, 0
-  %13 = zext i1 %12 to i8
-  %14 = trunc i8 %13 to i1
-  br i1 %14, label %if.then2, label %if.else2
+if.end1:
+  %9 = load i32, i32* @p
+  %10 = load i32, i32* @k
+  %11 = sub nsw i32 %9, %10
+  store i32 %11, i32* @i
+  br label %for.begin2
 
-if.then2:
-  %15 = load i8*, i8** %x
-  %16 = load i32, i32* %i
-  %17 = getelementptr inbounds i8, i8* %15, i32 %16
-  store i8 1, i8* %17
-  br label %if.end2
+for.begin2:
+  %12 = load i32, i32* @i
+  %13 = load i32, i32* @p
+  %14 = load i32, i32* @k
+  %15 = add i32 %13, %14
+  %16 = icmp sle i32 %12, %15
+  %17 = zext i1 %16 to i8
+  %18 = trunc i8 %17 to i1
+  br i1 %18, label %for.body2, label %for.end2
 
-if.else2:
-  %18 = load i8*, i8** %x
-  %19 = load i32, i32* %i
-  %20 = getelementptr inbounds i8, i8* %18, i32 %19
-  store i8 0, i8* %20
-  br label %if.end2
+for.body2:
+  %19 = load i32, i32* @i
+  %20 = icmp sle i32 1, %19
+  %21 = zext i1 %20 to i8
+  store i8 %21, i8* %.phi
+  br i1 %26, label %and.rhs3, label %and.end3
 
-if.end2:
-  %21 = load i32, i32* %i
-  %22 = add i32 %21, 1
-  store i32 %22, i32* %i
-  br label %for.begin1
-
-for.end1:
-  store i32 0, i32* %_i1
-  br label %for.begin3
-
-for.begin3:
-  %23 = load i32, i32* %_i1
-  %24 = icmp slt i32 %23, 100
+and.rhs3:
+  %22 = load i32, i32* @i
+  %23 = load i32, i32* @n
+  %24 = icmp sle i32 %22, %23
   %25 = zext i1 %24 to i8
-  %26 = trunc i8 %25 to i1
-  br i1 %26, label %for.body3, label %for.end3
+  store i8 %25, i8* %.phi
+  %26 = trunc i8 %21 to i1
+  br label %and.end3
 
-for.body3:
-  %27 = load i8*, i8** %x
-  %28 = load i32, i32* %_i1
-  %29 = getelementptr inbounds i8, i8* %27, i32 %28
-  %30 = load i8, i8* %29
-  %31 = trunc i8 %30 to i1
-  br i1 %31, label %if.then4, label %if.else4
+and.end3:
+  %27 = load i8, i8* %.phi
+  %28 = trunc i8 %27 to i1
+  br i1 %28, label %if.then4, label %if.end4
 
 if.then4:
-  call void @println(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i32 0, i32 0))
-  br label %if.end4
+  %29 = load i32, i32* @i
+  %30 = load i32, i32* @p
+  %31 = icmp eq i32 %29, %30
+  %32 = zext i1 %31 to i8
+  %33 = trunc i8 %32 to i1
+  br i1 %33, label %if.then5, label %if.else5
 
-if.else4:
-  call void @println(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str.1, i32 0, i32 0))
+if.then5:
+  call void @print(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @.str.1, i32 0, i32 0))
+  %34 = load i32, i32* @i
+  %35 = call i8* @toString(i32 %34)
+  call void @print(i8* %35)
+  call void @print(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str.2, i32 0, i32 0))
+  br label %if.end5
+
+if.else5:
+  %36 = load i32, i32* @i
+  call void @printInt(i32 %36)
+  call void @print(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @.str.3, i32 0, i32 0))
+  br label %if.end5
+
+if.end5:
   br label %if.end4
 
 if.end4:
-  %32 = load i32, i32* %_i1
-  %33 = add i32 %32, 1
-  store i32 %33, i32* %_i1
-  br label %for.begin3
+  %37 = load i32, i32* @i
+  %38 = add i32 %37, 1
+  store i32 %38, i32* @i
+  br label %for.begin2
 
-for.end3:
+for.end2:
+  %39 = load i32, i32* @p
+  %40 = load i32, i32* @k
+  %41 = add i32 %39, %40
+  %42 = load i32, i32* @n
+  %43 = icmp slt i32 %41, %42
+  %44 = zext i1 %43 to i8
+  %45 = trunc i8 %44 to i1
+  br i1 %45, label %if.then6, label %if.end6
+
+if.then6:
+  call void @print(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.4, i32 0, i32 0))
+  br label %if.end6
+
+if.end6:
   store i32 0, i32* %retval
   br label %return
 
 return:
-  %34 = load i32, i32* %retval
-  ret i32 %34
+  %46 = load i32, i32* %retval
+  ret i32 %46
 }
 
