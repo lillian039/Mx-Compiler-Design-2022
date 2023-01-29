@@ -36,8 +36,8 @@ public class VarDef extends GlobalDef {
         stringCollect = globalScope.stringCollect;
         for (var vars : varDef) {
             IRBaseType irBaseType = toIRType(vars.typeNode);
-            if(!vars.typeNode.NotClass()){
-                irBaseType=new PtrType(irBaseType);
+            if (!vars.typeNode.NotClass()) {
+                irBaseType = new PtrType(irBaseType);
             }
             Register reg = new Register(new PtrType(irBaseType), vars.name);
             reg.isGlobe = true;
@@ -51,8 +51,10 @@ public class VarDef extends GlobalDef {
             String name;
             if (value == 0) name = ".str";
             else name = ".str." + value;
+            constString.strName = name;
             Register register = new Register(ptrType, name);
             register.value = constString;
+            register.isGlobe = true;
             Alloca alloca = new Alloca(register);
             globalScope.addReg(register.name, register);
             GlobalString.add(alloca);

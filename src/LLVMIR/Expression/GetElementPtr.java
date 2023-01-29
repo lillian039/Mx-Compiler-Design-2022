@@ -12,7 +12,7 @@ public class GetElementPtr extends IRInstruction {
     public Register tmpStore;
     public IRValue elementNum;
 
-    boolean isStruct = false;
+    public boolean isStruct = false;
 
     public GetElementPtr(Register tmpStore, Register startPointer, IRValue elementNum) {
         this.startPointer = startPointer;

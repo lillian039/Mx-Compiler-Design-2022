@@ -119,22 +119,22 @@ public class IRBuilder implements ASTVisitor {
 
     void addStrGlobalInner() {
         ClassType stringType = (ClassType) gScope.getIRType("string");
-        IntType boolType = (IntType) gScope.getIRType("bool");
+        IntType charType = new IntType(8,"char");
         Register regS1 = new Register(stringType, "s1");
         Register regS2 = new Register(stringType, "s2");
         ArrayList<FuncDef> strFunc = new ArrayList<>();
 
-        FuncDef str_eq = new FuncDef("___str_eq", boolType, true);
+        FuncDef str_eq = new FuncDef("___str_eq", charType, true);
         strFunc.add(str_eq);
-        FuncDef str_ne = new FuncDef("___str_ne", boolType, true);
+        FuncDef str_ne = new FuncDef("___str_ne", charType, true);
         strFunc.add(str_ne);
-        FuncDef str_slt = new FuncDef("___str_slt", boolType, true);
+        FuncDef str_slt = new FuncDef("___str_slt", charType, true);
         strFunc.add(str_slt);
-        FuncDef str_sle = new FuncDef("___str_sle", boolType, true);
+        FuncDef str_sle = new FuncDef("___str_sle", charType, true);
         strFunc.add(str_sle);
-        FuncDef str_sgt = new FuncDef("___str_sgt", boolType, true);
+        FuncDef str_sgt = new FuncDef("___str_sgt", charType, true);
         strFunc.add(str_sgt);
-        FuncDef str_sge = new FuncDef("___str_sge", boolType, true);
+        FuncDef str_sge = new FuncDef("___str_sge", charType, true);
         strFunc.add(str_sge);
 
         FuncDef str_add = new FuncDef("___str_add", stringType, true);
@@ -157,7 +157,7 @@ public class IRBuilder implements ASTVisitor {
 
         IRBaseType i8ptr = new PtrType(new IntType(8, "char"));
         Register register = new Register(regCnt++, i8ptr);
-        Malloc malloc = new Malloc(register, new ConstInt((baseClassType.size() + 7) / 8));
+        Malloc malloc = new Malloc(register, new ConstInt((baseClassType.size() + 7) / 8), gScope.getGlobalFunc("__malloc"));
         currentBlock.push_back(malloc);
 
         Register classReg = new Register(regCnt++, node.irBaseType);
@@ -175,7 +175,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(DotVarExprNode node) {
         node.irBaseType = new PtrType(toIRType(node.type));
-        if(!node.type.NotClass()){
+        if (!node.type.NotClass()) {
             node.irBaseType = new PtrType(node.irBaseType);
         }
         node.lhs.accept(this);
@@ -221,7 +221,7 @@ public class IRBuilder implements ASTVisitor {
         Alloca allocateInstruction = new Alloca(allocReg);
         currentScope.addReg(node.name, allocReg);
         currentFunc.addAllocate(allocateInstruction);
-       // currentBlock.push_back(allocateInstruction);
+        // currentBlock.push_back(allocateInstruction);
 
         if (node.expression != null) {
             node.expression.accept(this);
@@ -348,9 +348,9 @@ public class IRBuilder implements ASTVisitor {
         BasicBlock target = node.elseStmt == null ? newBlock : elseBlock;
 
 
-        if(node.condition.isAssignable){
-            Register loadReg=new Register(regCnt++,((PtrType)node.condition.irValue.IRType).type);
-            Load load=new Load(loadReg,(Register)node.condition.irValue);
+        if (node.condition.isAssignable) {
+            Register loadReg = new Register(regCnt++, ((PtrType) node.condition.irValue.IRType).type);
+            Load load = new Load(loadReg, (Register) node.condition.irValue);
             currentBlock.push_back(load);
             ConditionValue = loadReg;
         }
@@ -398,7 +398,7 @@ public class IRBuilder implements ASTVisitor {
         PtrType i8ptr = new PtrType(new IntType(8, "_char"));
         //mallocConv 最终要返回的ptr
         Register mallocOrigin = new Register(regCnt++, i8ptr);
-        Malloc mallocArr = new Malloc(mallocOrigin, length);
+        Malloc mallocArr = new Malloc(mallocOrigin, length, gScope.getGlobalFunc("__malloc"));
         currentBlock.push_back(mallocArr);
 
 
@@ -764,28 +764,33 @@ public class IRBuilder implements ASTVisitor {
             node.irValue = register;
             return;
         }
-        IRBaseType boolType = gScope.getIRType("bool");
-        Register ls = new Register(regCnt++, boolType);
+        IRBaseType charType = new IntType(8, "char");
+        Register ls = new Register(regCnt++, charType);
         if (node.option.equals("==")) {//比较两个字符串内容是否完全一致（不是内存地址）
-            call = new Call("___str_eq", ls, boolType);
+            call = new Call("___str_eq", ls, charType);
         } else if (node.option.equals("!=")) {
-            call = new Call("___str_ne", ls, boolType);
+            call = new Call("___str_ne", ls, charType);
         } else if (node.option.equals("<")) {
-            call = new Call("___str_slt", ls, boolType);
+            call = new Call("___str_slt", ls, charType);
         } else if (node.option.equals(">")) {
-            call = new Call("___str_sgt", ls, boolType);
+            call = new Call("___str_sgt", ls, charType);
         } else if (node.option.equals(">=")) {
-            call = new Call("___str_sge", ls, boolType);
+            call = new Call("___str_sge", ls, charType);
         } else if (node.option.equals("<=")) {
-            call = new Call("___str_sle", ls, boolType);
+            call = new Call("___str_sle", ls, charType);
         }
-        if (call == null) System.out.println("call null");
-        else {
-            call.addParameter(lsStr);
-            call.addParameter(rsStr);
-            currentBlock.push_back(call);
-            node.irValue = ls;
+
+        if (ls.IRType.isSameType(charType)) {
+            Register newReg = new Register(regCnt++, i32Type);
+            Zext zext = new Zext(charType, i32Type, newReg, ls);
+            currentBlock.push_back(zext);
+            ls = newReg;
         }
+        call.addParameter(lsStr);
+        call.addParameter(rsStr);
+        currentBlock.push_back(call);
+        node.irValue = ls;
+
     }
 
     @Override
@@ -810,14 +815,15 @@ public class IRBuilder implements ASTVisitor {
             BasicBlock befBlock = currentBlock;
             BasicBlock rhsBlock = new BasicBlock(name + ".rhs" + label, label);
             BasicBlock endBlock = new BasicBlock(name + ".end" + label, label);
+
+            Register conditionI1 = new Register(regCnt++, new IntType(1, "i1"));
+            Trunc i8Toi1 = new Trunc(gScope.getIRType("bool"), new IntType(1, "i1"), conditionI1, lsVal);
+            befBlock.push_back(i8Toi1);
+
             currentFunc.addBlock(rhsBlock);
             currentBlock = rhsBlock;
             node.rs.accept(this);
             currentBlock.push_back(new Jump(endBlock));
-
-            Register conditionI1 = new Register(regCnt++, new IntType(1, "i1"));
-            Trunc i8Toi1 = new Trunc(gScope.getIRType("bool"), new IntType(1, "i1"), conditionI1, lsVal);
-            currentBlock.push_back(i8Toi1);
 
             if (node.option.equals("||")) {
                 Branch orBr = new Branch(conditionI1, endBlock, rhsBlock);
@@ -867,7 +873,7 @@ public class IRBuilder implements ASTVisitor {
                 IRInstruction currentInstruction = new Icmp(lvalue, rvalue, i1Reg, op);
                 currentBlock.push_back(currentInstruction);
 
-                Zext zextToi8 = new Zext(new IntType(1, "i1"), new IntType(8, "bool"), reg, i1Reg);
+                Zext zextToi8 = new Zext(new IntType(1, "i1"), new IntType(32, "bool"), reg, i1Reg);
                 currentBlock.push_back(zextToi8);
 
                 node.irValue = reg;
@@ -917,7 +923,7 @@ public class IRBuilder implements ASTVisitor {
         //构造存短路求值的寄存器phi
         Register phi = new Register(new PtrType(gScope.getIRType("bool")), ".phi");
         currentFunc.addAllocate(new Alloca(phi));
-       // currentFunc.Entry.push_back(new Alloca(phi));
+        // currentFunc.Entry.push_back(new Alloca(phi));
         gScope.addReg(".phi", phi);
 
         rootIR.addFunc(currentFunc);
@@ -933,7 +939,7 @@ public class IRBuilder implements ASTVisitor {
                 Register a_addr = new Register(new PtrType(varType), vars.name + ".addr");
                 Alloca allocPara = new Alloca(a_addr);
                 currentFunc.addAllocate(allocPara);
-              //  currentBlock.push_back(allocPara);
+                //  currentBlock.push_back(allocPara);
                 Register a = new Register(varType, vars.name);
                 currentFunc.parameterList.add(a);
                 Store storeVal = new Store(a, a_addr);
@@ -1019,7 +1025,7 @@ public class IRBuilder implements ASTVisitor {
             rhsVal = loadSizeReg;
 
         } else {
-            String className = lhsVal.IRType.isSameType(charPtr) ? "string" : ((PtrType) lhsVal.IRType).type.name;
+            String className = lhsVal.IRType.isSameType(gScope.getIRType("string")) ? "string" : ((PtrType) lhsVal.IRType).type.name;
 
             node.rhs.name = "__" + className + "_" + node.rhs.name;
             node.rhs.accept(this);
@@ -1092,6 +1098,7 @@ public class IRBuilder implements ASTVisitor {
 
     IRValue LoadVal(ExprNode expr) {
         if (!expr.isAssignable) return expr.irValue;
+
         Register loadReg = new Register(regCnt++, ((PtrType) expr.irValue.IRType).type);
         Load loadVal = new Load(loadReg, (Register) expr.irValue);
         currentBlock.push_back(loadVal);

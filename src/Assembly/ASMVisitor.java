@@ -20,7 +20,7 @@ public interface ASMVisitor {
 
     void visit(ASMMoveInst it);
 
-    void visit(ASMPseudoInst it);
+    void visit(ASMCmpInst it);
 
     void visit(ASMRetInst it);
 

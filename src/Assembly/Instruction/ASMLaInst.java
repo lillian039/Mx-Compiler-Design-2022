@@ -1,13 +1,14 @@
 package Assembly.Instruction;
 
 import Assembly.ASMVisitor;
+import Assembly.Operand.ASMReg;
 import Assembly.Operand.ASMVirReg;
 
 public class ASMLaInst extends ASMInst {
-    ASMVirReg rd;
-    String name;
 
-    public ASMLaInst(ASMVirReg virReg, String name) {
+    public String name;
+
+    public ASMLaInst(ASMReg virReg, String name) {
         this.rd = virReg;
         this.name = name;
     }

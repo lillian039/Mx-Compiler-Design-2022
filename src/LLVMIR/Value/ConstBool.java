@@ -7,7 +7,7 @@ public class ConstBool extends ConstVal {
 
     public ConstBool(boolean value) {
         this.value = value ? 1 : 0;
-        this.IRType = new IntType(8, "bool");
+        this.IRType = new IntType(32, "bool");
     }
 
     @Override

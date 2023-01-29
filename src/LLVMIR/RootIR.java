@@ -25,10 +25,4 @@ public class RootIR {
     }
 
 
-    public ClassDef getClass(String name) {
-        for (var classDef : classDefs) {
-            if (classDef.name.equals(name)) return classDef;
-        }
-        return null;
-    }
 }

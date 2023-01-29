@@ -10,16 +10,13 @@ import LLVMIR.Expression.*;
 import LLVMIR.GlobalDefine.ClassDef;
 import LLVMIR.GlobalDefine.FuncDef;
 import LLVMIR.GlobalDefine.VarDef;
-import LLVMIR.IRType.IntType;
+import LLVMIR.IRType.*;
 import LLVMIR.IRVisitor;
 import LLVMIR.RootIR;
 import LLVMIR.Terminal.Branch;
 import LLVMIR.Terminal.Jump;
 import LLVMIR.Terminal.Ret;
-import LLVMIR.Value.ConstInt;
-import LLVMIR.Value.ConstVal;
-import LLVMIR.Value.IRValue;
-import LLVMIR.Value.Register;
+import LLVMIR.Value.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,9 +32,7 @@ public class InstructionSelector implements IRVisitor {
 
     ASMPhyReg s0 = new ASMPhyReg("s0");
     ASMPhyReg a0 = new ASMPhyReg("a0");
-
     ASMPhyReg sp = new ASMPhyReg("sp");
-
     ASMPhyReg ra = new ASMPhyReg("ra");
 
     ArrayList<ASMPhyReg> regFunc = new ArrayList<>();//function argument
@@ -61,28 +56,38 @@ public class InstructionSelector implements IRVisitor {
     }
 
     ASMVirReg getReg(IRValue irValue) {
-        if (irValue.virReg != null) return irValue.virReg;
-        ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
         if (irValue instanceof ConstVal) {
+            ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
+            offset -= (irValue.IRType.size() + 7) / 8;
             ASMLiInst li = new ASMLiInst(virReg, new ASMImm(((ConstVal) irValue).value));
             currentASMBlock.push_back(li);
-        }
+            irValue.virReg = virReg;
+            return virReg;
 
-        offset -= irValue.IRType.size() / 8;
-        irValue.virReg = virReg;
-        return virReg;
-    }
-
-    ASMAddress getAddress(IRValue addrAddress) {
-        if (addrAddress instanceof Register && ((Register) addrAddress).isGlobe) {
+        } else if (irValue instanceof Register && ((Register) irValue).isGlobe) {
             ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
-            offset -= 4;
-            ASMLaInst la = new ASMLaInst(virReg, ((Register) addrAddress).name);
+            offset -= (irValue.IRType.size() + 7) / 8;
+            ASMLaInst la = new ASMLaInst(virReg, ((Register) irValue).name);
             currentASMBlock.push_back(la);
-            return new ASMAddress(new ASMImm(0), virReg);
+            irValue.virReg = virReg;
+            return virReg;
+
+        } else if (irValue instanceof ConstString) {
+            ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
+            offset -= (irValue.IRType.size() + 7) / 8;
+            ASMLaInst la = new ASMLaInst(virReg, ((ConstString) irValue).strName);
+            currentASMBlock.push_back(la);
+            irValue.virReg = virReg;
+            return virReg;
+
+        } else {
+            if (irValue.virReg != null) return irValue.virReg;
+            ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
+            offset -= (irValue.IRType.size() + 7) / 8;
+            irValue.virReg = virReg;
+            return virReg;
         }
-        ASMVirReg virReg = getReg(addrAddress);
-        return new ASMAddress(new ASMImm(virReg.offset), s0);
+
     }
 
 
@@ -92,6 +97,10 @@ public class InstructionSelector implements IRVisitor {
         regFunc.add(asmFn.getReg("a1"));
         regFunc.add(asmFn.getReg("a2"));
         regFunc.add(asmFn.getReg("a3"));
+        regFunc.add(asmFn.getReg("a4"));
+        regFunc.add(asmFn.getReg("a5"));
+        regFunc.add(asmFn.getReg("a6"));
+        regFunc.add(asmFn.getReg("a7"));
     }
 
 
@@ -107,7 +116,11 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Alloca it) {
-        getReg(it.reg);
+        ASMVirReg newVirReg = new ASMVirReg(cntVirReg++, offset);
+        offset -= 4;
+        ASMReg rd = getReg(it.reg);
+        ASMBinaryArith addi = new ASMBinaryArith(rd, s0, null, new ASMImm(newVirReg.offset), "addi");
+        currentASMBlock.push_back(addi);
     }
 
     public void visit(Binary it) {
@@ -124,12 +137,12 @@ public class InstructionSelector implements IRVisitor {
             case "or" -> op = "or";
             case "xor" -> op = "xor";
         }
-        ASMBinaryArith binaryArith = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), op);
+        ASMBinaryArith binaryArith = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), null, op);
         currentASMBlock.push_back(binaryArith);
     }
 
     public void visit(Bitcast it) {
-        ASMMoveInst move = new ASMMoveInst(getReg(it.value), getReg(it.storeReg));
+        ASMMoveInst move = new ASMMoveInst(getReg(it.storeReg), getReg(it.value));
         currentASMBlock.push_back(move);
     }
 
@@ -137,89 +150,106 @@ public class InstructionSelector implements IRVisitor {
         int cnt = 0;
         int offsetNow = -8;
         for (var para : it.parameterList) {
-            if (cnt < 4) {
-                ASMMemoryInst lw = new ASMMemoryInst(regFunc.get(cnt), getAddress(para), "lw");
-                currentASMBlock.push_back(lw);
+            if (cnt < 8) {
+                ASMMoveInst mv = new ASMMoveInst(regFunc.get(cnt), getReg(para));
+                currentASMBlock.push_back(mv);
                 cnt++;
             } else {
-                ASMMemoryInst sw = new ASMMemoryInst(getReg(para), new ASMAddress(new ASMImm(offsetNow), sp), "sw");
+                ASMMemoryInst sw = new ASMMemoryInst(getReg(para), null, sp, new ASMImm(offsetNow), "sw");
                 currentASMBlock.push_back(sw);
                 offsetNow -= para.IRType.size() / 8;
             }
         }
         ASMCallInst call = new ASMCallInst(it.name);
         currentASMBlock.push_back(call);
-        if (it.caller != null) {
-            ASMMemoryInst sw = new ASMMemoryInst(a0, getAddress(it.caller), "sw");
-            currentASMBlock.push_back(sw);
+        if (it.caller != null && !(it.caller.IRType instanceof VoidType)) {
+            ASMMoveInst mv = new ASMMoveInst(getReg(it.caller), a0);
+            currentASMBlock.push_back(mv);
         }
     }
 
     public void visit(GetElementPtr it) {
         ASMVirReg startPointer = getReg(it.startPointer);
         ASMVirReg tmpStore = getReg(it.tmpStore);
-        ASMMemoryInst lw;
-        if (it.elementNum instanceof ConstInt) {
-            int value = ((ConstInt) it.elementNum).value;
-            lw = new ASMMemoryInst(tmpStore, new ASMAddress(new ASMImm(value), startPointer), "lw");
+        IRBaseType type = ((PtrType) it.startPointer.IRType).type;
+
+        ASMVirReg offsetReg;
+        if (it.isStruct) {
+            int value = 0;
+            for (int i = 1; i <= ((ConstInt) it.elementNum).value; i++)
+                value += ((ClassType) type).members.get(i - 1).size() / 8;
+            offsetReg = getReg(new ConstInt(value));
         } else {
-            ASMVirReg offsetReg = new ASMVirReg(cntVirReg++, offset);
-            offset -= 4;
-            lw = new ASMMemoryInst(tmpStore, new ASMAddress(offsetReg, startPointer), "lw");
+            if (it.elementNum instanceof ConstInt) {
+                offsetReg = getReg(it.elementNum);
+            } else {
+                offsetReg = new ASMVirReg(cntVirReg++, offset);
+                offset -= 4;
+                ConstInt size = new ConstInt(type.size() / 8);
+                ASMBinaryArith mul = new ASMBinaryArith(offsetReg, getReg(it.elementNum), getReg(size), null, "mul");
+                currentASMBlock.push_back(mul);
+            }
         }
-        currentASMBlock.push_back(lw);
+
+        ASMBinaryArith add = new ASMBinaryArith(tmpStore, offsetReg, startPointer, null, "add");
+        currentASMBlock.push_back(add);
     }
 
     public void visit(Icmp it) {
         it.swapInst();
         if (it.op.equals("slt")) {
-            ASMBinaryArith slt = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), "slt");
+            ASMBinaryArith slt = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), null, "slt");
             currentASMBlock.push_back(slt);
         } else if (it.op.equals("sge")) {
-            ASMBinaryArith sge = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), "slt");
+            ASMBinaryArith sge = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), null, "slt");
             currentASMBlock.push_back(sge);
-            ASMBinaryArith xori = new ASMBinaryArith(getReg(it.ls), getReg(it.ls), new ASMImm(1), "xori");
+            ASMBinaryArith xori = new ASMBinaryArith(getReg(it.ls), getReg(it.ls), null, new ASMImm(1), "xori");
             currentASMBlock.push_back(xori);
 
         } else if (it.op.equals("eq")) {
-            ASMBinaryArith xor = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), "xor");
+            ASMBinaryArith xor = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), null, "xor");
             currentASMBlock.push_back(xor);
-            ASMPseudoInst seqz = new ASMPseudoInst(getReg(it.ls), getReg(it.ls), "seqz");
+            ASMCmpInst seqz = new ASMCmpInst(getReg(it.ls), getReg(it.ls), null, "seqz");
             currentASMBlock.push_back(seqz);
 
         } else if (it.op.equals("ne")) {
-            ASMBinaryArith xor = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), "xor");
+            ASMBinaryArith xor = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), null, "xor");
             currentASMBlock.push_back(xor);
-            ASMPseudoInst snez = new ASMPseudoInst(getReg(it.ls), getReg(it.ls), "snez");
+            ASMCmpInst snez = new ASMCmpInst(getReg(it.ls), getReg(it.ls), null, "snez");
             currentASMBlock.push_back(snez);
         }
 
     }
 
     public void visit(Load it) {
-        String op = it.loadType.isSameType(new IntType(8, "bool")) ? "lbu" : "lw";
-        ASMMemoryInst load = new ASMMemoryInst(getReg(it.desReg), getAddress(it.ptr), op);
+        ASMMemoryInst load = new ASMMemoryInst(getReg(it.desReg), null, getReg(it.ptr), new ASMImm(0), "lw");
         currentASMBlock.push_back(load);
     }
 
     public void visit(Malloc it) {
+        ASMMoveInst mv = new ASMMoveInst(a0, getReg(it.size));
+        currentASMBlock.push_back(mv);
+
         ASMCallInst call = new ASMCallInst("__malloc");
         currentASMBlock.push_back(call);
+
+        ASMMoveInst mvBack = new ASMMoveInst(getReg(it.ptrStart), a0);
+        currentASMBlock.push_back(mvBack);
+
     }
 
     public void visit(Store it) {
-        String op = it.value.IRType.isSameType(new IntType(8, "bool")) ? "sb" : "sw";
-        ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), getAddress(it.storeAddr), op);
+        ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), null, getReg(it.storeAddr), new ASMImm(0), "sw");
         currentASMBlock.push_back(store);
     }
 
     public void visit(Trunc it) {
-        ASMMoveInst move = new ASMMoveInst(getReg(it.value), getReg(it.storeReg));
+        ASMMoveInst move = new ASMMoveInst(getReg(it.storeReg), getReg(it.value));
         currentASMBlock.push_back(move);
     }
 
     public void visit(Zext it) {
-        ASMMoveInst move = new ASMMoveInst(getReg(it.value), getReg(it.storeReg));
+        ASMMoveInst move = new ASMMoveInst(getReg(it.storeReg), getReg(it.value));
         currentASMBlock.push_back(move);
     }
 
@@ -236,12 +266,10 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Ret it) {
-        if (it.returnReg != null) {
-            ASMMemoryInst lw = new ASMMemoryInst(a0, getAddress(it.returnReg), "lw");
-            currentASMBlock.push_back(lw);
+        if (it.returnReg != null && !(it.returnReg.IRType instanceof VoidType)) {
+            ASMMoveInst move = new ASMMoveInst(a0, getReg(it.returnReg));
+            currentASMBlock.push_back(move);
         }
-        ASMRetInst ret = new ASMRetInst();
-        currentASMBlock.push_back(ret);
     }
 
     public void visit(VarDef it) {
@@ -274,13 +302,14 @@ public class InstructionSelector implements IRVisitor {
             } else offset -= paraReg.IRType.size() / 8;
         }
 
+        cnt = 0;
         for (var paraReg : it.parameterList) {
-            if (cnt < 4) {
-                ASMMemoryInst sw = new ASMMemoryInst(regFunc.get(cnt), getAddress(paraReg), "sw");
-                currentASMBlock.push_back(sw);
+            if (cnt < 8) {
+                ASMMoveInst mv = new ASMMoveInst(getReg(paraReg), regFunc.get(cnt));
+                currentASMBlock.push_back(mv);
                 cnt++;
             } else {
-                ASMMemoryInst lw = new ASMMemoryInst(getReg(paraReg), new ASMAddress(new ASMImm(offsetPara), sp), "lw");
+                ASMMemoryInst lw = new ASMMemoryInst(getReg(paraReg), null, sp, new ASMImm(offsetPara), "lw");
                 currentASMBlock.push_back(lw);
                 offsetPara -= paraReg.IRType.size() / 8;
             }
@@ -296,20 +325,24 @@ public class InstructionSelector implements IRVisitor {
             it.returnBlock.accept(this);
         }
         ASMBlock entry = currentFunc.getHead();
-        ASMMemoryInst sws0 = new ASMMemoryInst(s0, new ASMAddress(new ASMImm(-offset + 4), sp), "sw");
+        ASMBinaryArith addi = new ASMBinaryArith(s0, sp, null, new ASMImm(-offset), "addi");
+        entry.add_front(addi);
+        ASMMemoryInst sws0 = new ASMMemoryInst(s0, null, sp, new ASMImm(-offset - 8), "sw");
         entry.add_front(sws0);
-        ASMMemoryInst swra = new ASMMemoryInst(ra, new ASMAddress(new ASMImm(-offset + 8), sp), "sw");
+        ASMMemoryInst swra = new ASMMemoryInst(ra, null, sp, new ASMImm(-offset - 4), "sw");
         entry.add_front(swra);
-        ASMBinaryArith addiEntry = new ASMBinaryArith(sp, sp, new ASMImm(offset), "addi");
+        ASMBinaryArith addiEntry = new ASMBinaryArith(sp, sp, null, new ASMImm(offset), "addi");
         entry.add_front(addiEntry);
 
         ASMBlock tail = currentFunc.getTail();
-        ASMMemoryInst lws0 = new ASMMemoryInst(s0, new ASMAddress(new ASMImm(-offset + 8), sp), "lw");
+        ASMMemoryInst lws0 = new ASMMemoryInst(s0, null, sp, new ASMImm(-offset - 8), "lw");
         tail.push_back(lws0);
-        ASMMemoryInst lwra = new ASMMemoryInst(ra, new ASMAddress(new ASMImm(-offset + 4), sp), "lw");
+        ASMMemoryInst lwra = new ASMMemoryInst(ra, null, sp, new ASMImm(-offset - 4), "lw");
         tail.push_back(lwra);
-        ASMBinaryArith addiOut = new ASMBinaryArith(sp, sp, new ASMImm(-offset), "addi");
+        ASMBinaryArith addiOut = new ASMBinaryArith(sp, sp, null, new ASMImm(-offset), "addi");
         tail.push_back(addiOut);
+        ASMRetInst ret = new ASMRetInst();
+        tail.push_back(ret);
     }
 
     public void visit(ClassDef it) {

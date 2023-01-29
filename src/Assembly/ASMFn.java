@@ -22,16 +22,19 @@ public class ASMFn {
 
     public ArrayList<ASMGlobalVarDef> globalDefs = new ArrayList<>();
 
+    public ArrayList<ASMGlobalVarDef> globalStr = new ArrayList<>();
+
     public void addFunc(ASMFunc asmFunc) {
         asmFuncs.add(asmFunc);
     }
 
-    public void addAllocFunc(ASMFunc asmFunc){
+    public void addAllocFunc(ASMFunc asmFunc) {
         allocFuncs.add(asmFunc);
     }
 
     public void addGlobalVar(ASMGlobalVarDef var) {
-        globalDefs.add(var);
+        if (var.varType.equals(".asciz")) globalStr.add(var);
+        else globalDefs.add(var);
     }
 
     public ASMFn() {

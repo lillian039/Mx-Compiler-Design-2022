@@ -5,8 +5,6 @@ import Assembly.Operand.ASMImm;
 import Assembly.Operand.ASMReg;
 
 public class ASMLiInst extends ASMInst {
-    public ASMReg rd;
-    public ASMImm imm;
 
     public ASMLiInst(ASMReg rd, ASMImm imm) {
         this.imm = imm;

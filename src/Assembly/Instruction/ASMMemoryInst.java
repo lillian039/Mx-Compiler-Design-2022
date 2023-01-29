@@ -1,24 +1,27 @@
 package Assembly.Instruction;
 
 import Assembly.ASMVisitor;
-import Assembly.Operand.ASMAddress;
+import Assembly.Operand.ASMImm;
 import Assembly.Operand.ASMReg;
 
 public class ASMMemoryInst extends ASMInst {
-    public ASMReg rd;
-    public ASMAddress address;
 
-    public String loadName;
+    public String name;
 
-    public ASMMemoryInst(ASMReg rd, ASMAddress address, String loadName) {
+    // rd, imm(rs2) ----- rd, rs1(rs2)
+    public ASMMemoryInst(ASMReg rd, ASMReg rs1, ASMReg rs2, ASMImm imm, String name) {
         this.rd = rd;
-        this.address = address;
-        this.loadName = loadName;
+        this.rs1 = rs1;
+        this.rs2 = rs2;
+        this.imm = imm;
+        this.name = name;
     }
 
     @Override
     public void printASMInst() {
-        System.out.println(loadName + "  " + "\t" + rd.toString() + ", " + address.toString());
+        System.out.print(name + "  " + "\t" + rd.toString() + ", " );
+        if(imm == null)System.out.println(rs1.toString()+"("+rs2.toString()+")");
+        else System.out.println(imm.toString()+"("+rs2.toString()+")");
     }
 
     @Override

@@ -19,6 +19,6 @@ public class IntType extends IRBaseType{
 
     @Override
     public int size() {
-        return size;
+        return 32;
     }
 }

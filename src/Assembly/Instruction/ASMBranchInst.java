@@ -7,7 +7,6 @@ import Assembly.Operand.ASMReg;
 
 public class ASMBranchInst extends ASMInst {
     public String typeName;
-    public ASMReg rs1;
     public String  dest;
 
     public ASMBranchInst(ASMReg rs1, String dest, String typeName) {

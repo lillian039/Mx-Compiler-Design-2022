@@ -9,10 +9,15 @@ import LLVMIR.IRType.PtrType;
 public class ConstString extends IRValue {
     String string;
     public int number;
+
+    public String originStr;
+
+    public String strName;
     int size;
     ArrType arrPtrType;
 
     public ConstString(String string, int number) {
+        originStr = string;
         this.string = ReplaceString(string);
         this.number = number;
         this.size = this.string.length() + 1;

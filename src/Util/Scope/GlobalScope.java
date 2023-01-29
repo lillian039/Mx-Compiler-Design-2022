@@ -152,7 +152,8 @@ public class GlobalScope extends Scope {
         NullType nullType = new NullType();
         VoidType voidType = new VoidType();
         IntType intType = new IntType(32, "int");
-        IntType boolType = new IntType(8, "bool");
+        IntType boolType = new IntType(32, "bool");
+        IntType charType = new IntType(8,"char");
         IRTypes.put("null", nullType);
         IRTypes.put("void", voidType);
         IRTypes.put("bool", boolType);

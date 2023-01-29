@@ -1,29 +1,31 @@
 package Assembly.Instruction;
 
 import Assembly.ASMVisitor;
-import Assembly.Operand.ASMOperand;
+import Assembly.Operand.ASMImm;
 import Assembly.Operand.ASMReg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ASMPseudoInst extends ASMInst{
+public class ASMCmpInst extends ASMInst {
 
-    String op;
-    ASMReg rd;
-    ASMOperand rs1;
+    public String op;
+
+    //rd == rs1||imm snez xxx
 
     public static ArrayList<String> opName = new ArrayList<>(Arrays.asList(
-            "snez","seqz"));
+            "snez", "seqz"));
 
-    public ASMPseudoInst(ASMReg rd,ASMOperand rs1,String op){
+    public ASMCmpInst(ASMReg rd, ASMReg rs1, ASMImm imm, String op) {
         this.rd = rd;
         this.rs1 = rs1;
+        this.imm = imm;
         this.op = op;
     }
+
     @Override
     public void printASMInst() {
-        System.out.println(op+"\t"+rd.toString() + ", " + rs1.toString());
+        System.out.println(op + "\t" + rd.toString() + ", " + rs1.toString());
     }
 
     @Override

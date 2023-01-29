@@ -12,6 +12,8 @@ public class ClassType extends IRBaseType {
         return memberMap.get(name);
     }
 
+    public boolean isStr = false;
+
     public ClassType(String name) {
         this.name = name;
     }
@@ -29,6 +31,7 @@ public class ClassType extends IRBaseType {
 
     @Override
     public int size() {
+        if(name.equals("string"))return 32;
         int sum = 0;
         for (var member : members) {
             sum += member.size();
