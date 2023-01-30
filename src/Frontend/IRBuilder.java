@@ -171,7 +171,9 @@ public class IRBuilder implements ASTVisitor {
         }
 
         node.irBaseType = new PtrType(classReg.IRType);
-        Register ptrReg = new Register(regCnt++, node.irBaseType);
+        Register ptrReg = new Register(node.irBaseType,".tmp"+regCnt);
+        Alloca alloca = new Alloca(ptrReg);
+        currentBlock.push_back(alloca);
         Store store = new Store(classReg, ptrReg);
         currentBlock.push_back(store);
         node.irValue = ptrReg;
@@ -497,7 +499,9 @@ public class IRBuilder implements ASTVisitor {
 
         node.irValue = newArrCreate(newArrExpr, 0, ptr);
         node.irBaseType = new PtrType(node.irValue.IRType);
-        Register ptrReg = new Register(regCnt++, node.irBaseType);
+        Register ptrReg = new Register(node.irBaseType,".tmp"+regCnt);
+        Alloca alloca = new Alloca(ptrReg);
+        currentBlock.push_back(alloca);
         Store store = new Store(node.irValue, ptrReg);
         currentBlock.push_back(store);
         node.irValue = ptrReg;
@@ -509,9 +513,9 @@ public class IRBuilder implements ASTVisitor {
         node.ls.accept(this);
         Register ls = (Register) node.ls.irValue;
         IRBaseType irBaseType = ls.IRType;
-        if(node.ls instanceof FuncExprNode || node.ls instanceof DotFuncExprNode){
-            Register ptrReg = new Register(regCnt++,new PtrType(ls.IRType));
-            Store store = new Store(ls,ptrReg);
+        if (node.ls instanceof FuncExprNode || node.ls instanceof DotFuncExprNode) {
+            Register ptrReg = new Register(new PtrType(ls.IRType),".tmp"+regCnt);
+            Store store = new Store(ls, ptrReg);
             currentBlock.push_back(store);
             ls = ptrReg;
             irBaseType = ptrReg.IRType;
@@ -538,10 +542,6 @@ public class IRBuilder implements ASTVisitor {
         }
         node.irValue = ls;
         node.irBaseType = node.irValue.IRType;
-
-        if (node.irBaseType instanceof IntType) {
-            int i = 1;
-        }
 
         if (inCircuit(((PtrType) node.irBaseType).type)) loadVarInCirCuit(ls);
     }
@@ -643,7 +643,7 @@ public class IRBuilder implements ASTVisitor {
         if (!(node.irBaseType instanceof VoidType)) {
             caller = new Register(regCnt++, node.irBaseType);
             callFunction.caller = caller;
-        } else caller = new Register(node.irBaseType, "tmpstore");
+        } else caller = new Register(node.irBaseType, ".tmpstore");
 
         if (inCircuit != 0 && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
             Store storePhi = new Store(caller, currentScope.getReg(".phi"));
@@ -651,13 +651,6 @@ public class IRBuilder implements ASTVisitor {
         }
 
         caller.callFunc = callFunction;
-//        if(caller.IRType instanceof PtrType){
-//            node.isAssignable = true;
-//            node.irBaseType = new PtrType(node.irBaseType);
-//            Register ptrReg = new Register(regCnt++,node.irBaseType);
-//            Store store = new Store(caller,ptrReg);
-//            currentBlock.push_back(st);
-//        }
         node.irValue = caller;
     }
 
@@ -1043,14 +1036,11 @@ public class IRBuilder implements ASTVisitor {
             rhsVal = loadSizeReg;
 
         } else {
-            if (lhsVal.IRType instanceof ClassType) {
-                int i = 1;
-            }
             String className;
-            if(node.lhs instanceof FuncExprNode || node.lhs instanceof DotFuncExprNode){
+            if (node.lhs instanceof FuncExprNode || node.lhs instanceof DotFuncExprNode) {
                 className = lhsVal.IRType.name;
-            }
-            else className = lhsVal.IRType.isSameType(gScope.getIRType("string")) ? "string" : ((PtrType) lhsVal.IRType).type.name;
+            } else
+                className = lhsVal.IRType.isSameType(gScope.getIRType("string")) ? "string" : ((PtrType) lhsVal.IRType).type.name;
 
             node.rhs.name = "__" + className + "_" + node.rhs.name;
             node.rhs.accept(this);
@@ -1060,14 +1050,6 @@ public class IRBuilder implements ASTVisitor {
             Call callfunc = ((Register) node.rhs.irValue).callFunc;
             callfunc.addParameter(lhsVal);
         }
-//        if (node.rhs.irValue.IRType instanceof PtrType) {
-//            node.isAssignable = true;
-//            node.irBaseType = new PtrType(node.rhs.irValue.IRType);
-//            Register ptrReg = new Register(regCnt++, node.irBaseType);
-//            Store store = new Store(rhsVal, ptrReg);
-//            currentBlock.push_back(store);
-//            rhsVal = ptrReg;
-//        }
         node.irValue = rhsVal;
     }
 
