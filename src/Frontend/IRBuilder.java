@@ -1037,10 +1037,13 @@ public class IRBuilder implements ASTVisitor {
 
         } else {
             String className;
-            if (node.lhs instanceof FuncExprNode || node.lhs instanceof DotFuncExprNode) {
-                className = lhsVal.IRType.name;
-            } else
-                className = lhsVal.IRType.isSameType(gScope.getIRType("string")) ? "string" : ((PtrType) lhsVal.IRType).type.name;
+            if(lhsVal.IRType.isSameType(gScope.getIRType("string")))className = "string";
+           // else if (node.lhs instanceof FuncExprNode || node.lhs instanceof DotFuncExprNode) className = lhsVal.IRType.name;
+            else className = ((PtrType) lhsVal.IRType).type.name;
+
+            if(className ==null){
+                int i = 1;
+            }
 
             node.rhs.name = "__" + className + "_" + node.rhs.name;
             node.rhs.accept(this);

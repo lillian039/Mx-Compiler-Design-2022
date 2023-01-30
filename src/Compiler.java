@@ -48,7 +48,7 @@ public class Compiler {
             RootIR rootIR = new RootIR();
             new IRCollector(globalScope).visit(root);
             new IRBuilder(globalScope, rootIR).visit(root);
-          //  new IRPrinter(rootIR).print();
+            //new IRPrinter(rootIR).print();
 
             ASMFn asmFn = new ASMFn();
             new InstructionSelector(asmFn).visit(rootIR);
