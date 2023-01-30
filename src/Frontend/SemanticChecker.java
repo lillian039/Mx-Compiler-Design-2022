@@ -180,6 +180,9 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(FuncExprNode node) {
         FunDefStmtNode func = currentScope.getFunc(node.name);
+        if(func == null){
+            int i = 1;
+        }
         if (func == null) throw new SemanticError("func not exist", node.pos);
         if (node.parameterValueNode != null) node.parameterValueNode.accept(this);
         if (node.parameterValueNode == null && func.parameterList == null) {

@@ -32,7 +32,7 @@ public class SymbolCollector implements ASTVisitor {
             visit(funDef);
             if (funDef.name.equals("main")) node.mainNode = funDef;
         }
-        if(node.mainNode==null)throw new SyntaxError("No main function",node.pos);
+        if (node.mainNode == null) throw new SyntaxError("No main function", node.pos);
         firstVisit = false;
         for (ClassDefStmtNode classDef : node.classDef) {
             visit(classDef);
@@ -104,54 +104,54 @@ public class SymbolCollector implements ASTVisitor {
         if (!gScope.hasType(node.typeNode.type.name)) throw new SyntaxError("Type not exsit", node.pos);
         node.typeNode.type = gScope.getType(node.typeNode.type.name);
         for (SingleVarDefNode var : node.varDef) {
-            var.typeNode= node.typeNode;
+            var.typeNode = node.typeNode;
         }
         if (TmpClass != null) {
-            if (TmpClass.memberDef.containsKey(node.varDef.get(0).name))
-                throw new SemanticError("renaming class member", node.pos);
-            TmpClass.memberDef.put(node.varDef.get(0).name, node.varDef.get(0));
-            TmpClass.memberOrder.add(node.varDef.get(0).name);
+            for (int i = 0; i < node.varDef.size(); i++) {
+                if (TmpClass.memberDef.containsKey(node.varDef.get(i).name))
+                    throw new SemanticError("renaming class member", node.pos);
+                TmpClass.memberDef.put(node.varDef.get(i).name, node.varDef.get(i));
+                TmpClass.memberOrder.add(node.varDef.get(i).name);
+            }
         }
     }
 
 
-
     @Override
     public void visit(FunDefStmtNode node) {
-        if(TmpClass!=null&&TmpClass.name.equals(node.name)){
-            if(TmpClass.constructor!=null)throw new SemanticError("Constructor already exist",node.pos);
-            if(node.returnTypeNode!=null)throw new SemanticError("Wrong construction function define",node.pos);
-            if(node.parameterList!=null)throw new SemanticError("Constructor cannot have parameter",node.pos);
-            node.returnTypeNode=new TypeNode(node.pos,gScope.getType(TmpClass.name),false);
-            TmpClass.constructor=node;
-        }
-        else if(node.name.equals("main")){
+        if (TmpClass != null && TmpClass.name.equals(node.name)) {
+            if (TmpClass.constructor != null) throw new SemanticError("Constructor already exist", node.pos);
+            if (node.returnTypeNode != null) throw new SemanticError("Wrong construction function define", node.pos);
+            if (node.parameterList != null) throw new SemanticError("Constructor cannot have parameter", node.pos);
+            node.returnTypeNode = new TypeNode(node.pos, gScope.getType(TmpClass.name), false);
+            TmpClass.constructor = node;
+        } else if (TmpClass == null && node.name.equals("main")) {
             if (gScope.hasType(node.name)) throw new SyntaxError("Class name already exist", node.pos);
-            if(!node.returnTypeNode.type.name.equals("int"))throw new SemanticError("main can only return int",node.pos);
-            if(node.returnTypeNode.isArr)throw new SemanticError("main can not return arr",node.pos);
-            if(!(node.parameterList==null))throw new SemanticError("main function cannot have parameter",node.pos);
-            node.returnTypeNode.type=gScope.getType("int");
-        }
-        else {
+            if (!node.returnTypeNode.type.name.equals("int"))
+                throw new SemanticError("main can only return int", node.pos);
+            if (node.returnTypeNode.isArr) throw new SemanticError("main can not return arr", node.pos);
+            if (!(node.parameterList == null)) throw new SemanticError("main function cannot have parameter", node.pos);
+            node.returnTypeNode.type = gScope.getType("int");
+        } else {
             if (gScope.hasType(node.name)) throw new SyntaxError("Class name already exist", node.pos);
             if (!gScope.hasType(node.returnTypeNode.type.name))
                 throw new SyntaxError("Return type not exist", node.pos);
             node.returnTypeNode.type = gScope.getType(node.returnTypeNode.type.name);
-            if(node.parameterList!=null) {
+            if (node.parameterList != null) {
                 for (SingleVarDefNode varDef : node.parameterList.parameterList) {
                     if (!gScope.hasType(varDef.typeNode.type.name))
                         throw new SyntaxError("Variable type not exist", node.pos);
                     varDef.typeNode.type = gScope.getType(varDef.typeNode.type.name);
                 }
             }
-        if (firstVisit) {
-            gScope.addFunDefine(node.name, node);
-        } else if (TmpClass != null) {
-            if (TmpClass.funcDef.containsKey(node.name))
-                throw new SyntaxError("Func name already exist in class", node.pos);
-            TmpClass.funcDef.put(node.name, node);
-            TmpClass.functionOrder.add(node.name);
-        }
+            if (firstVisit) {
+                gScope.addFunDefine(node.name, node);
+            } else if (TmpClass != null) {
+                if (TmpClass.funcDef.containsKey(node.name))
+                    throw new SyntaxError("Func name already exist in class", node.pos);
+                TmpClass.funcDef.put(node.name, node);
+                TmpClass.functionOrder.add(node.name);
+            }
         }
     }
 
@@ -167,7 +167,7 @@ public class SymbolCollector implements ASTVisitor {
             for (StmtNode stmt : node.classBody.statements) {
                 if (stmt instanceof VarDefStmtNode) {
                     VarDefStmtNode varDefStmt = (VarDefStmtNode) stmt;
-                    if (varDefStmt.varDef.size() > 1) throw new SemanticError("Only single def allowed", node.pos);
+                    // if (varDefStmt.varDef.size() > 1) throw new SemanticError("Only single def allowed", node.pos);
                     visit(varDefStmt);
                 } else if (stmt instanceof FunDefStmtNode) {
                     visit((FunDefStmtNode) stmt);
