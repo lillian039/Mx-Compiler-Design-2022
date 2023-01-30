@@ -181,7 +181,7 @@ public class InstructionSelector implements IRVisitor {
             offsetReg = getReg(new ConstInt(value));
         } else {
             if (it.elementNum instanceof ConstInt) {
-                offsetReg = getReg(it.elementNum);
+                offsetReg = getReg(new ConstInt(((ConstInt) it.elementNum).value * type.size() / 8));
             } else {
                 offsetReg = new ASMVirReg(cntVirReg++, offset);
                 offset -= 4;

@@ -409,18 +409,19 @@ public class IRBuilder implements ASTVisitor {
         Store storeArrLength = new Store(dimen, arrLength);
         currentBlock.push_back(storeArrLength);
 
+        Register mallocConv = new Register(regCnt++, ptrType);
+        Bitcast bitcastMallocType = new Bitcast(mallocOrigin.IRType, ptrType, mallocConv, mallocOrigin);
+        currentBlock.push_back(bitcastMallocType);
+
         //返回的指针要挪到size后一位，并且类型转化
-        Register mallocChar = new Register(regCnt++, i8ptr);
-        GetElementPtr getArrPtr = new GetElementPtr(mallocChar, mallocOrigin, new ConstInt(4));
+        Register mallocPtr = new Register(regCnt++, ptrType);
+        GetElementPtr getArrPtr = new GetElementPtr(mallocPtr, mallocConv, new ConstInt(1));
         currentBlock.push_back(getArrPtr);
 
-        Register mallocConv = new Register(regCnt++, ptrType);
-        Bitcast bitcastMallocType = new Bitcast(mallocOrigin.IRType, ptrType, mallocConv, mallocChar);
-        currentBlock.push_back(bitcastMallocType);
 
 
         //最后一层 直接返回
-        if (layer == dimensions.size() - 1) return mallocConv;
+        if (layer == dimensions.size() - 1) return mallocPtr;
 
         //捏一个for循环
         int label = currentFunc.label++;
