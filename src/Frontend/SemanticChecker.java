@@ -56,6 +56,7 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(NewArrNode node) {
         node.type.accept(this);
+        node.isAssignable = true;
         boolean flag = false;
         for (NewArrDemNode dem : node.arrList) {
             dem.accept(this);

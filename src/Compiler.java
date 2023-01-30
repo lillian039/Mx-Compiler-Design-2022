@@ -21,10 +21,10 @@ import java.io.*;
 public class Compiler {
 
     public static void main(String[] args) throws Exception {
-       // String name = "test.mx";
+        String name = "test.mx";
         //InputStream input = new FileInputStream(name);
-      //  PrintStream output = new PrintStream("output.s");
-      //  System.setOut(output);
+       //PrintStream output = new PrintStream("test.s");
+       // System.setOut(output);
         InputStream input = System.in;
         try {
             RootNode root;

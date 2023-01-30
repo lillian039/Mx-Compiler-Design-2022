@@ -184,6 +184,9 @@ public class IRBuilder implements ASTVisitor {
         Register newLs = new Register(regCnt++, node.irBaseType);
 
         ClassType structBaseType = (ClassType) gScope.getIRType(node.lhs.type.type.name);
+        if(!structBaseType.memberMap.containsKey(((VarExprNode) node.rhs).name)){
+            int i = 1;
+        }
         ConstInt number = new ConstInt(structBaseType.getMap(((VarExprNode) node.rhs).name));
         GetElementPtr getPtr = new GetElementPtr(newLs, ls, number, true);
         currentBlock.push_back(getPtr);
@@ -493,6 +496,12 @@ public class IRBuilder implements ASTVisitor {
         }
 
         node.irValue = newArrCreate(newArrExpr, 0, ptr);
+        node.irBaseType = new PtrType(node.irValue.IRType);
+        Register ptrReg = new Register(regCnt++,node.irBaseType);
+        Store store = new Store(node.irValue,ptrReg);
+        currentBlock.push_back(store);
+        node.irValue = ptrReg;
+
     }
 
     @Override
@@ -522,6 +531,10 @@ public class IRBuilder implements ASTVisitor {
         }
         node.irValue = ls;
         node.irBaseType = node.irValue.IRType;
+
+        if(node.irBaseType instanceof IntType){
+            int i= 1;
+        }
 
         if (inCircuit(((PtrType) node.irBaseType).type)) loadVarInCirCuit(ls);
     }
@@ -1035,9 +1048,6 @@ public class IRBuilder implements ASTVisitor {
         ClassType type = (ClassType) gScope.getIRType(node.name);
         ClassDef currentClass = new ClassDef(node.name, type);
         currentScope = new ClassScope(currentScope, gScope.getType(node.name));
-        for (int i = 0; i < node.memberOrder.size(); i++) {
-            type.memberMap.put(node.memberOrder.get(i), i);
-        }
 
         for (var func : node.funcDef.values()) {
             FunDefStmtNode FuncNode = func;

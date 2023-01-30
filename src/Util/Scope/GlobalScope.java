@@ -173,6 +173,9 @@ public class GlobalScope extends Scope {
                     IRBaseType memType = toIRType(classTypeNode);
                     if(!classTypeNode.NotClass())memType=new PtrType(memType);
                     ((ClassType) classType).members.add(memType);
+                    for (int i = 0; i < classDef.classDef.memberOrder.size(); i++) {
+                        ((ClassType) classType).memberMap.put(classDef.classDef.memberOrder.get(i), i);
+                    }
                 }
             }
         }
