@@ -22,7 +22,7 @@ public class Compiler {
 
     public static void main(String[] args) throws Exception {
         String name = "test.mx";
-       // InputStream input = new FileInputStream(name);
+      //  InputStream input = new FileInputStream(name);
         PrintStream output = new PrintStream("output.s");
         System.setOut(output);
         InputStream input = System.in;
@@ -48,7 +48,7 @@ public class Compiler {
             RootIR rootIR = new RootIR();
             new IRCollector(globalScope).visit(root);
             new IRBuilder(globalScope, rootIR).visit(root);
-            //new IRPrinter(rootIR).print();
+         //   new IRPrinter(rootIR).print();
 
             ASMFn asmFn = new ASMFn();
             new InstructionSelector(asmFn).visit(rootIR);

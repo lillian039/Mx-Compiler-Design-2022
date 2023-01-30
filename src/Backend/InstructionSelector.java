@@ -56,14 +56,15 @@ public class InstructionSelector implements IRVisitor {
     }
 
     ASMVirReg getReg(IRValue irValue) {
-        if (irValue instanceof ConstVal) {
+        if (irValue instanceof Null) {
+            return getReg(new ConstInt(0));
+        } else if (irValue instanceof ConstVal) {
             ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
             offset -= (irValue.IRType.size() + 7) / 8;
             ASMLiInst li = new ASMLiInst(virReg, new ASMImm(((ConstVal) irValue).value));
             currentASMBlock.push_back(li);
             irValue.virReg = virReg;
             return virReg;
-
         } else if (irValue instanceof Register && ((Register) irValue).isGlobe) {
             ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
             offset -= (irValue.IRType.size() + 7) / 8;

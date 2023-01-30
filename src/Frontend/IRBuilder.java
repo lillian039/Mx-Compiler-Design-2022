@@ -119,7 +119,7 @@ public class IRBuilder implements ASTVisitor {
 
     void addStrGlobalInner() {
         ClassType stringType = (ClassType) gScope.getIRType("string");
-        IntType charType = new IntType(8,"char");
+        IntType charType = new IntType(8, "char");
         Register regS1 = new Register(stringType, "s1");
         Register regS2 = new Register(stringType, "s2");
         ArrayList<FuncDef> strFunc = new ArrayList<>();
@@ -188,14 +188,8 @@ public class IRBuilder implements ASTVisitor {
         GetElementPtr getPtr = new GetElementPtr(newLs, ls, number, true);
         currentBlock.push_back(getPtr);
 
-        if (inCircuit != 0 && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
-            Register loadDataReg = new Register(regCnt++, ((PtrType) node.irBaseType).type);
-            Load loadData = new Load(loadDataReg, newLs);
-            currentBlock.push_back(loadData);
+        if (inCircuit(((PtrType) node.irBaseType).type)) loadVarInCirCuit(newLs);
 
-            Store store = new Store(loadDataReg, currentScope.getReg(".phi"));
-            currentBlock.push_back(store);
-        }
         node.irValue = newLs;
     }
 
@@ -259,11 +253,7 @@ public class IRBuilder implements ASTVisitor {
         node.irBaseType = var.IRType;
         node.irValue = var;
 
-
-        if (inCircuit != 0 && node.irBaseType.isSameType(gScope.getIRType("bool"))) {
-            Store store = new Store(var, currentScope.getReg(".phi"));
-            currentBlock.push_back(store);
-        }
+        if (inCircuit(((PtrType) var.IRType).type)) loadVarInCirCuit(var);
     }
 
     @Override
@@ -419,7 +409,6 @@ public class IRBuilder implements ASTVisitor {
         currentBlock.push_back(getArrPtr);
 
 
-
         //最后一层 直接返回
         if (layer == dimensions.size() - 1) return mallocPtr;
 
@@ -534,6 +523,9 @@ public class IRBuilder implements ASTVisitor {
             ls = newReg;
         }
         node.irValue = ls;
+        node.irBaseType = node.irValue.IRType;
+
+        if (inCircuit(((PtrType) node.irBaseType).type)) loadVarInCirCuit(ls);
     }
 
     @Override
@@ -544,7 +536,7 @@ public class IRBuilder implements ASTVisitor {
         currentFunc.addBlock(newBlock);
         currentBlock.push_back(new Jump(newBlock));
         currentBlock = newBlock;
-        node.conditionNode.accept(this);
+        if (node.conditionNode != null) node.conditionNode.accept(this);
         LoopScope loopScope = new LoopScope(currentScope);
         loopScope.continueLoop = currentBlock;
         loopScope.breakLoop = new BasicBlock("for.end" + label, label);
@@ -552,15 +544,19 @@ public class IRBuilder implements ASTVisitor {
         BasicBlock body = new BasicBlock("for.body" + label, label);
         currentFunc.addBlock(body);
 
-        Register conditionI1 = new Register(regCnt++, new IntType(1, "i1"));
-        Trunc i8Toi1 = new Trunc(gScope.getIRType("bool"), new IntType(1, "i1"), conditionI1, node.conditionNode.irValue);
-        currentBlock.push_back(i8Toi1);
-        currentBlock.push_back(new Branch(conditionI1, body, loopScope.breakLoop));
+        if (node.conditionNode != null) {
+            Register conditionI1 = new Register(regCnt++, new IntType(1, "i1"));
+            Trunc i8Toi1 = new Trunc(gScope.getIRType("bool"), new IntType(1, "i1"), conditionI1, node.conditionNode.irValue);
+            currentBlock.push_back(i8Toi1);
+            currentBlock.push_back(new Branch(conditionI1, body, loopScope.breakLoop));
+        } else {
+            currentBlock.push_back(new Jump(body));
+        }
 
         currentBlock = body;
         currentScope = loopScope;
         if (node.body != null) node.body.accept(this);
-        node.stepNode.accept(this);
+        if (node.stepNode != null) node.stepNode.accept(this);
         Jump jumpBegin = new Jump(newBlock);
         currentBlock.push_back(jumpBegin);
         currentScope = currentScope.parentScope;
@@ -1104,5 +1100,18 @@ public class IRBuilder implements ASTVisitor {
         Load loadVal = new Load(loadReg, (Register) expr.irValue);
         currentBlock.push_back(loadVal);
         return loadReg;
+    }
+
+    void loadVarInCirCuit(Register irValue) {
+        Register loadDataReg = new Register(regCnt++, ((PtrType) irValue.IRType).type);
+        Load loadData = new Load(loadDataReg, irValue);
+        currentBlock.push_back(loadData);
+
+        Store store = new Store(loadDataReg, currentScope.getReg(".phi"));
+        currentBlock.push_back(store);
+    }
+
+    boolean inCircuit(IRBaseType curType) {
+        return inCircuit != 0 && curType.isSameType(gScope.getIRType("bool"));
     }
 }

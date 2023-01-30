@@ -1,6 +1,7 @@
 package LLVMIR.Expression;
 
 import LLVMIR.IRInstruction;
+import LLVMIR.IRType.PtrType;
 import LLVMIR.IRVisitor;
 import LLVMIR.Value.IRValue;
 import LLVMIR.Value.Register;
@@ -24,7 +25,7 @@ public class Store extends IRInstruction {
         if (this.value == null) System.out.println("Store Value???");
 
         else
-            System.out.println("store " + value.IRType.typeToString() + " " + value.valueToString() +
+            System.out.println("store " + ((PtrType)storeAddr.IRType).type.typeToString() + " " + value.valueToString() +
                     ", "+ storeAddr.IRType.typeToString()+" "+ storeAddr.valueToString() ) ;
         //+ ", align " + (value.IRType.size() + 7) / 8);
     }
