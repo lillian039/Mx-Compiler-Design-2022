@@ -51,9 +51,9 @@ public class Compiler {
          //   new IRPrinter(rootIR).print();
 
             ASMFn asmFn = new ASMFn();
-            new InstructionSelector(asmFn).visit(rootIR);
+          //  new InstructionSelector(asmFn).visit(rootIR);
            // new ASMPrinter(asmFn).printOrigin();
-            new ASMRegAlloc(asmFn).alloc();
+          //  new ASMRegAlloc(asmFn).alloc();
           //  new ASMPrinter(asmFn).printAlloc();
           //  BuiltinASMPrinter builtinASMPrinter = new BuiltinASMPrinter("builtin.s");
         } catch (Error err) {
