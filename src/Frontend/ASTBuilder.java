@@ -291,7 +291,8 @@ public class ASTBuilder extends MxBaseVisitor<ASTNode> {
     public ASTNode visitSuite(MxParser.SuiteContext ctx) {
         BlockStmtNode blockStmtNode = new BlockStmtNode(new Position(ctx));
         for (var stmt : ctx.statement()) {
-            blockStmtNode.statements.add((StmtNode) visit(stmt));
+            StmtNode stmtNode = (StmtNode) visit(stmt);
+            if(stmtNode!=null)blockStmtNode.statements.add(stmtNode);
         }
         return blockStmtNode;
     }

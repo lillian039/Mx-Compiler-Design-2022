@@ -83,8 +83,10 @@ public class IRCollector implements ASTVisitor {
 
     @Override
     public void visit(BlockStmtNode node) {
-        for (var stmt : node.statements) {
-            stmt.accept(this);
+        if (node.statements != null) {
+            for (var stmt : node.statements) {
+                stmt.accept(this);
+            }
         }
     }
 
@@ -96,6 +98,8 @@ public class IRCollector implements ASTVisitor {
         for (var varDef : node.memberDef.values()) {
             varDef.accept(this);
         }
+
+        if (node.constructor != null) node.constructor.accept(this);
     }
 
     @Override
@@ -113,7 +117,7 @@ public class IRCollector implements ASTVisitor {
         if (node.initializeStmt != null) node.initializeStmt.accept(this);
         if (node.conditionNode != null) node.conditionNode.accept(this);
         if (node.stepNode != null) node.stepNode.accept(this);
-        if(node.body!=null)node.body.accept(this);
+        if (node.body != null) node.body.accept(this);
     }
 
     @Override
@@ -126,7 +130,7 @@ public class IRCollector implements ASTVisitor {
     public void visit(IfStmtNode node) {
         node.condition.accept(this);
         if (node.thenStmt != null) node.thenStmt.accept(this);
-        if(node.elseStmt!=null)node.elseStmt.accept(this);
+        if (node.elseStmt != null) node.elseStmt.accept(this);
     }
 
     @Override
