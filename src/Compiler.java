@@ -23,8 +23,8 @@ public class Compiler {
     public static void main(String[] args) throws Exception {
         String name = "test.mx";
         //InputStream input = new FileInputStream(name);
-        //PrintStream output = new PrintStream("output.s");
-        //System.setOut(output);
+        PrintStream output = new PrintStream("output.s");
+        System.setOut(output);
         InputStream input = System.in;
         try {
             RootNode root;
@@ -51,11 +51,11 @@ public class Compiler {
          //   new IRPrinter(rootIR).print();
 
             ASMFn asmFn = new ASMFn();
-          //  new InstructionSelector(asmFn).visit(rootIR);
+            new InstructionSelector(asmFn).visit(rootIR);
            // new ASMPrinter(asmFn).printOrigin();
-          //  new ASMRegAlloc(asmFn).alloc();
-          //  new ASMPrinter(asmFn).printAlloc();
-          //  BuiltinASMPrinter builtinASMPrinter = new BuiltinASMPrinter("builtin.s");
+            new ASMRegAlloc(asmFn).alloc();
+            new ASMPrinter(asmFn).printAlloc();
+            BuiltinASMPrinter builtinASMPrinter = new BuiltinASMPrinter("builtin.s");
         } catch (Error err) {
 //            System.out.println(err.errorMsg());
             throw err;
