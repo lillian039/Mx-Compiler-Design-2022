@@ -64,10 +64,13 @@ public class IRCollector implements ASTVisitor {
 
     @Override
     public void visit(DotFuncExprNode node) {
+        node.lhs.accept(this);
+        node.rhs.accept(this);
     }
 
     @Override
     public void visit(AssignExprNode node) {
+        node.lhs.accept(this);
         node.rhs.accept(this);
     }
 

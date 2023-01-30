@@ -141,6 +141,9 @@ public class GlobalScope extends Scope {
     }
 
     public int getString(String str) {
+        if(!stringCollect.containsKey(str)){
+            int i =1 ;
+        }
         return stringCollect.get(str);
     }
 

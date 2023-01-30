@@ -445,6 +445,7 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(NewClassExprNode node) {
         node.type.accept(this);
+        node.isAssignable = true;
     }
 
 }
