@@ -493,12 +493,10 @@ public class IRBuilder implements ASTVisitor {
         }
 
         node.irValue = newArrCreate(newArrExpr, 0, ptr);
-
-
     }
 
     @Override
-    public void visit(ArrExprNode node) {//todo 应该取指针
+    public void visit(ArrExprNode node) {
         node.ls.accept(this);
         Register ls = (Register) node.ls.irValue;
         IRBaseType irBaseType = ls.IRType;
@@ -518,7 +516,7 @@ public class IRBuilder implements ASTVisitor {
             }
 
             Register newReg = new Register(regCnt++, ptrStart.IRType);
-            GetElementPtr getElementPtr = new GetElementPtr(newReg, ptrStart, elementNum);//todo get出来应该是个指针
+            GetElementPtr getElementPtr = new GetElementPtr(newReg, ptrStart, elementNum);
             currentBlock.push_back(getElementPtr);
             ls = newReg;
         }
@@ -913,14 +911,12 @@ public class IRBuilder implements ASTVisitor {
         if (!(currentFunc.irReturnType instanceof VoidType)) {
             Alloca allocaRet = new Alloca(retReg);
             currentFunc.addAllocate(allocaRet);
-            //currentBlock.push_back(allocaRet);
             currentFunc.retval = retReg;
         }
 
         //构造存短路求值的寄存器phi
         Register phi = new Register(new PtrType(gScope.getIRType("bool")), ".phi");
         currentFunc.addAllocate(new Alloca(phi));
-        // currentFunc.Entry.push_back(new Alloca(phi));
         gScope.addReg(".phi", phi);
 
         rootIR.addFunc(currentFunc);
@@ -936,7 +932,6 @@ public class IRBuilder implements ASTVisitor {
                 Register a_addr = new Register(new PtrType(varType), vars.name + ".addr");
                 Alloca allocPara = new Alloca(a_addr);
                 currentFunc.addAllocate(allocPara);
-                //  currentBlock.push_back(allocPara);
                 Register a = new Register(varType, vars.name);
                 currentFunc.parameterList.add(a);
                 Store storeVal = new Store(a, a_addr);
@@ -951,7 +946,6 @@ public class IRBuilder implements ASTVisitor {
             Register allocThisReg = new Register(new PtrType(thisType), "this.addr");
             Alloca allocaThis = new Alloca(allocThisReg);
             currentFunc.addAllocate(allocaThis);
-            //currentBlock.push_back(allocaThis);
             Store storeAlloc = new Store(thisReg, allocThisReg);
             currentBlock.push_back(storeAlloc);
             currentScope.addReg("this", allocThisReg);
@@ -1056,7 +1050,6 @@ public class IRBuilder implements ASTVisitor {
             node.constructor.accept(this);
         }
         rootIR.classDefs.add(currentClass);
-
         currentScope = currentScope.parentScope;
 
     }
@@ -1083,8 +1076,7 @@ public class IRBuilder implements ASTVisitor {
     }
 
     IRBaseType toIRType(TypeNode node) {
-        IRBaseType base = gScope.getIRType(node.type.name);
-        IRBaseType newIRBaseType = base;
+        IRBaseType newIRBaseType = gScope.getIRType(node.type.name);
         int layer = node.originLayer;
         while (layer > 0) {
             layer--;

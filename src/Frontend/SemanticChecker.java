@@ -114,8 +114,10 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(BinaryExprNode node) {
         node.rs.accept(this);
         node.ls.accept(this);
-        if (!node.rs.type.sameType(node.ls.type) && node.rs.type.type != nullType && node.ls.type.type != nullType)
+        if (!node.rs.type.sameType(node.ls.type) && node.rs.type.type != nullType && node.ls.type.type != nullType) {
+            int i=0;
             throw new SemanticError("type not match", node.pos);
+        }
         String option = node.option;
         Type lType = node.ls.type.type;
         Type rType = node.rs.type.type;
