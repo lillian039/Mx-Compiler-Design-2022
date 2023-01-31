@@ -21,6 +21,8 @@ import LLVMIR.Value.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static java.lang.Math.max;
+
 public class InstructionSelector implements IRVisitor {
     /*
     sp -4 ra
@@ -38,6 +40,8 @@ public class InstructionSelector implements IRVisitor {
     ArrayList<ASMPhyReg> regFunc = new ArrayList<>();//function argument
     int offset = -12;
 
+    int maxForFunc = 0;
+
     int cntVirReg = 0;
     ASMBlock currentASMBlock;
 
@@ -45,6 +49,7 @@ public class InstructionSelector implements IRVisitor {
 
     String currentFuncName;
 
+    int PARA_REG_SIZE = 3;
 
     HashMap<String, ASMGlobalVarDef> aSMGlobalVarDefCollect = new HashMap<>();
 
@@ -149,18 +154,19 @@ public class InstructionSelector implements IRVisitor {
 
     public void visit(Call it) {
         int cnt = 0;
-        int offsetNow = -8;
+        int nowOff = 0;
         for (var para : it.parameterList) {
-            if (cnt < 8) {
+            if (cnt < PARA_REG_SIZE) {
                 ASMMoveInst mv = new ASMMoveInst(regFunc.get(cnt), getReg(para));
                 currentASMBlock.push_back(mv);
                 cnt++;
             } else {
-                ASMMemoryInst sw = new ASMMemoryInst(getReg(para), null, sp, new ASMImm(offsetNow), "sw");
+                nowOff += 4;
+                ASMMemoryInst sw = new ASMMemoryInst(getReg(para), null, sp, new ASMImm(nowOff), "sw");
                 currentASMBlock.push_back(sw);
-                offsetNow -= para.IRType.size() / 8;
             }
         }
+        maxForFunc = max(maxForFunc, nowOff);
         ASMCallInst call = new ASMCallInst(it.name);
         currentASMBlock.push_back(call);
         if (it.caller != null && !(it.caller.IRType instanceof VoidType)) {
@@ -292,27 +298,21 @@ public class InstructionSelector implements IRVisitor {
         asmFn.addFunc(currentFunc);
         currentFuncName = it.name;
         offset = -12;
+        maxForFunc = 0;
         currentASMBlock = getBlock("");
+
         int cnt = 0;
+        int offsetPara = 4;
 
-        int offsetPara = -12;
-        //get offset
         for (var paraReg : it.parameterList) {
-            if (cnt < 4) {
-                cnt++;
-            } else offset -= paraReg.IRType.size() / 8;
-        }
-
-        cnt = 0;
-        for (var paraReg : it.parameterList) {
-            if (cnt < 8) {
+            if (cnt < PARA_REG_SIZE) {
                 ASMMoveInst mv = new ASMMoveInst(getReg(paraReg), regFunc.get(cnt));
                 currentASMBlock.push_back(mv);
                 cnt++;
             } else {
-                ASMMemoryInst lw = new ASMMemoryInst(getReg(paraReg), null, sp, new ASMImm(offsetPara), "lw");
+                ASMMemoryInst lw = new ASMMemoryInst(getReg(paraReg), null, s0, new ASMImm(offsetPara), "lw");
                 currentASMBlock.push_back(lw);
-                offsetPara -= paraReg.IRType.size() / 8;
+                offsetPara += 4;
             }
         }
         it.allocate.accept(this);
@@ -326,6 +326,9 @@ public class InstructionSelector implements IRVisitor {
             it.returnBlock.accept(this);
         }
         ASMBlock entry = currentFunc.getHead();
+
+        offset -= maxForFunc;
+
         ASMBinaryArith addi = new ASMBinaryArith(s0, sp, null, new ASMImm(-offset), "addi");
         entry.add_front(addi);
         ASMMemoryInst sws0 = new ASMMemoryInst(s0, null, sp, new ASMImm(-offset - 8), "sw");

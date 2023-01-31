@@ -1,6 +1,7 @@
 package Assembly;
 
 import Assembly.Instruction.ASMInst;
+import Assembly.Instruction.ASMMemoryInst;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -8,6 +9,8 @@ import java.util.LinkedList;
 public class ASMBlock {
     public LinkedList<ASMInst> insts = new LinkedList<>();
     public String blockName;
+
+    public ASMMemoryInst lwS0;
 
     public ASMBlock(String name) {
         this.blockName = name;

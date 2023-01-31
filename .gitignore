@@ -8,3 +8,9 @@ test.mx
 test.out
 code
 ir_judge.py
+builtin.ll
+builtin.s
+output.s
+test.in
+test.ll
+test.s
