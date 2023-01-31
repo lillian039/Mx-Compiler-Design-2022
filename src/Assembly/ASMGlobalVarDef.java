@@ -16,7 +16,7 @@ public class ASMGlobalVarDef {
     public ASMGlobalVarDef(Register val) {
         IRBaseType type = ((PtrType) val.IRType).type;
         varName = val.name;
-        if (type.isSameType(new ClassType("string"))) {
+        if (type.isSameType(new ClassType("string")) && varName.charAt(0) == '.') {
             strVal = "\"" + ((ConstString) val.value).originStr + "\"";
             varType = ".asciz";
         } else if (type instanceof IntType) {
