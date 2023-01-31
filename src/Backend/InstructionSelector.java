@@ -235,6 +235,7 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Load it) {
+        int i =1;
         if (!it.ptr.IRType.isSameType(it.desReg.IRType)) {
             ASMMemoryInst load = new ASMMemoryInst(getReg(it.desReg), null, getReg(it.ptr), new ASMImm(0), "lw");
             currentASMBlock.push_back(load);
@@ -257,6 +258,7 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Store it) {
+        int i=1;
         if (!it.storeAddr.IRType.isSameType(it.value.IRType)) {
             ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), null, getReg(it.storeAddr), new ASMImm(0), "sw");
             currentASMBlock.push_back(store);

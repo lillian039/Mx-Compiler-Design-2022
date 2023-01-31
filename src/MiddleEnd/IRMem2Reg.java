@@ -47,7 +47,6 @@ public class IRMem2Reg implements IRVisitor {
     public void visit(BasicBlock it) {
         for (var stmt : it.stmts) {
             stmt.accept(this);
-            //    if (stmt instanceof Alloca) it.stmts.remove(stmt);
         }
         if (it.tailStmt != null) it.tailStmt.accept(this);
     }

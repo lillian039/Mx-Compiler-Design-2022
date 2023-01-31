@@ -141,8 +141,8 @@ public class GlobalScope extends Scope {
     }
 
     public int getString(String str) {
-        if(!stringCollect.containsKey(str)){
-            int i =1 ;
+        if (!stringCollect.containsKey(str)) {
+            int i = 1;
         }
         return stringCollect.get(str);
     }
@@ -156,7 +156,7 @@ public class GlobalScope extends Scope {
         VoidType voidType = new VoidType();
         IntType intType = new IntType(32, "int");
         IntType boolType = new IntType(32, "bool");
-        IntType charType = new IntType(8,"char");
+
         IRTypes.put("null", nullType);
         IRTypes.put("void", voidType);
         IRTypes.put("bool", boolType);
@@ -172,9 +172,9 @@ public class GlobalScope extends Scope {
             if (classDef.classDef != null) {
                 IRBaseType classType = IRTypes.get(classDef.name);
                 for (var memDef : classDef.classDef.memberOrder) {
-                    TypeNode classTypeNode=classDef.classDef.memberDef.get(memDef).typeNode;
+                    TypeNode classTypeNode = classDef.classDef.memberDef.get(memDef).typeNode;
                     IRBaseType memType = toIRType(classTypeNode);
-                    if(!classTypeNode.NotClass())memType=new PtrType(memType);
+                    if (!classTypeNode.NotClass()) memType = new PtrType(memType);
                     ((ClassType) classType).members.add(memType);
                     for (int i = 0; i < classDef.classDef.memberOrder.size(); i++) {
                         ((ClassType) classType).memberMap.put(classDef.classDef.memberOrder.get(i), i);
@@ -188,17 +188,18 @@ public class GlobalScope extends Scope {
         //初始化全局函数
         for (var func : funcMembers.values()) {
             BasicBlock basicBlock = new BasicBlock("entry", 0);
-            IRBaseType returnType=toIRType(func.returnTypeNode);
-            if(!func.returnTypeNode.NotClass()){
+            IRBaseType returnType = toIRType(func.returnTypeNode);
+
+            if (!func.returnTypeNode.NotClass()) {
                 returnType = new PtrType(returnType);
             }
-            FuncDef funcDef = new FuncDef(basicBlock, func.name,returnType);
+            FuncDef funcDef = new FuncDef(basicBlock, func.name, returnType);
 
             funcDef.isInner = func.isInner;
             if (func.isInner) {
                 externalFunc.add(funcDef);
                 funcDef.originFunc = func;
-                InitializeInnerPara(func, funcDef,false);
+                InitializeInnerPara(func, funcDef, false);
             }
             globalFunc.put(func.name, funcDef);
         }
@@ -210,8 +211,8 @@ public class GlobalScope extends Scope {
             ClassDefStmtNode classDef = type.classDef;
             for (var func : classDef.funcDef.values()) {
                 BasicBlock basicBlock = new BasicBlock("entry", 0);
-                IRBaseType returnType=toIRType(func.returnTypeNode);
-                if(!func.returnTypeNode.NotClass()){
+                IRBaseType returnType = toIRType(func.returnTypeNode);
+                if (!func.returnTypeNode.NotClass()) {
                     returnType = new PtrType(returnType);
                 }
                 FuncDef funcDef = new FuncDef(basicBlock, "__" + classDef.name + "_" + func.name, returnType);
@@ -219,7 +220,7 @@ public class GlobalScope extends Scope {
                 funcDef.isInner = func.isInner;
                 //仅针对string
                 if (func.isInner) {
-                    InitializeInnerPara(func, funcDef,true);
+                    InitializeInnerPara(func, funcDef, true);
                     externalFunc.add(funcDef);
                 }
                 globalFunc.put(funcDef.name, funcDef);
@@ -235,8 +236,8 @@ public class GlobalScope extends Scope {
     }
 
     IRBaseType toIRType(TypeNode node) {
-        IRBaseType base = getIRType(node.type.name);
-        IRBaseType newIRBaseType = base;
+        IRBaseType newIRBaseType = getIRType(node.type.name);
+        ;
         int layer = node.layer;
         while (layer > 0) {
             layer--;
@@ -257,7 +258,7 @@ public class GlobalScope extends Scope {
         }
 
         if (isString) {
-            IRBaseType type = new PtrType(new IntType(8, "char"));
+            IRBaseType type = new ClassType("string");
             Register register = new Register(type, "str");
             funcDef.parameterList.add(register);
         }

@@ -1,10 +1,7 @@
 package LLVMIR.Value;
 
 import AST.Atom.TypeNode;
-import LLVMIR.IRType.ArrType;
-import LLVMIR.IRType.IRBaseType;
-import LLVMIR.IRType.IntType;
-import LLVMIR.IRType.PtrType;
+import LLVMIR.IRType.*;
 
 public class ConstString extends IRValue {
     String string;
@@ -22,7 +19,7 @@ public class ConstString extends IRValue {
         this.number = number;
         this.size = this.string.length() + 1;
         arrPtrType = new ArrType(this.size, new IntType(8, "char"));
-        this.IRType = new PtrType(new IntType(8, "char"));
+        this.IRType = new ClassType("string");
     }
 
     String ReplaceString(String str){

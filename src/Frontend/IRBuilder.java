@@ -173,7 +173,7 @@ public class IRBuilder implements ASTVisitor {
         node.irBaseType = new PtrType(classReg.IRType);
         Register ptrReg = new Register(node.irBaseType,".tmp"+regCnt);
         Alloca alloca = new Alloca(ptrReg);
-        currentBlock.push_back(alloca);
+        currentFunc.allocate.push_back(alloca);
         Store store = new Store(classReg, ptrReg);
         currentBlock.push_back(store);
         node.irValue = ptrReg;
@@ -501,7 +501,7 @@ public class IRBuilder implements ASTVisitor {
         node.irBaseType = new PtrType(node.irValue.IRType);
         Register ptrReg = new Register(node.irBaseType,".tmp"+regCnt);
         Alloca alloca = new Alloca(ptrReg);
-        currentBlock.push_back(alloca);
+        currentFunc.allocate.push_back(alloca);
         Store store = new Store(node.irValue, ptrReg);
         currentBlock.push_back(store);
         node.irValue = ptrReg;
@@ -1038,7 +1038,6 @@ public class IRBuilder implements ASTVisitor {
         } else {
             String className;
             if(lhsVal.IRType.isSameType(gScope.getIRType("string")))className = "string";
-           // else if (node.lhs instanceof FuncExprNode || node.lhs instanceof DotFuncExprNode) className = lhsVal.IRType.name;
             else className = ((PtrType) lhsVal.IRType).type.name;
 
             if(className ==null){
