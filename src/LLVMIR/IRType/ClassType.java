@@ -12,15 +12,13 @@ public class ClassType extends IRBaseType {
         return memberMap.get(name);
     }
 
-    public boolean isStr = false;
-
     public ClassType(String name) {
         this.name = name;
     }
 
     @Override
     public boolean isSameType(IRBaseType irBaseType) {
-        return irBaseType == this;
+        return irBaseType instanceof ClassType && irBaseType.name.equals(name);
     }
 
     @Override

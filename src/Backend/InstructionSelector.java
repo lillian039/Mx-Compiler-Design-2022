@@ -49,7 +49,7 @@ public class InstructionSelector implements IRVisitor {
 
     String currentFuncName;
 
-    int PARA_REG_SIZE = 3;
+    int PARA_REG_SIZE = 7;
 
     HashMap<String, ASMGlobalVarDef> aSMGlobalVarDefCollect = new HashMap<>();
 
@@ -130,6 +130,7 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Binary it) {
+
         String op = null;
         switch (it.op) {
             case "add" -> op = "add";
@@ -143,7 +144,12 @@ public class InstructionSelector implements IRVisitor {
             case "or" -> op = "or";
             case "xor" -> op = "xor";
         }
-        ASMBinaryArith binaryArith = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), null, op);
+        ASMBinaryArith binaryArith;
+        if (it.rs2 instanceof ConstInt && !op.equals("mul") && !op.equals("div") && !op.equals("rem") && !op.equals("sub")) {
+            binaryArith = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), null, new ASMImm(((ConstInt) it.rs2).value), op + "i");
+        } else if (it.rs2 instanceof ConstInt && op.equals("sub")) {
+            binaryArith = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), null, new ASMImm(-((ConstInt) it.rs2).value), "addi");
+        } else binaryArith = new ASMBinaryArith(getReg(it.ls), getReg(it.rs1), getReg(it.rs2), null, op);
         currentASMBlock.push_back(binaryArith);
     }
 
@@ -229,8 +235,13 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Load it) {
-        ASMMemoryInst load = new ASMMemoryInst(getReg(it.desReg), null, getReg(it.ptr), new ASMImm(0), "lw");
-        currentASMBlock.push_back(load);
+        if (!it.ptr.IRType.isSameType(it.desReg.IRType)) {
+            ASMMemoryInst load = new ASMMemoryInst(getReg(it.desReg), null, getReg(it.ptr), new ASMImm(0), "lw");
+            currentASMBlock.push_back(load);
+        } else {
+            ASMMoveInst mv = new ASMMoveInst(getReg(it.desReg), getReg(it.ptr));
+            currentASMBlock.push_back(mv);
+        }
     }
 
     public void visit(Malloc it) {
@@ -246,8 +257,14 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Store it) {
-        ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), null, getReg(it.storeAddr), new ASMImm(0), "sw");
-        currentASMBlock.push_back(store);
+        if (!it.storeAddr.IRType.isSameType(it.value.IRType)) {
+            ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), null, getReg(it.storeAddr), new ASMImm(0), "sw");
+            currentASMBlock.push_back(store);
+        } else {
+            ASMMoveInst moveInst = new ASMMoveInst(getReg(it.storeAddr), getReg(it.value));
+            currentASMBlock.push_back(moveInst);
+        }
+
     }
 
     public void visit(Trunc it) {
@@ -315,7 +332,7 @@ public class InstructionSelector implements IRVisitor {
                 offsetPara += 4;
             }
         }
-        it.allocate.accept(this);
+        //  it.allocate.accept(this);
         it.Entry.accept(this);
         for (var block : it.basicBlocks) {
             currentASMBlock = getBlock(block.labelName);
@@ -359,4 +376,5 @@ public class InstructionSelector implements IRVisitor {
         }
         if (it.tailStmt != null) it.tailStmt.accept(this);
     }
+
 }

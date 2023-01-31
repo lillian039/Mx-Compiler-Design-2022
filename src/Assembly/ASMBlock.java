@@ -10,8 +10,6 @@ public class ASMBlock {
     public LinkedList<ASMInst> insts = new LinkedList<>();
     public String blockName;
 
-    public ASMMemoryInst lwS0;
-
     public ASMBlock(String name) {
         this.blockName = name;
     }

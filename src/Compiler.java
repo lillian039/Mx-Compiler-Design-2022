@@ -5,6 +5,7 @@ import Backend.ASMRegAlloc;
 import Backend.InstructionSelector;
 import Frontend.*;
 import LLVMIR.RootIR;
+import MiddleEnd.IRMem2Reg;
 import Util.BuiltinASMPrinter;
 import Util.Err.Error;
 import Util.Scope.GlobalScope;
@@ -48,7 +49,8 @@ public class Compiler {
             RootIR rootIR = new RootIR();
             new IRCollector(globalScope).visit(root);
             new IRBuilder(globalScope, rootIR).visit(root);
-           // new IRPrinter(rootIR).print();
+            new IRMem2Reg(rootIR).visit(rootIR);
+            //new IRPrinter(rootIR).print();
 
             ASMFn asmFn = new ASMFn();
             new InstructionSelector(asmFn).visit(rootIR);
