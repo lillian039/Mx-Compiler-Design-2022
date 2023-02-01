@@ -65,14 +65,14 @@ public class InstructionSelector implements IRVisitor {
             return getReg(new ConstInt(0));
         } else if (irValue instanceof ConstVal) {
             ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
-            offset -= (irValue.IRType.size() + 7) / 8;
+            offset -= 4;
             ASMLiInst li = new ASMLiInst(virReg, new ASMImm(((ConstVal) irValue).value));
             currentASMBlock.push_back(li);
             irValue.virReg = virReg;
             return virReg;
         } else if (irValue instanceof Register && ((Register) irValue).isGlobe) {
             ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
-            offset -= (irValue.IRType.size() + 7) / 8;
+            offset -= 4;
             ASMLaInst la = new ASMLaInst(virReg, ((Register) irValue).name);
             currentASMBlock.push_back(la);
             irValue.virReg = virReg;
@@ -80,7 +80,7 @@ public class InstructionSelector implements IRVisitor {
 
         } else if (irValue instanceof ConstString) {
             ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
-            offset -= (irValue.IRType.size() + 7) / 8;
+            offset -= 4;
             ASMLaInst la = new ASMLaInst(virReg, ((ConstString) irValue).strName);
             currentASMBlock.push_back(la);
             irValue.virReg = virReg;
@@ -89,7 +89,7 @@ public class InstructionSelector implements IRVisitor {
         } else {
             if (irValue.virReg != null) return irValue.virReg;
             ASMVirReg virReg = new ASMVirReg(cntVirReg++, offset);
-            offset -= (irValue.IRType.size() + 7) / 8;
+            offset -= 4;
             irValue.virReg = virReg;
             return virReg;
         }
@@ -189,8 +189,9 @@ public class InstructionSelector implements IRVisitor {
         ASMVirReg offsetReg;
         if (it.isStruct) {
             int value = 0;
-            for (int i = 1; i <= ((ConstInt) it.elementNum).value; i++)
+            for (int i = 1; i <= ((ConstInt) it.elementNum).value; i++) {
                 value += ((ClassType) type).members.get(i - 1).size() / 8;
+            }
             offsetReg = getReg(new ConstInt(value));
         } else {
             if (it.elementNum instanceof ConstInt) {
@@ -199,6 +200,7 @@ public class InstructionSelector implements IRVisitor {
                 offsetReg = new ASMVirReg(cntVirReg++, offset);
                 offset -= 4;
                 ConstInt size = new ConstInt(type.size() / 8);
+
                 ASMBinaryArith mul = new ASMBinaryArith(offsetReg, getReg(it.elementNum), getReg(size), null, "mul");
                 currentASMBlock.push_back(mul);
             }
@@ -235,7 +237,9 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Load it) {
-        int i =1;
+//        int i = 1;
+//        ASMMemoryInst load = new ASMMemoryInst(getReg(it.desReg), null, getReg(it.ptr), new ASMImm(0), "lw");
+//        currentASMBlock.push_back(load);
         if (!it.ptr.IRType.isSameType(it.desReg.IRType)) {
             ASMMemoryInst load = new ASMMemoryInst(getReg(it.desReg), null, getReg(it.ptr), new ASMImm(0), "lw");
             currentASMBlock.push_back(load);
@@ -258,7 +262,9 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Store it) {
-        int i=1;
+//        int i = 1;
+//        ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), null, getReg(it.storeAddr), new ASMImm(0), "sw");
+//        currentASMBlock.push_back(store);
         if (!it.storeAddr.IRType.isSameType(it.value.IRType)) {
             ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), null, getReg(it.storeAddr), new ASMImm(0), "sw");
             currentASMBlock.push_back(store);
@@ -334,7 +340,7 @@ public class InstructionSelector implements IRVisitor {
                 offsetPara += 4;
             }
         }
-        //  it.allocate.accept(this);
+        //it.allocate.accept(this);
         it.Entry.accept(this);
         for (var block : it.basicBlocks) {
             currentASMBlock = getBlock(block.labelName);

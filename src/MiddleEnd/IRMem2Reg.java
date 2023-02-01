@@ -30,10 +30,11 @@ public class IRMem2Reg implements IRVisitor {
     }
 
     IRValue getReg(IRValue irValue) {
+        int i = 1;
         if (!(irValue instanceof Register)) return irValue;
-        String name = ((Register) irValue).name;
+        String name = irValue.valueToString();
         if (name == null || !memToReg.containsKey(name)) return irValue;
-        return memToReg.get(((Register) irValue).name);
+        return memToReg.get(name);
     }
 
     @Override
@@ -53,7 +54,7 @@ public class IRMem2Reg implements IRVisitor {
 
     @Override
     public void visit(Alloca it) {
-        memToReg.put(it.reg.name, new Register(((PtrType) it.reg.IRType).type, "__reg_" + cnt++));
+        memToReg.put(it.reg.valueToString(), new Register(((PtrType) it.reg.IRType).type, "__reg_" + cnt++));
     }
 
     @Override
@@ -71,10 +72,11 @@ public class IRMem2Reg implements IRVisitor {
     @Override
     public void visit(Call it) {
         ArrayList<IRValue> newList = new ArrayList<>();
-        for(var para:it.parameterList){
+        for (var para : it.parameterList) {
             newList.add(getReg(para));
         }
         it.parameterList = newList;
+        it.caller = (Register) getReg(it.caller);
     }
 
     @Override
@@ -98,7 +100,8 @@ public class IRMem2Reg implements IRVisitor {
 
     @Override
     public void visit(Malloc it) {
-
+        it.size = getReg(it.size);
+        it.ptrStart = (Register) getReg(it.ptrStart);
     }
 
     @Override
@@ -136,6 +139,7 @@ public class IRMem2Reg implements IRVisitor {
 
     @Override
     public void visit(FuncDef it) {
+        memToReg = new HashMap<>();
         it.allocate.accept(this);
         it.Entry.accept(this);
         for (var block : it.basicBlocks) {
