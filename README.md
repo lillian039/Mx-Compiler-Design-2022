@@ -8,6 +8,9 @@
 - [x] 完成 AST 的架构
 - [x] 完成SymbolCollector
 - [x] 完成 SemanticCheck
+- [x] 完成 IRBuilder
+- [x] 完成 Codegen
+- [x] 完成 Mem2Reg 优化
 
 [TOC]
 
@@ -101,3 +104,5 @@ Type 类的修改：
 赋予每个Type
 
 #### 🌻Codegen 架构
+
+TODO：完成寄存器分配
