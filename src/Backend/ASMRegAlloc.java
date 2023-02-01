@@ -52,12 +52,13 @@ public class ASMRegAlloc {
                     stmt.rs2 = t2;
                 }
 
-                if (stmt instanceof ASMMemoryInst && stmt.imm == null) {
-                    ASMBinaryArith addAddr = new ASMBinaryArith(t1, stmt.rs1, stmt.rs2, null, "add");
-                    currentBlock.push_back(addAddr);
-                    stmt.rs2 = t1;
-                    stmt.imm = new ASMImm(0);
-                }
+//                if (stmt instanceof ASMMemoryInst && stmt.imm == null) {
+//                    ASMBinaryArith addAddr = new ASMBinaryArith(t1, stmt.rs1, stmt.rs2, null, "add");
+//                    currentBlock.push_back(addAddr);
+//                    stmt.rs2 = t1;
+//                    stmt.imm = new ASMImm(0);
+//                }
+
                 currentBlock.push_back(stmt);
                 if(rdRecord instanceof ASMVirReg){
                     ASMMemoryInst sw = new ASMMemoryInst(stmt.rd, null,s0, new ASMImm(((ASMVirReg) rdRecord).offset), "sw");

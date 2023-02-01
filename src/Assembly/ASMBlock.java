@@ -2,14 +2,22 @@ package Assembly;
 
 import Assembly.Instruction.ASMInst;
 import Assembly.Instruction.ASMMemoryInst;
+import Assembly.Operand.ASMReg;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 public class ASMBlock {
     public LinkedList<ASMInst> insts = new LinkedList<>();
     public String blockName;
 
+    public ArrayList<ASMBlock> pred = new ArrayList<>();
+    public ArrayList<ASMBlock> succ = new ArrayList<>();
+
+    public HashSet<ASMReg> use = new HashSet<>();
+
+    public HashSet<ASMReg> def = new HashSet<>();
     public ASMBlock(String name) {
         this.blockName = name;
     }
@@ -22,7 +30,21 @@ public class ASMBlock {
         insts.addFirst(inst);
     }
 
+    public void add_pred(ASMBlock block){
+        pred.add(block);
+    }
 
+    public void add_succ(ASMBlock block){
+        succ.add(block);
+    }
+
+    public void add_use(ASMReg asmReg){
+        use.add(asmReg);
+    }
+
+    public void add_def(ASMReg asmReg){
+        def.add(asmReg);
+    }
     public void print() {
         System.out.println(blockName + ":");
         for (var stmt : insts) {

@@ -32,10 +32,10 @@ public class InstructionSelector implements IRVisitor {
      */
     ASMFn asmFn;
 
-    ASMPhyReg s0 = new ASMPhyReg("s0");
-    ASMPhyReg a0 = new ASMPhyReg("a0");
-    ASMPhyReg sp = new ASMPhyReg("sp");
-    ASMPhyReg ra = new ASMPhyReg("ra");
+    ASMPhyReg s0;
+    ASMPhyReg a0;
+    ASMPhyReg sp;
+    ASMPhyReg ra;
 
     ArrayList<ASMPhyReg> regFunc = new ArrayList<>();//function argument
     int offset = -12;
@@ -99,6 +99,10 @@ public class InstructionSelector implements IRVisitor {
 
     public InstructionSelector(ASMFn asmFn) {
         this.asmFn = asmFn;
+        a0 = asmFn.getReg("a0");
+        s0 = asmFn.getReg("s0");
+        sp = asmFn.getReg("sp");
+        ra = asmFn.getReg("ra");
         regFunc.add(a0);
         regFunc.add(asmFn.getReg("a1"));
         regFunc.add(asmFn.getReg("a2"));
@@ -237,9 +241,6 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Load it) {
-//        int i = 1;
-//        ASMMemoryInst load = new ASMMemoryInst(getReg(it.desReg), null, getReg(it.ptr), new ASMImm(0), "lw");
-//        currentASMBlock.push_back(load);
         if (!it.ptr.IRType.isSameType(it.desReg.IRType)) {
             ASMMemoryInst load = new ASMMemoryInst(getReg(it.desReg), null, getReg(it.ptr), new ASMImm(0), "lw");
             currentASMBlock.push_back(load);
@@ -262,7 +263,7 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Store it) {
-        if (!it.storeAddr.IRType.isSameType(it.value.IRType) && !(it.value instanceof Null)) {
+        if (!it.storeAddr.IRType.isSameType(it.value.IRType)) {
             ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), null, getReg(it.storeAddr), new ASMImm(0), "sw");
             currentASMBlock.push_back(store);
         } else {
