@@ -262,10 +262,7 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Store it) {
-//        int i = 1;
-//        ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), null, getReg(it.storeAddr), new ASMImm(0), "sw");
-//        currentASMBlock.push_back(store);
-        if (!it.storeAddr.IRType.isSameType(it.value.IRType)) {
+        if (!it.storeAddr.IRType.isSameType(it.value.IRType) && !(it.value instanceof Null)) {
             ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), null, getReg(it.storeAddr), new ASMImm(0), "sw");
             currentASMBlock.push_back(store);
         } else {
