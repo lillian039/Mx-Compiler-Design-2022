@@ -11,6 +11,7 @@
 - [x] 完成 IRBuilder
 - [x] 完成 Codegen
 - [x] 完成 Mem2Reg 优化
+- [x] 完成图染色优化
 
 [TOC]
 
@@ -105,4 +106,14 @@ Type 类的修改：
 
 #### 🌻Codegen 架构
 
-TODO：完成寄存器分配
+完成寄存器分配
+
+一些tips：
+
+block 的 use def 与 stmt 的 use def 求法不同，有细节
+
+offset的选取是基于全局的
+
+caller保护：call处添加def冲突
+
+callee保护：mv到虚拟寄存器中

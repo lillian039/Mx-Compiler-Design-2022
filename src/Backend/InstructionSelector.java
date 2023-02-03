@@ -381,7 +381,6 @@ public class InstructionSelector implements IRVisitor {
         }
 
         currentFunc.maxFuncParaOffset = maxForFunc;
-        //   offset -= maxForFunc;
     }
 
     public void visit(ClassDef it) {
