@@ -9,6 +9,10 @@ public class ASMFunc {
     public String funcName;
     public ArrayList<ASMBlock> asmBlocks = new ArrayList<>();
 
+    public ASMImm maxOffset;
+
+    public int maxFuncParaOffset;
+
     public ASMFunc(String funcName) {
         this.funcName = funcName;
     }

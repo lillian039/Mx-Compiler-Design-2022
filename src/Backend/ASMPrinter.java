@@ -10,6 +10,7 @@ public class ASMPrinter {
     }
 
     public void printOrigin() {
+        int i = 1;
         for (var func : asmFn.asmFuncs) {
             func.printFunc();
         }
@@ -20,7 +21,7 @@ public class ASMPrinter {
 
     public void printAlloc() {
         System.out.println("\t.text");
-        for (var func : asmFn.allocFuncs) {
+        for (var func : asmFn.asmFuncs) {
             System.out.println("\t.globl\t" + func.funcName);
             func.printFunc();
         }

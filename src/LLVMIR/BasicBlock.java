@@ -24,7 +24,7 @@ public class BasicBlock {
 
     public void push_back(IRInstruction stmt) {
         if (stmt instanceof TerminalStmt) {
-            tailStmt = (TerminalStmt) stmt;
+            if (tailStmt == null) tailStmt = (TerminalStmt) stmt;
         } else stmts.add(stmt);
     }
 
@@ -33,12 +33,12 @@ public class BasicBlock {
     }
 
     public void print() {
-        if (labelName != null && !labelName.equals("entry")) System.out.print(labelName + ":\t\t# prev: ");
-        for (int i = 0; i < prev.size(); i++) {
-            System.out.print(prev.get(i).labelName);
-            if (i != prev.size() - 1) System.out.print(", ");
-        }
-        System.out.println(" ");
+        if (labelName != null && !labelName.equals("entry")) System.out.println(labelName + ":");
+//        for (int i = 0; i < prev.size(); i++) {
+//            System.out.print(prev.get(i).labelName);
+//            if (i != prev.size() - 1) System.out.print(", ");
+//        }
+//        System.out.println(" ");
         for (var stmt : stmts) {
             System.out.print("  ");
             stmt.printInstruct();

@@ -8,7 +8,8 @@ public class ASMMemoryInst extends ASMInst {
 
     public String name;
 
-    // rd, imm(rs2) ----- rd, rs1(rs2)
+    // lw rd, imm(rs2)
+    // sw rs1 imm(rs2)
     public ASMMemoryInst(ASMReg rd, ASMReg rs1, ASMReg rs2, ASMImm imm, String name) {
         this.rd = rd;
         this.rs1 = rs1;
@@ -19,9 +20,9 @@ public class ASMMemoryInst extends ASMInst {
 
     @Override
     public void printASMInst() {
-        System.out.print(name + "  " + "\t" + rd.toString() + ", " );
-        if(imm == null)System.out.println(rs1.toString()+"("+rs2.toString()+")");
-        else System.out.println(imm.toString()+"("+rs2.toString()+")");
+        if (rd != null) System.out.print(name + "  " + "\t" + rd.toString() + ", ");
+        else System.out.print(name + "  " + "\t" + rs1.toString() + ", ");
+        System.out.println(imm.toString() + "(" + rs2.toString() + ")");
     }
 
     @Override

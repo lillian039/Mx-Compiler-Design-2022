@@ -1,0 +1,100 @@
+__mx_initialize_globalVar:
+	li  	%1, 20
+	li  	%2, 4
+	mul 	%0, %1, %2
+	addi	%3, %0, 4
+	mv  	a0, %3
+	call	__malloc
+	mv  	%4, a0
+	mv  	%5, %4
+	li  	%6, 20
+	sw  	%6, 0(%5)
+	mv  	%7, %4
+	li  	%9, 4
+	add 	%8, %9, %7
+	mv  	%10, %8
+	mv  	%11, %10
+	la  	%12, a
+	sw  	%11, 0(%12)
+main:
+	call	__mx_initialize_globalVar
+	call	getInt
+	mv  	%13, a0
+	la  	%14, n
+	sw  	%13, 0(%14)
+	li  	%15, 0
+	la  	%16, i
+	sw  	%15, 0(%16)
+	j    	main_for.begin1
+main_for.begin1:
+	la  	%18, i
+	lw  	%17, 0(%18)
+	la  	%20, n
+	lw  	%19, 0(%20)
+	slt 	%21, %17, %19
+	mv  	%22, %21
+	mv  	%23, %22
+	bnez	%23, main_for.body1
+	j    	main_for.end1
+main_for.body1:
+	la  	%25, a
+	lw  	%24, 0(%25)
+	la  	%27, i
+	lw  	%26, 0(%27)
+	li  	%30, 4
+	mul 	%29, %26, %30
+	add 	%28, %29, %24
+	call	getInt
+	mv  	%31, a0
+	sw  	%31, 0(%28)
+	la  	%33, i
+	lw  	%32, 0(%33)
+	addi	%34, %32, 1
+	la  	%35, i
+	sw  	%34, 0(%35)
+	j    	main_for.begin1
+main_for.end1:
+	li  	%36, 0
+	la  	%37, i
+	sw  	%36, 0(%37)
+	j    	main_for.begin2
+main_for.begin2:
+	la  	%39, i
+	lw  	%38, 0(%39)
+	la  	%41, n
+	lw  	%40, 0(%41)
+	slt 	%42, %38, %40
+	mv  	%43, %42
+	mv  	%44, %43
+	bnez	%44, main_for.body2
+	j    	main_for.end2
+main_for.body2:
+	la  	%46, a
+	lw  	%45, 0(%46)
+	la  	%48, i
+	lw  	%47, 0(%48)
+	li  	%51, 4
+	mul 	%50, %47, %51
+	add 	%49, %50, %45
+	lw  	%52, 0(%49)
+	mv  	a0, %52
+	call	printlnInt
+	la  	%54, i
+	lw  	%53, 0(%54)
+	addi	%55, %53, 1
+	la  	%56, i
+	sw  	%55, 0(%56)
+	j    	main_for.begin2
+main_for.end2:
+	li  	%58, 0
+	mv  	%57, %58
+	j    	main_return
+main_return:
+	mv  	%59, %57
+	mv  	a0, %59
+n:
+	.word	0
+a:
+	.word	0
+i:
+	.word	0

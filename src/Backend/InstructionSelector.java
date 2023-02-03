@@ -20,6 +20,7 @@ import LLVMIR.Value.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static java.lang.Math.max;
 
@@ -51,12 +52,16 @@ public class InstructionSelector implements IRVisitor {
 
     int PARA_REG_SIZE = 7;
 
+    HashMap<String,ASMBlock> existBlock = new HashMap<>();
+
     HashMap<String, ASMGlobalVarDef> aSMGlobalVarDefCollect = new HashMap<>();
 
     ASMBlock getBlock(String blockName) {
         String trueName = blockName.equals("") ? currentFuncName : currentFuncName + "_" + blockName;
+        if(existBlock.containsKey(trueName))return existBlock.get(trueName);
+
         ASMBlock newBlock = new ASMBlock(trueName);
-        currentFunc.addBlock(newBlock);
+        existBlock.put(trueName,newBlock);
         return newBlock;
     }
 
@@ -172,7 +177,7 @@ public class InstructionSelector implements IRVisitor {
                 cnt++;
             } else {
                 nowOff += 4;
-                ASMMemoryInst sw = new ASMMemoryInst(getReg(para), null, sp, new ASMImm(nowOff), "sw");
+                ASMMemoryInst sw = new ASMMemoryInst(null, getReg(para), sp, new ASMImm(nowOff), "sw");
                 currentASMBlock.push_back(sw);
             }
         }
@@ -264,7 +269,7 @@ public class InstructionSelector implements IRVisitor {
 
     public void visit(Store it) {
         if (!it.storeAddr.IRType.isSameType(it.value.IRType)) {
-            ASMMemoryInst store = new ASMMemoryInst(getReg(it.value), null, getReg(it.storeAddr), new ASMImm(0), "sw");
+            ASMMemoryInst store = new ASMMemoryInst(null, getReg(it.value), getReg(it.storeAddr), new ASMImm(0), "sw");
             currentASMBlock.push_back(store);
         } else {
             ASMMoveInst moveInst = new ASMMoveInst(getReg(it.storeAddr), getReg(it.value));
@@ -285,13 +290,20 @@ public class InstructionSelector implements IRVisitor {
 
     public void visit(Branch it) {
         ASMBranchInst branch = new ASMBranchInst(getReg(it.op), currentFuncName + "_" + it.trueBranch.labelName, "bnez");//branch neq zero
+        currentASMBlock.add_succ(getBlock(it.trueBranch.labelName));
+        getBlock(it.trueBranch.labelName).add_pred(currentASMBlock);
         currentASMBlock.push_back(branch);
+
         ASMJumpInst jump = new ASMJumpInst(currentFuncName + "_" + it.falseBranch.labelName);
+        currentASMBlock.add_succ(getBlock(it.falseBranch.labelName));
+        getBlock(it.falseBranch.labelName).add_pred(currentASMBlock);
         currentASMBlock.push_back(jump);
     }
 
     public void visit(Jump it) {
         ASMJumpInst jump = new ASMJumpInst(currentFuncName + "_" + it.target.labelName);
+        currentASMBlock.add_succ(getBlock(it.target.labelName));
+        getBlock(it.target.labelName).add_pred(currentASMBlock);
         currentASMBlock.push_back(jump);
     }
 
@@ -323,6 +335,7 @@ public class InstructionSelector implements IRVisitor {
         offset = -12;
         maxForFunc = 0;
         currentASMBlock = getBlock("");
+        currentFunc.addBlock(currentASMBlock);
 
         int cnt = 0;
         int offsetPara = 4;
@@ -342,34 +355,17 @@ public class InstructionSelector implements IRVisitor {
         it.Entry.accept(this);
         for (var block : it.basicBlocks) {
             currentASMBlock = getBlock(block.labelName);
+            currentFunc.addBlock(currentASMBlock);
             block.accept(this);
         }
         if (it.returnBlock != null) {
             currentASMBlock = getBlock(it.returnBlock.labelName);
             it.returnBlock.accept(this);
+            currentFunc.addBlock(currentASMBlock);
         }
-        ASMBlock entry = currentFunc.getHead();
 
-        offset -= maxForFunc;
-
-        ASMBinaryArith addi = new ASMBinaryArith(s0, sp, null, new ASMImm(-offset), "addi");
-        entry.add_front(addi);
-        ASMMemoryInst sws0 = new ASMMemoryInst(s0, null, sp, new ASMImm(-offset - 8), "sw");
-        entry.add_front(sws0);
-        ASMMemoryInst swra = new ASMMemoryInst(ra, null, sp, new ASMImm(-offset - 4), "sw");
-        entry.add_front(swra);
-        ASMBinaryArith addiEntry = new ASMBinaryArith(sp, sp, null, new ASMImm(offset), "addi");
-        entry.add_front(addiEntry);
-
-        ASMBlock tail = currentFunc.getTail();
-        ASMMemoryInst lws0 = new ASMMemoryInst(s0, null, sp, new ASMImm(-offset - 8), "lw");
-        tail.push_back(lws0);
-        ASMMemoryInst lwra = new ASMMemoryInst(ra, null, sp, new ASMImm(-offset - 4), "lw");
-        tail.push_back(lwra);
-        ASMBinaryArith addiOut = new ASMBinaryArith(sp, sp, null, new ASMImm(-offset), "addi");
-        tail.push_back(addiOut);
-        ASMRetInst ret = new ASMRetInst();
-        tail.push_back(ret);
+        currentFunc.maxFuncParaOffset = maxForFunc;
+        //   offset -= maxForFunc;
     }
 
     public void visit(ClassDef it) {
