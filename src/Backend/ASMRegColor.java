@@ -512,7 +512,7 @@ public class ASMRegColor {
     }
 
     void rewriteProgram() {
-     //   System.out.println("rewrite!");
+      //  System.out.println("rewrite!");
         for (var reg : spilledNodes) reg.assignStack = false;
         for (var block : currentFunc.asmBlocks) {
             offset = -12;//true offset

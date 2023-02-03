@@ -48,20 +48,22 @@ public class InstructionSelector implements IRVisitor {
 
     ASMFunc currentFunc;
 
+    ArrayList<ASMVirReg> calleeVirReg = new ArrayList<>();
+
     String currentFuncName;
 
     int PARA_REG_SIZE = 7;
 
-    HashMap<String,ASMBlock> existBlock = new HashMap<>();
+    HashMap<String, ASMBlock> existBlock = new HashMap<>();
 
     HashMap<String, ASMGlobalVarDef> aSMGlobalVarDefCollect = new HashMap<>();
 
     ASMBlock getBlock(String blockName) {
         String trueName = blockName.equals("") ? currentFuncName : currentFuncName + "_" + blockName;
-        if(existBlock.containsKey(trueName))return existBlock.get(trueName);
+        if (existBlock.containsKey(trueName)) return existBlock.get(trueName);
 
         ASMBlock newBlock = new ASMBlock(trueName);
-        existBlock.put(trueName,newBlock);
+        existBlock.put(trueName, newBlock);
         return newBlock;
     }
 
@@ -308,6 +310,11 @@ public class InstructionSelector implements IRVisitor {
     }
 
     public void visit(Ret it) {
+        for (int i = 0; i < calleeVirReg.size(); i++) {
+            ASMReg callee = asmFn.callee.get(i);
+            ASMMoveInst mv = new ASMMoveInst(callee, calleeVirReg.get(i));
+            currentASMBlock.push_back(mv);
+        }
         if (it.returnReg != null && !(it.returnReg.IRType instanceof VoidType)) {
             ASMMoveInst move = new ASMMoveInst(a0, getReg(it.returnReg));
             currentASMBlock.push_back(move);
@@ -336,6 +343,15 @@ public class InstructionSelector implements IRVisitor {
         maxForFunc = 0;
         currentASMBlock = getBlock("");
         currentFunc.addBlock(currentASMBlock);
+
+        calleeVirReg = new ArrayList<>();
+        for (var callee : asmFn.callee) {
+            ASMVirReg newReg = new ASMVirReg(cntVirReg++, offset);
+            offset -= 4;
+            ASMMoveInst mv = new ASMMoveInst(newReg, callee);
+            calleeVirReg.add(newReg);
+            currentASMBlock.push_back(mv);
+        }
 
         int cnt = 0;
         int offsetPara = 4;

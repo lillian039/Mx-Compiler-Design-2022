@@ -56,6 +56,7 @@ public class Compiler {
             ASMFn asmFn = new ASMFn();
             new InstructionSelector(asmFn).visit(rootIR);
            //  new ASMPrinter(asmFn).printOrigin();
+            //new ASMRegAlloc(asmFn).alloc();
             new ASMRegColor().visit(asmFn);
             new ASMPrinter(asmFn).printAlloc();
             BuiltinASMPrinter builtinASMPrinter = new BuiltinASMPrinter("builtin.s");
