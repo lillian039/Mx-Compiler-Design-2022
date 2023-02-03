@@ -516,9 +516,8 @@ public class ASMRegColor {
     void rewriteProgram() {
       //  System.out.println("rewrite!");
         for (var reg : spilledNodes) reg.assignStack = false;
-
+        offset = -12;//true offset
         for (var block : currentFunc.asmBlocks) {
-            offset = -12;//true offset
             newstmts = new LinkedList<>();
             for (var stmt : block.insts) {
                 if (stmt.rs1 != null && spilledNodes.contains(stmt.rs1)) stmt.rs1 = addLoad(stmt.rs1);
