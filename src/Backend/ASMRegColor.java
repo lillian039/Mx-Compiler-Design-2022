@@ -13,7 +13,7 @@ public class ASMRegColor {
 
     ASMFunc currentFunc;
 
-    int K = 27;
+    int K = 26;
 
     int regCnt = 0;
 
@@ -467,7 +467,7 @@ public class ASMRegColor {
         while (!selectStack.isEmpty()) {
             ASMReg n = selectStack.pop();
             HashSet<Integer> okColor = new HashSet<>();
-            for (int i = 5; i < 32; i++) okColor.add(i);
+            okColor.addAll(asmFn.OKcolor);
             HashSet<ASMReg> colored = new HashSet<>(coloredNodes);
             colored.addAll(precolored);
 
@@ -516,7 +516,7 @@ public class ASMRegColor {
     void rewriteProgram() {
       //  System.out.println("rewrite!");
         for (var reg : spilledNodes) reg.assignStack = false;
-        offset = -12;//true offset
+        offset = -12;
         for (var block : currentFunc.asmBlocks) {
             newstmts = new LinkedList<>();
             for (var stmt : block.insts) {

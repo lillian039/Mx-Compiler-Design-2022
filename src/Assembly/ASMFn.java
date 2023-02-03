@@ -16,6 +16,8 @@ public class ASMFn {
     public ArrayList<ASMPhyReg> caller = new ArrayList<>();
     public ArrayList<ASMPhyReg> callee = new ArrayList<>();
     public ArrayList<ASMFunc> allocFuncs = new ArrayList<>();
+
+    public ArrayList<Integer> OKcolor = new ArrayList<>();
     public HashMap<String, ASMPhyReg> phyRegs = new HashMap<>();
 
     public ASMPhyReg getReg(String name) {
@@ -50,10 +52,14 @@ public class ASMFn {
             phyRegs.put(phyRegName.get(i), new ASMPhyReg(phyRegName.get(i)));
         }
         addRange(5, 7, caller);
-        addRange(8, 9, callee);
+        addRange(9, 9, callee);
         addRange(10, 17, caller);
         addRange(18, 27, callee);
         addRange(28, 31, caller);
+
+        for (int i = 5; i <= 7; i++) OKcolor.add(i);
+        for (int i = 9; i <= 31; i++) OKcolor.add(i);
+
     }
 
 }
