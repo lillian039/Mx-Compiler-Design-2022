@@ -493,6 +493,7 @@ public class ASMRegColor {
         if (!rs.assignStack) {
             ((ASMVirReg) rs).offset = offset;
             offset -= 4;
+            rs.assignStack = true;
         }
         ASMReg newRs = new ASMVirReg(regCnt++, 0);
         ASMMemoryInst lw = new ASMMemoryInst(newRs, null, s0, new ASMImm(((ASMVirReg) rs).offset), "lw");
@@ -504,6 +505,7 @@ public class ASMRegColor {
         if (!rs.assignStack) {
             ((ASMVirReg) rs).offset = offset;
             offset -= 4;
+            rs.assignStack = true;
         }
         ASMReg newRs = new ASMVirReg(regCnt++, 0);
         ASMMemoryInst sw = new ASMMemoryInst(null, newRs, s0, new ASMImm(((ASMVirReg) rs).offset), "sw");
@@ -514,6 +516,7 @@ public class ASMRegColor {
     void rewriteProgram() {
       //  System.out.println("rewrite!");
         for (var reg : spilledNodes) reg.assignStack = false;
+
         for (var block : currentFunc.asmBlocks) {
             offset = -12;//true offset
             newstmts = new LinkedList<>();

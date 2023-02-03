@@ -52,7 +52,6 @@ public class ASMRegAlloc {
                     stmt.rs2 = t2;
                 }
 
-
                 currentBlock.push_back(stmt);
                 if (rdRecord instanceof ASMVirReg) {
                     ASMMemoryInst sw = new ASMMemoryInst(stmt.rd, null, s0, new ASMImm(((ASMVirReg) rdRecord).offset), "sw");
