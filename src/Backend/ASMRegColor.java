@@ -466,8 +466,7 @@ public class ASMRegColor {
     void assignColors() {
         while (!selectStack.isEmpty()) {
             ASMReg n = selectStack.pop();
-            HashSet<Integer> okColor = new HashSet<>();
-            for (int i = 5; i < 32; i++) okColor.add(i);
+            HashSet<Integer> okColor = new HashSet<>(asmFn.OKcolor);
             HashSet<ASMReg> colored = new HashSet<>(coloredNodes);
             colored.addAll(precolored);
 
