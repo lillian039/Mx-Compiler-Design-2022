@@ -316,7 +316,7 @@ public class IRBuilder implements ASTVisitor {
                 currentBlock.push_back(store);
             }
         } else {
-            Register newLs=null;
+            Register newLs = null;
             if (!node.expression.irValue.isConst) newLs = new Register(regCnt++, currentEntity.IRType);
             if (node.option.equals("-")) {
                 if (node.expression.irValue.isConst) {
@@ -926,6 +926,7 @@ public class IRBuilder implements ASTVisitor {
 
                 } else {
                     int op = 0;
+                    if (rs == 0 && node.option.equals("/")) rs = 1;
                     switch (node.option) {
                         case "+" -> op = ls + rs;
                         case "-" -> op = ls - rs;
