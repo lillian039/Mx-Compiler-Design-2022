@@ -38,13 +38,6 @@ public class ASMBlock {
         succ.add(block);
     }
 
-    public void add_use(ASMReg asmReg){
-        use.add(asmReg);
-    }
-
-    public void add_def(ASMReg asmReg){
-        def.add(asmReg);
-    }
     public void print() {
         System.out.println(blockName + ":");
         for (var stmt : insts) {

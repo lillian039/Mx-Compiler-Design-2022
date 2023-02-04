@@ -24,10 +24,10 @@ public class Compiler {
 
     public static void main(String[] args) throws Exception {
         String name = "test.mx";
-        InputStream input = new FileInputStream(name);
-        PrintStream output = new PrintStream("test.s");
+        //InputStream input = new FileInputStream(name);
+        PrintStream output = new PrintStream("output.s");
         System.setOut(output);
-      //  InputStream input = System.in;
+        InputStream input = System.in;
         try {
             RootNode root;
             GlobalScope globalScope = new GlobalScope(null);
@@ -51,7 +51,7 @@ public class Compiler {
             new IRCollector(globalScope).visit(root);
             new IRBuilder(globalScope, rootIR).visit(root);
             new IRMem2Reg(rootIR).visit(rootIR);
-            //new IRPrinter(rootIR).print();
+          //  new IRPrinter(rootIR).print();
 
             ASMFn asmFn = new ASMFn();
             new InstructionSelector(asmFn).visit(rootIR);

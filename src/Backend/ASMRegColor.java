@@ -69,6 +69,11 @@ public class ASMRegColor {
 
     public void visit(ASMFunc asmFunc) {
         while (true) {
+//            while (true) {
+//                initialize();
+//                livenessAnalysis();
+//                if (removeUseless()) break;
+//            }
             initialize();
             livenessAnalysis();
             build();
@@ -82,7 +87,7 @@ public class ASMRegColor {
             }
             assignColors();
             if (spilledNodes.isEmpty()) break;
-           // System.out.println(spilledNodes.size());
+            // System.out.println(spilledNodes.size());
             rewriteProgram();
         }
 
@@ -216,13 +221,12 @@ public class ASMRegColor {
     }
 
     void livenessAnalysis() {
-        int i = 1;
         while (true) {
             boolean flag = true;
             for (var block : currentFunc.asmBlocks) {
                 HashSet<ASMReg> blockIn = setIn.get(block);
                 HashSet<ASMReg> blockOut = setOut.get(block);
-                int originInSize = blockIn.size(),originOutSize = blockOut.size();
+                int originInSize = blockIn.size(), originOutSize = blockOut.size();
                 blockOut.removeAll(setDef.get(block));
                 blockIn.addAll(blockOut);
                 for (var succ : block.succ) {
@@ -233,6 +237,29 @@ public class ASMRegColor {
             if (flag) break;
         }
 
+    }
+
+    //去掉多余的赋值语句
+    boolean removeUseless() {
+        boolean flag = true;
+        for (var block : currentFunc.asmBlocks) {
+            LinkedList<ASMInst> newList = new LinkedList<>();
+            HashSet<ASMReg> live = new HashSet<>(setOut.get(block));
+            ListIterator<ASMInst> curInst = block.insts.listIterator(block.insts.size());
+            while (curInst.hasPrevious()) {
+                ASMInst I = curInst.previous();
+                if (I.unoptimizable || I.rd == null || live.contains(I.rd)) {
+                    live.removeAll(I.def);
+                    live.addAll(I.use);
+                    newList.addFirst(I);
+                }
+            }
+
+            if (block.insts.size() != newList.size()) flag = false;
+            block.insts = newList;
+        }
+
+        return flag;
     }
 
     void addEdge(ASMReg u, ASMReg v) {
@@ -513,7 +540,7 @@ public class ASMRegColor {
     }
 
     void rewriteProgram() {
-      //  System.out.println("rewrite!");
+        //  System.out.println("rewrite!");
         for (var reg : spilledNodes) reg.assignStack = false;
         for (var block : currentFunc.asmBlocks) {
             newstmts = new LinkedList<>();

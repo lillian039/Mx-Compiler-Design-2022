@@ -176,10 +176,12 @@ public class InstructionSelector implements IRVisitor {
             if (cnt < PARA_REG_SIZE) {
                 ASMMoveInst mv = new ASMMoveInst(regFunc.get(cnt), getReg(para));
                 currentASMBlock.push_back(mv);
+                mv.unoptimizable = true;
                 cnt++;
             } else {
                 nowOff += 4;
                 ASMMemoryInst sw = new ASMMemoryInst(null, getReg(para), sp, new ASMImm(nowOff), "sw");
+                sw.unoptimizable = true;
                 currentASMBlock.push_back(sw);
             }
         }
@@ -251,6 +253,7 @@ public class InstructionSelector implements IRVisitor {
         if (!it.ptr.IRType.isSameType(it.desReg.IRType)) {
             ASMMemoryInst load = new ASMMemoryInst(getReg(it.desReg), null, getReg(it.ptr), new ASMImm(0), "lw");
             currentASMBlock.push_back(load);
+          //  load.unoptimizable = true;
         } else {
             ASMMoveInst mv = new ASMMoveInst(getReg(it.desReg), getReg(it.ptr));
             currentASMBlock.push_back(mv);
@@ -260,6 +263,7 @@ public class InstructionSelector implements IRVisitor {
     public void visit(Malloc it) {
         ASMMoveInst mv = new ASMMoveInst(a0, getReg(it.size));
         currentASMBlock.push_back(mv);
+        mv.unoptimizable = true;
 
         ASMCallInst call = new ASMCallInst("__malloc");
         currentASMBlock.push_back(call);
@@ -273,6 +277,7 @@ public class InstructionSelector implements IRVisitor {
         if (!it.storeAddr.IRType.isSameType(it.value.IRType)) {
             ASMMemoryInst store = new ASMMemoryInst(null, getReg(it.value), getReg(it.storeAddr), new ASMImm(0), "sw");
             currentASMBlock.push_back(store);
+            store.unoptimizable = true;
         } else {
             ASMMoveInst moveInst = new ASMMoveInst(getReg(it.storeAddr), getReg(it.value));
             currentASMBlock.push_back(moveInst);
@@ -314,10 +319,12 @@ public class InstructionSelector implements IRVisitor {
             ASMReg callee = asmFn.callee.get(i);
             ASMMoveInst mv = new ASMMoveInst(callee, calleeVirReg.get(i));
             currentASMBlock.push_back(mv);
+            mv.unoptimizable = true;
         }
         if (it.returnReg != null && !(it.returnReg.IRType instanceof VoidType)) {
             ASMMoveInst move = new ASMMoveInst(a0, getReg(it.returnReg));
             currentASMBlock.push_back(move);
+            move.unoptimizable = true;
         }
     }
 
@@ -349,6 +356,7 @@ public class InstructionSelector implements IRVisitor {
             ASMVirReg newReg = new ASMVirReg(cntVirReg++, offset);
             offset -= 4;
             ASMMoveInst mv = new ASMMoveInst(newReg, callee);
+            mv.unoptimizable = true;
             calleeVirReg.add(newReg);
             currentASMBlock.push_back(mv);
         }
