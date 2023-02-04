@@ -87,7 +87,6 @@ public class ASMRegColor {
             }
             assignColors();
             if (spilledNodes.isEmpty()) break;
-            // System.out.println(spilledNodes.size());
             rewriteProgram();
         }
 
