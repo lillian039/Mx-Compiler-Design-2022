@@ -69,13 +69,13 @@ public class ASMRegColor {
 
     public void visit(ASMFunc asmFunc) {
         while (true) {
-//            while (true) {
-//                initialize();
-//                livenessAnalysis();
-//                if (removeUseless()) break;
-//            }
-            initialize();
-            livenessAnalysis();
+            while (true) {
+                initialize();
+                livenessAnalysis();
+                if (removeUseless()) break;
+            }
+         //   initialize();
+         //   livenessAnalysis();
             build();
             makeWorkList();
             while (true) {
